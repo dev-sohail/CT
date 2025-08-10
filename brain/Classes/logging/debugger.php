@@ -82,7 +82,7 @@ class Debugger
      * Path to the debug log file
      * @var string
      */
-    protected static string $logFile = DIR_LOGS . '/debug.log';
+    protected static string $logFile = '';
 
     /**
      * Optional callback for database query logging
@@ -105,6 +105,14 @@ class Debugger
 
         if ($logFile !== null) {
             self::$logFile = $logFile;
+        } else {
+            // Resolve a sensible default log file path
+            $base = defined('DIR_STORAGE_LOGS') ? DIR_STORAGE_LOGS
+                : (defined('DIR_LOGS') ? DIR_LOGS : (defined('ROOT') ? (ROOT . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'logs') : __DIR__));
+            if (!is_dir($base)) {
+                @mkdir($base, 0755, true);
+            }
+            self::$logFile = rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'debug.log';
         }
 
         self::registerHandlers();

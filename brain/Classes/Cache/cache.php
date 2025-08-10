@@ -562,7 +562,10 @@ class Cache
             return rtrim($this->registry->get('paths.cache'), DIRECTORY_SEPARATOR);
         }
 
-        // Use DIR_CACHE constant if defined
+        // Use cache directory constants if defined
+        if (defined('DIR_STORAGE_CACHE')) {
+            return rtrim(DIR_STORAGE_CACHE, DIRECTORY_SEPARATOR);
+        }
         if (defined('DIR_CACHE')) {
             return rtrim(DIR_CACHE, DIRECTORY_SEPARATOR);
         }

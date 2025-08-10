@@ -15,7 +15,11 @@ class Template
     {
         $this->role = $role ?? defined('DEFAULT_ROLE') ? DEFAULT_ROLE : 'App';
         $this->module = $module ?? defined('DEFAULT_MODULE') ? DEFAULT_MODULE : 'Main';
-        $this->viewPath = defined('DIR_VIEW') ? rtrim(DIR_VIEW, '/') . '/' : __DIR__ . '/../../../Views/';
+        if (defined('DIR_MODULES')) {
+            $this->viewPath = rtrim(DIR_MODULES, '/') . "/{$this->role}/{$this->module}/Views/";
+        } else {
+            $this->viewPath = __DIR__ . '/../../../Views/';
+        }
     }
 
     /**
@@ -81,7 +85,16 @@ class Template
      */
     protected function getViewFilePath(string $file): string
     {
-        $file = rtrim($file, $this->extension) . $this->extension;
-        return $this->viewPath . "{$this->role}/{$this->module}/view/{$file}";
+        $base = rtrim($this->viewPath, '/');
+        $candidates = [
+            $base . '/' . rtrim($file, '.ct.php') . '.ct.php',
+            $base . '/' . rtrim($file, '.php') . '.php',
+        ];
+        foreach ($candidates as $candidate) {
+            if (file_exists($candidate)) {
+                return $candidate;
+            }
+        }
+        return $candidates[0];
     }
 }

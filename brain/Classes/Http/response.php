@@ -60,7 +60,7 @@ class Response
      *
      * @param int $code
      */
-    public function setStatusCode(int $code): void
+    public static function setStatusCode(int $code): void
     {
         http_response_code($code);
     }
@@ -70,9 +70,10 @@ class Response
      *
      * @param string $header
      */
-    public function addHeader(string $header): void
+    public static function addHeader(string $header): void
     {
-        $this->headers[] = $header;
+        self::$headers[] = $header;
+        header($header);
     }
 
     /**

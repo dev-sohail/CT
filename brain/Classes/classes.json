@@ -1,0 +1,146 @@
++---api
+|       API.php
+|       HttpClient.php
+|       json.php
+|       ServiceDiscovery.php
+|       
++---Auth
+|       Auth.php
+|       BruteForceGuard.php
+|       DeviceFingerprint.php
+|       Password.php
+|       session.php
+|       SessionHijackProtector.php
+|       user.php
+|       
++---business
+|       ActivityFeed.php
+|       ApprovalManager.php
+|       NotificationQueue.php
+|       rolemanager.php
+|       WorkflowEngine.php
+|       
++---Cache
+|       cache.php
+|       
++---commerce
+|       cart.php
+|       currency.php
+|       DiscountEngine.php
+|       InvoiceGenerator.php
+|       MultiCurrency.php
+|       SubscriptionManager.php
+|       TaxCalculator.php
+|       
++---Console
+|       ClearCache.php
+|       MakeCommand.php
+|       MakeController.php
+|       MakeModel.php
+|       MakeModule.php
+|       
++---core
+|       config.php
+|       Routes.php
+|       
++---database
+|       Database.php
+|       DBMigration.php
+|       DBORM.php
+|       Transaction.php
+|       
++---Exceptions
+|       Handler.php
+|       
++---Helpers
+|       Arr.php
+|       Date.php
+|       document.php
+|       Env.php
+|       File.php
+|       image.php
+|       Number.php
+|       pagination.php
+|       Path.php
+|       Str.php
+|       Timer.php
+|       url--.php
+|       
++---Http
+|       Cookie.php
+|       Cors.php
+|       Headers.php
+|       Middleware.php
+|       RateLimiter.php
+|       request.php
+|       RequestFilter.php
+|       response.php
+|       
++---Localization
+|       language.php
+|       Locale.php
+|       
++---logging
+|       AuditTrail.php
+|       debugger.php
+|       Logger.php
+|       UsageTracker.php
+|       
++---Media
+|       DocGenerator.php
+|       ImageProcessor.php
+|       Uploader.php
+|       
++---security
+|       Acl.php
+|       captcha.php
+|       Csrf.php
+|       encryption.php
+|       Firewall.php
+|       InputNormalizer.php
+|       Sanitizer.php
+|       SecurityScanner.php
+|       Validator.php
+|       
++---Services
+|       Mailer.php
+|       
++---support
+|       ErrorCodeMap.php
+|       HelpManager.php
+|       SupportTicket.php
+|       
++---System
+|       affiliate.php
+|       Backup.php
+|       deployment.php
+|       GeoIP.php
+|       icvSoap.php
+|       Indexer.php
+|       Installer.php
+|       LicenseManager.php
+|       sgrid.php
+|       Slugger.php
+|       Version.php
+|       
++---Testing
+|       Fuzzer.php
+|       microtest.php
+|       Mocker.php
+|       ScenarioRunner.php
+|       TestCase.php
+|       TestDataFactory.php
+|       unittest.php
+|       
+\---view
+        AssetManager.php
+        AssetPipeline.php
+        Component.php
+        FormBuilder.php
+        HtmlHelper.php
+        Layout.php
+        Render.php
+        SvgIcon.php
+        template.php
+        ThemeManager.php
+        

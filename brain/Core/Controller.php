@@ -15,9 +15,17 @@ abstract class Controller
      */
     protected function loadModel($role, $module, $name)
     {
-        $path = DIR_MODULES . $role . '/' . $module . '/models/' . $name . '.php';
+        $base = rtrim(DIR_MODULES, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $role . DIRECTORY_SEPARATOR . $module;
+        $candidates = [
+            $base . '/Models/' . $name . '.php',
+            $base . '/models/' . $name . '.php',
+        ];
+        $path = null;
+        foreach ($candidates as $candidate) {
+            if (is_readable($candidate)) { $path = $candidate; break; }
+        }
 
-        if (is_readable($path)) {
+        if ($path) {
             require_once($path);
             $class = ucfirst($name);
             if (class_exists($class)) {
@@ -33,9 +41,19 @@ abstract class Controller
      */
     protected function loadView($role, $module, $name, $data = [])
     {
-        $path = DIR_MODULES . $role . '/' . $module . '/view/' . $name . '.php';
+        $base = rtrim(DIR_MODULES, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $role . DIRECTORY_SEPARATOR . $module;
+        $candidates = [
+            $base . '/Views/' . $name . '.php',
+            $base . '/Views/' . $name . '.ct.php',
+            $base . '/view/' . $name . '.php',
+            $base . '/view/' . $name . '.ct.php',
+        ];
+        $path = null;
+        foreach ($candidates as $candidate) {
+            if (is_readable($candidate)) { $path = $candidate; break; }
+        }
 
-        if (is_readable($path)) {
+        if ($path) {
             extract($data);
             require($path);
         } else {
@@ -48,9 +66,17 @@ abstract class Controller
      */
     protected function loadController($role, $module, $name)
     {
-        $path = DIR_MODULES . $role . '/' . $module . '/controllers/' . $name . '.php';
+        $base = rtrim(DIR_MODULES, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $role . DIRECTORY_SEPARATOR . $module;
+        $candidates = [
+            $base . '/Controllers/' . $name . '.php',
+            $base . '/controllers/' . $name . '.php',
+        ];
+        $path = null;
+        foreach ($candidates as $candidate) {
+            if (is_readable($candidate)) { $path = $candidate; break; }
+        }
 
-        if (is_readable($path)) {
+        if ($path) {
             require_once($path);
             $class = ucfirst($name);
             if (class_exists($class)) {
@@ -66,9 +92,12 @@ abstract class Controller
      */
     protected function loadRoutes($role, $module)
     {
-        $path = DIR_MODULES . $role . '/' . $module . '/routes.php';
-        if (is_readable($path)) {
-            require_once($path);
+        $base = rtrim(DIR_MODULES, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $role . DIRECTORY_SEPARATOR . $module;
+        foreach ([$base . '/routes.php', $base . '/Routes.php'] as $path) {
+            if (is_readable($path)) {
+                require_once($path);
+                break;
+            }
         }
     }
 

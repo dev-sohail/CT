@@ -44,6 +44,16 @@ class Session {
     }
 
     /**
+     * Explicitly start the session if not started.
+     */
+    public function start(): void {
+        if (!session_id()) {
+            session_start();
+            $this->data =& $_SESSION;
+        }
+    }
+
+    /**
      * Returns the current session ID.
      *
      * @return string

@@ -14,7 +14,9 @@ class Logger
      */
     public function __construct(string $logFileName = 'frame.log', bool $splitByLevel = true)
     {
-        $this->logPath = rtrim(DIR_LOGS, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $base = defined('DIR_STORAGE_LOGS') ? DIR_STORAGE_LOGS
+            : (defined('DIR_LOGS') ? DIR_LOGS : (defined('ROOT') ? (ROOT . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'logs') : __DIR__));
+        $this->logPath = rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
         $this->defaultLogFile = $logFileName;
         $this->splitByLevel = $splitByLevel;
 

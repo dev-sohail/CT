@@ -1,0 +1,41 @@
++---automate
+|   \---scripts
+|           backup_db.sh
+|           clear_cache.sh
+|           creatclasses.bat
+|           deploy.sh
+|           reorg.php
+|           
++---backups
++---cache
+|       core_paths.json
+|       paths.json
+|       
++---css
+|       bootstrap.css
+|       custom.css
+|       tailwind.css
+|       
++---docs
+|       api.md
+|       coding-standards.md
+|       setup.md
+|       
++---js
+|       bootstrap.js
+|       custom.js
+|       
++---lang
+|   +---main
+|   |       en-notification.php
+|   |       english.php
+|   |       
+|   +---other
+|   \---secondary
+|           sec-notification.php
+|           secondary.php
+|           
++---logs
++---sessions
++---temp
+\---uploads

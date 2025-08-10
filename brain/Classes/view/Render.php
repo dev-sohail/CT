@@ -21,10 +21,22 @@ class Render
      */
     public function render(string $role, string $module, string $file, array $data = [], bool $return = false)
     {
-        $viewPath = rtrim(DIR_MODULES, '/') . "/$role/$module/view/" . ltrim($file, '/') . '.ct.php';
-
-        if (!is_file($viewPath)) {
-            trigger_error("Render error: View [$file] not found at [$viewPath]", E_USER_WARNING);
+        $base = rtrim(DIR_MODULES, '/');
+        $candidates = [
+            "$base/$role/$module/Views/" . ltrim($file, '/') . '.ct.php',
+            "$base/$role/$module/Views/" . ltrim($file, '/') . '.php',
+            "$base/$role/$module/view/" . ltrim($file, '/') . '.ct.php',
+            "$base/$role/$module/view/" . ltrim($file, '/') . '.php',
+        ];
+        $viewPath = '';
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                $viewPath = $candidate;
+                break;
+            }
+        }
+        if ($viewPath === '') {
+            trigger_error("Render error: View [$file] not found in module [$role/$module]", E_USER_WARNING);
             return '';
         }
 
@@ -54,10 +66,20 @@ class Render
     public function renderWithLayout(string $layoutPath, string $role, string $module, string $view, array $data = []): void
     {
         $data['content'] = $this->render($role, $module, $view, $data, true);
-        $layoutFullPath = rtrim(DIR_VIEW, '/') . '/' . ltrim($layoutPath, '/') . '.ct.php';
-
-        if (!is_file($layoutFullPath)) {
-            trigger_error("Layout [$layoutPath] not found at [$layoutFullPath]", E_USER_WARNING);
+        $base = rtrim(DIR_MODULES, '/');
+        $layoutCandidates = [
+            "$base/$role/$module/Views/" . ltrim($layoutPath, '/') . '.ct.php',
+            "$base/$role/$module/Views/" . ltrim($layoutPath, '/') . '.php',
+        ];
+        $layoutFullPath = '';
+        foreach ($layoutCandidates as $candidate) {
+            if (is_file($candidate)) {
+                $layoutFullPath = $candidate;
+                break;
+            }
+        }
+        if ($layoutFullPath === '') {
+            trigger_error("Layout [$layoutPath] not found in module [$role/$module]", E_USER_WARNING);
             return;
         }
 

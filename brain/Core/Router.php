@@ -1,6 +1,10 @@
 <?php
 
-class Router
+/**
+ *my modules are in form of DIR_MODULES/roles(admin, app, etc)/(Module Name)/(Model, Controller, View, routes.php)
+ */
+
+ class Router
 {
     protected static $routes = [];
     protected static $notFound;

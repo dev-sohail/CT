@@ -8,6 +8,7 @@ class Firewall
     }
 
     private function checkRequest(){
-        echo('hello');
+        // Placeholder for request validation logic
+        // Implement IP blacklisting/whitelisting, rate-limiting hooks, etc.
     }
 }
