@@ -107,7 +107,7 @@ class API
      */
     public static function getVersion(): string
     {
-        return $_GET['version'] ?? '1.0';
+        return $_GET['version'] ?? '0.1';
     }
 
     /**
