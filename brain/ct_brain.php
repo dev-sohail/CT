@@ -1,17 +1,19 @@
 <?php
 
 /**
- * my classes are in form of DIR_BRAIN/DIR_CLASSES/(classes names)
- * core classes are in DIR_BRAIN/DIR_CLASSES/core
- * core abstract classes are in DIR_BRAIN/DIR_CORE/(classes names i.e model.php, controller.php, registry.php, router.php,registry.php, middleware.php)
- * all assissats are in     DIR_STORAGE/(folder name i.e cache, css, js, lang, logs, temp, sessions, uploads...)
+ * CyberTirah Framework - Bootstrap + Env loader (fixed)
  *
- * @version 1.4.0
- * @author CyberTirah Development Team
+ * - No Composer / PSR-4 autoloading used. This file scans and requires framework core
+ *   and utility PHP files explicitly (custom framework loader).
+ * - Defensive and clear error handling added.
+ * - loadAllUtilityClasses now returns an array of loaded classes->paths.
+ * - Safe checks before instantiating Registry.
+ *
+ * @version 1.4.1
+ * @author CyberTirah Development Team (fixed)
  * @license MIT
  * @since PHP 8.0+
  */
-
 
 class MakingEnv
 {
@@ -20,18 +22,20 @@ class MakingEnv
     public function __construct(string $envFile = ROOT . '/.env')
     {
         $this->phpversion();
+
         if (file_exists($envFile)) {
             $this->loadEnv($envFile);
             error_log(".env file Loaded Successfully");
         } else {
-
-            exit('<center style="margin-top: 8rem; color: red;">' . ".env file not found at:" . '</br>' . $envFile . '</br>' . " Using default values." . '</center>');
+            // Do not expose full path in production, but user asked explicit error.
+            exit('<center style="margin-top: 8rem; color: red;">' .
+                ".env file not found at:" . '</br>' . $envFile . '</br>' . " Using default values." .
+                '</center>');
         }
     }
 
-    private function phpversion()
+    private function phpversion(): void
     {
-
         if (version_compare(PHP_VERSION, '8.0', '<')) {
             http_response_code(500);
             exit('<center style="margin-top: 8rem;">This application requires at least PHP 8.0 or higher. Current version: ' . PHP_VERSION . '</center>');
@@ -41,9 +45,17 @@ class MakingEnv
     private function loadEnv(string $file): void
     {
         $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($lines as $line) {
 
-            if (strpos(trim($line), '#') === 0) {
+        foreach ($lines as $rawLine) {
+            $line = trim($rawLine);
+
+            // skip comments and empty lines
+            if ($line === '' || str_starts_with($line, '#')) {
+                continue;
+            }
+
+            // ignore lines that do not contain '='
+            if (strpos($line, '=') === false) {
                 continue;
             }
 
@@ -51,18 +63,21 @@ class MakingEnv
             $key = trim($key);
             $value = trim($value);
 
-            if (str_starts_with($value, '"') && str_ends_with($value, '"')) {
+            // strip surrounding quotes if present
+            if ((str_starts_with($value, '"') && str_ends_with($value, '"')) || (str_starts_with($value, "'") && str_ends_with($value, "'"))) {
                 $value = substr($value, 1, -1);
             }
 
             $this->config[$key] = $value;
+            // populate superglobals for compatibility
             $_ENV[$key] = $value;
+            putenv("$key=$value");
         }
     }
 
     public function get(string $key, $default = null)
     {
-        return $this->config[$key] ?? $default;
+        return $this->config[$key] ?? $_ENV[$key] ?? getenv($key) ?: $default;
     }
 }
 
@@ -93,24 +108,50 @@ class Bootstrap
             define('APP_START_TIME', microtime(true));
         }
 
+        // Load environment first
         $envconfig = new MakingEnv();
         $instance = new self($envconfig);
 
         try {
-            $instance->loadCoreFiles();
+            $loadedCore = $instance->loadCoreFiles();
         } catch (RuntimeException $e) {
             error_log("Failed to load critical core files: " . $e->getMessage());
             exit('<center style="margin-top: 8rem; color: red;">' . "Critical framework files failed to load. Please check the logs." . '</center>');
         }
 
-        if (isset($instance)) {
-            print_r($instance->loadUtilityClass());
-            foreach ($className as $file) {
-                new $file;
+        // Load utility classes (no autoloader). We will require their files and keep a map.
+        $loadedUtilities = $instance->loadAllUtilityClasses();
+
+        // Auto-register all utilities in Registry if available
+        if (class_exists('Registry')) {
+            try {
+                $registry = new Registry();
+
+                foreach ($loadedUtilities as $className => $path) {
+                    if (!class_exists($className)) {
+                        continue;
+                    }
+
+                    $reflect = new ReflectionClass($className);
+                    if ($reflect->isAbstract() || $reflect->isInterface() || $reflect->isTrait()) {
+                        continue;
+                    }
+
+                    // Simple instantiation without constructor arguments
+                    try {
+                        $instanceObj = new $className();
+                        $registry->set(lcfirst($className), $instanceObj);
+                    } catch (Throwable $e) {
+                        error_log("Failed to instantiate utility class $className: " . $e->getMessage());
+                    }
+                }
+            } catch (Throwable $e) {
+                error_log('Failed to instantiate Registry: ' . $e->getMessage());
             }
         } else {
-            throw new Exception("Instance not set before autoloader registration.");
+            error_log('Registry class not found after core files load.');
         }
+
         return $instance;
     }
 
@@ -122,7 +163,7 @@ class Bootstrap
 
         $this->preventDirectAccess();
         $this->initializePaths();
-        $this->initializeMakingEnv();
+        // config (MakingEnv) is already provided in constructor
         $this->defineApplicationConstants();
         $this->initializeSession();
         $this->configurePHP();
@@ -152,6 +193,7 @@ class Bootstrap
             }
         }
 
+        // Walk the folder tree and define constants for subfolders (useful shortcuts)
         foreach ($dirs as $dir) {
             $basePath = ROOT . DIRECTORY_SEPARATOR . $dir;
 
@@ -191,6 +233,7 @@ class Bootstrap
 
     private function initializeMakingEnv(): void
     {
+        // Left for backward compatibility if needed; not used because constructor already loaded env.
         $this->dbConfig = [
             'DB_DRIVER' => $this->config->get('DB_DRIVER', 'mysql'),
             'DB_HOST' => $this->config->get('DB_HOST', 'localhost'),
@@ -234,7 +277,7 @@ class Bootstrap
         if (defined('DIR_BRAIN_CORE')) {
             $dirs[] = DIR_BRAIN_CORE;
         }
-  
+
         $dirs[] = ROOT . DIRECTORY_SEPARATOR . 'brain' . DIRECTORY_SEPARATOR . 'Core';
         $dirs[] = ROOT . DIRECTORY_SEPARATOR . 'brain' . DIRECTORY_SEPARATOR . 'Classes' . DIRECTORY_SEPARATOR . 'core';
 
@@ -246,11 +289,11 @@ class Bootstrap
             }
         }
 
-        $this->coreFiles = [];
         foreach ($files as $file) {
             $key = pathinfo($file, PATHINFO_FILENAME);
             $this->coreFiles[$key] = $file;
         }
+
         if (defined('DIR_STORAGE_CACHE')) {
             @file_put_contents(
                 DIR_STORAGE_CACHE . '/core_paths.json',
@@ -306,30 +349,53 @@ class Bootstrap
         return $loadedFiles;
     }
 
-    public function loadAllUtilityClass(): array
+    /**
+     * Scan and require all non-core utility classes found in DIR_BRAIN_CLASSES (and subfolders).
+     * Returns an associative array of className => filePath.
+     */
+    public function loadAllUtilityClasses(): array
     {
-        if (isset($this->loadedClasses[$className])) {
-            return true;
+        // return cached if already scanned
+        if (!empty($this->loadedClasses)) {
+            return $this->loadedClasses;
         }
+
         $roots = [];
-        if (defined('DIR_BRAIN_CLASSES')) { $roots[] = DIR_BRAIN_CLASSES; }
+        if (defined('DIR_BRAIN_CLASSES')) {
+            $roots[] = DIR_BRAIN_CLASSES;
+        }
+
         foreach ($roots as $root) {
+            if (!is_dir($root)) continue;
+
             $iterator = new RecursiveIteratorIterator(
                 new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)
             );
+
             foreach ($iterator as $fileInfo) {
-                if ($fileInfo->isFile() && $fileInfo->getExtension() === 'php') {
+                if ($fileInfo->isFile() && strtolower($fileInfo->getExtension()) === 'php') {
                     $path = $fileInfo->getRealPath();
                     if ($path) {
+                        // We do not try to guess namespaces. We map basename => path for simple classes.
                         $className = $fileInfo->getBasename('.php');
-                        $this->safeRequire($path, true);
-                        $this->loadedClasses[$className] = $path;
-                        return true;
+                        try {
+                            $this->safeRequire($path, true);
+                            $this->loadedClasses[$className] = $path;
+                        } catch (RuntimeException $e) {
+                            // do not break loading of other utilities
+                            error_log("Failed to require utility file: $path - " . $e->getMessage());
+                        }
                     }
                 }
             }
         }
-        return false;
+
+        return $this->loadedClasses;
+    }
+
+    public function getLoadedUtilityClasses(): array
+    {
+        return $this->loadedClasses;
     }
 
     public function defineApplicationConstants(): void
@@ -361,13 +427,12 @@ class Bootstrap
             $allowedHeaders = $this->config->get('CORS_ALLOWED_HEADERS', 'Content-Type, Authorization, X-Requested-With');
             header('Access-Control-Allow-Headers: ' . $allowedHeaders);
 
-            if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
                 http_response_code(200);
                 exit();
             }
         }
     }
-
 
     public function initializeSession(): void
     {
@@ -378,7 +443,7 @@ class Bootstrap
         }
 
         $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
+            || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
             || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
         $forceHttps = filter_var($this->config->get('FORCE_HTTPS', false), FILTER_VALIDATE_BOOLEAN);
@@ -410,8 +475,8 @@ class Bootstrap
             ini_set('memory_limit', $this->config->get('MEMORY_LIMIT', '256M'));
             set_time_limit((int)$this->config->get('TIME_LIMIT', 300));
 
-            ini_set('max_execution_time', $this->config->get('MAX_EXECUTION_TIME', '300'));
-            ini_set('max_input_time', $this->config->get('MAX_INPUT_TIME', '300'));
+            ini_set('max_execution_time', (string)$this->config->get('MAX_EXECUTION_TIME', '300'));
+            ini_set('max_input_time', (string)$this->config->get('MAX_INPUT_TIME', '300'));
             ini_set('post_max_size', $this->config->get('POST_MAX_SIZE', '50M'));
             ini_set('upload_max_filesize', $this->config->get('UPLOAD_MAX_FILESIZE', '50M'));
         } else {
@@ -426,8 +491,184 @@ class Bootstrap
     }
 }
 
-// Run the Bootstaping of Framework
-Bootstrap::boot();
+// Ensure $bootstrap exists (use existing or boot)
+if (!isset($bootstrap) && class_exists('Bootstrap')) {
+    $bootstrap = Bootstrap::boot();
+}
 
-// Making global registry
-$registry = new Registry();
+// load map of utilities (path map: basename => path)
+$loadedMap = [];
+if (isset($bootstrap) && method_exists($bootstrap, 'loadAllUtilityClasses')) {
+    $loadedMap = $bootstrap->loadAllUtilityClasses();
+} elseif (isset($bootstrap) && method_exists($bootstrap, 'getLoadedUtilityClasses')) {
+    $loadedMap = $bootstrap->getLoadedUtilityClasses();
+}
+
+if (class_exists('Registry')) {
+    try {
+        $registry = new Registry();
+    } catch (Throwable $e) {
+        error_log('Failed to instantiate Registry: ' . $e->getMessage());
+        $registry = null;
+    }
+} else {
+    error_log('Registry class not found after core files load.');
+    $registry = null;
+}
+
+if ($registry && !empty($loadedMap)) {
+    $fileToClasses = [];
+    foreach (get_declared_classes() as $decl) {
+        try {
+            $rc = new ReflectionClass($decl);
+        } catch (ReflectionException $e) {
+            continue;
+        }
+        $file = $rc->getFileName();
+        if ($file) {
+            $rp = realpath($file) ?: $file;
+            $fileToClasses[$rp][] = $decl;
+        }
+    }
+
+    $candidates = [];
+    foreach ($loadedMap as $basename => $path) {
+        $rp = realpath($path) ?: $path;
+        $classes = $fileToClasses[$rp] ?? [];
+        foreach ($classes as $fqcn) {
+            try {
+                $rc = new ReflectionClass($fqcn);
+            } catch (ReflectionException $e) {
+                continue;
+            }
+            if ($rc->isInstantiable()) {
+                $candidates[$fqcn] = $rc;
+            }
+        }
+    }
+
+    $tryInstantiate = function (ReflectionClass $rc, $registry) {
+        $ctor = $rc->getConstructor();
+        if (!$ctor || $ctor->getNumberOfRequiredParameters() === 0) {
+            try { return $rc->newInstance(); } catch (Throwable $e) { return null; }
+        }
+
+        $params = $ctor->getParameters();
+        $args = [];
+
+        foreach ($params as $p) {
+            $t = $p->getType();
+
+            if ($t instanceof ReflectionNamedType && !$t->isBuiltin()) {
+                $paramClass = $t->getName();
+                $paramShort = lcfirst((new ReflectionClass($paramClass))->getShortName());
+
+                $dep = null;
+                if (method_exists($registry, 'get')) {
+                    try {
+                        $dep = $registry->get($paramShort);
+                        if ($dep === null) {
+                            $dep = $registry->get($paramClass);
+                        }
+                    } catch (Throwable $e) {
+                        $dep = null;
+                    }
+                }
+                if ($dep === null && property_exists($registry, $paramShort)) {
+                    $dep = $registry->{$paramShort};
+                }
+                if ($dep === null && class_exists($paramClass)) {
+                    try {
+                        $depRc = new ReflectionClass($paramClass);
+                        if ($depRc->isInstantiable()) {
+                            $depCtor = $depRc->getConstructor();
+                            if (!$depCtor || $depCtor->getNumberOfRequiredParameters() === 0) {
+                                $dep = $depRc->newInstance();
+                            }
+                        }
+                    } catch (Throwable $e) {
+                        $dep = null;
+                    }
+                }
+
+                if ($dep === null) {
+                    return null;
+                }
+                $args[] = $dep;
+            } else {
+                if ($p->isDefaultValueAvailable()) {
+                    $args[] = $p->getDefaultValue();
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        try {
+            return $rc->newInstanceArgs($args);
+        } catch (Throwable $e) {
+            return null;
+        }
+    };
+
+    $pending = $candidates;
+    $registered = [];
+    $maxPasses = 4;
+    $pass = 0;
+
+    while (!empty($pending) && $pass < $maxPasses) {
+        foreach ($pending as $fqcn => $rc) {
+            $short = lcfirst($rc->getShortName());
+            $exists = false;
+            if (method_exists($registry, 'get')) {
+                try { $exists = $registry->get($short) !== null; } catch (Throwable $_) { $exists = false; }
+            } elseif (property_exists($registry, $short)) {
+                $exists = isset($registry->{$short});
+            }
+
+            if ($exists) {
+                unset($pending[$fqcn]);
+                continue;
+            }
+
+            $obj = null;
+
+            $ctor = $rc->getConstructor();
+            if ($ctor && $ctor->getNumberOfParameters() === 1) {
+                $p = $ctor->getParameters()[0];
+                $t = $p->getType();
+                if ($t instanceof ReflectionNamedType && !$t->isBuiltin() && $t->getName() === Registry::class) {
+                    try { $obj = $rc->newInstance($registry); } catch (Throwable $e) { $obj = null; }
+                }
+            }
+
+            if ($obj === null) {
+                $obj = $tryInstantiate($rc, $registry);
+            }
+
+            if ($obj !== null) {
+                $key = lcfirst($rc->getShortName());
+                if (method_exists($registry, 'set')) {
+                    try {
+                        $registry->set($key, $obj);
+                    } catch (Throwable $e) {
+                        error_log("Registry::set failed for {$key}: " . $e->getMessage());
+                    }
+                } else {
+                    $registry->{$key} = $obj;
+                }
+
+                $registered[$fqcn] = $key;
+                unset($pending[$fqcn]);
+            }
+        }
+        $pass++;
+    }
+
+    if (!empty($pending)) {
+        $notRegistered = array_keys($pending);
+        error_log('Some utility classes could not be auto-instantiated: ' . implode(', ', array_map(fn($c)=> (string)$c, $notRegistered)));
+    }
+
+    $GLOBALS['registry'] = $registry;
+}

@@ -3,7 +3,9 @@
 class Response
 {
     private static array $headers = [];
-    
+    private $level;
+    private $output;
+
     /**
      * Send a 404 Not Found response and exit.
      */
@@ -45,6 +47,77 @@ class Response
         exit;
     }
 
+    public function setCompression(int $level): void
+    {
+        $this->level = $level;
+    }
+
+    public function setOutput(string $output): void
+    {
+        $this->output = $output;
+    }
+
+    // public function view(string $role, string $module, string $template, array $data = []): string
+    // {
+    //     if (!defined('DS')) {
+    //         define('DS', DIRECTORY_SEPARATOR);
+    //     }
+
+    //     $file = DIR_MODULES . DS . $role . DS . $module . DS . 'Views' . DS . $template;
+
+    //     if (file_exists($file)) {
+    //         extract($data, EXTR_SKIP);
+    //         ob_start();
+    //         require($file);
+    //         return ob_get_clean();
+    //     } else {
+    //         trigger_error('Error: Could not load template ' . $file . '!', E_USER_ERROR);
+    //         exit();
+    //     }
+    // }
+
+
+    private function compress(string $data, int $level = 0): string
+    {
+        $encoding = null;
+        if (isset($_SERVER['HTTP_ACCEPT_ENCODING'])) {
+            if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
+                $encoding = 'gzip';
+            } elseif (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'x-gzip') !== false) {
+                $encoding = 'x-gzip';
+            }
+        }
+
+        if (!$encoding || !extension_loaded('zlib') || ini_get('zlib.output_compression') || headers_sent() || connection_status()) {
+            return $data;
+        }
+
+        $this->addHeader('Content-Encoding: ' . $encoding);
+        return gzencode($data, $level);
+    }
+
+    public function output(): void
+    {
+        if ($this->output) {
+            $output = $this->level ? $this->compress($this->output, $this->level) : $this->output;
+
+            if (!headers_sent()) {
+                foreach (self::$headers as $header) {
+                    header($header, true);
+                }
+            }
+            echo $output;
+        }
+    }
+
+    public function jsonResponse(array $data = []): void
+    {
+        header('Access-Control-Allow-Origin: *');
+        header('Content-Type: application/json');
+        echo json_encode($data);
+        exit;
+    }
+
     /**
      * Send plain text or HTML content and exit.
      */
@@ -57,18 +130,14 @@ class Response
 
     /**
      * Sets the HTTP status code (e.g. 200, 404).
-     *
-     * @param int $code
      */
     public static function setStatusCode(int $code): void
     {
         http_response_code($code);
     }
 
-      /**
+    /**
      * Adds a custom HTTP header to the response.
-     *
-     * @param string $header
      */
     public static function addHeader(string $header): void
     {
@@ -78,9 +147,6 @@ class Response
 
     /**
      * Redirect to another URL and exit.
-     *
-     * @param string $url
-     * @param int $statusCode HTTP status code for redirect, default 302 Found
      */
     public static function redirect(string $url, int $statusCode = 302): void
     {
