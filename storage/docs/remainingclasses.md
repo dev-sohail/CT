@@ -18,9 +18,7 @@ api
 business
 ├── ActivityFeed.php
 ├── ApprovalManager.php
-├── NotificationQueue.php
-├── RoleManager.php
-└── WorkflowEngine.php
+└── PaymentGateway.php
 
 SearchEngine
 ├── Indexer.php
@@ -28,63 +26,11 @@ SearchEngine
 ├── ResultRanker.php
 └── SearchManager.php
 
-Cache
-└── cache.php
-
-commerce
-├── Cart.php
-├── Currency.php
-├── DiscountEngine.php
-├── InvoiceGenerator.php
-├── MultiCurrency.php
-├── SubscriptionManager.php
-└── TaxCalculator.php
-
-Console
-├── ClearCache.php
-├── MakeCommand.php
-├── MakeController.php
-├── MakeModel.php
-└── MakeModule.php
-
 core
-├── config.php
-├── Routes.php
 └── Scheduler.php
 
 database
-├── CacheStore.php
-├── Database.php
-├── DBMigration.php
-├── DBORM.php
-└── Transaction.php
-
-Exceptions
-└── Handler.php
-
-Helpers
-├── Arr.php
-├── Date.php
-├── document.php
-├── Env.php
-├── File.php
-├── image.php
-├── Number.php
-├── pagination.php
-├── Path.php
-├── Str.php
-├── Timer.php
-└── url.php
-
-Http
-├── Cookie.php
-├── Cors.php
-├── Headers.php
-├── Middleware.php
-├── RateLimiter.php
-├── request.php
-├── RequestFilter.php
-└── response.php
+└── CacheStore.php
 
 IoT
 ├── Data
@@ -123,20 +69,8 @@ IoT
     ├── SecureChannel.php
     └── TamperDetector.php
 
-Localization
-├── language.php
-└── Locale.php
-
 logging
-├── AuditTrail.php
-├── debugger.php
-├── Logger.php
-└── UsageTracker.php
-
-Media
-├── DocGenerator.php
-├── ImageProcessor.php
-└── Uploader.php
+└── AuditTrail.php
 
 Networking
 ├── ApiGateway.php
@@ -147,23 +81,11 @@ Networking
 └── WebHookHandler.php
 
 security
-├── Acl.php
 ├── AuditPolicy.php
-├── captcha.php
-├── Csrf.php
-├── encryption.php
-├── Firewall.php
-├── InputNormalizer.php
 ├── JWTHandler.php
 ├── KeyVault.php
 ├── OAuthManager.php
 ├── PasswordHasher.php
-├── Sanitizer.php
-├── SecurityScanner.php
-└── Validator.php
-
-Services
-└── Mailer.php
 
 Storage
 ├── BlobStorage.php
@@ -172,39 +94,16 @@ Storage
 ├── EventStore.php
 └── SearchIndex.php
 
-support
-├── ErrorCodeMap.php
-├── HelpManager.php
-└── SupportTicket.php
-
 System
-├── affiliate.php
-├── Backup.php
 ├── CrashHandler.php
-├── deployment.php
 ├── DeploymentManager.php
 ├── ErrorReporter.php
-├── GeoIP.php
-├── icvSoap.php
-├── Indexer.php
-├── Installer.php
-├── LicenseManager.php
 ├── LogRotator.php
-├── sgrid.php
-├── Slugger.php
 ├── SystemMonitor.php
-└── Version.php
 
 Testing
-├── Fuzzer.php
-├── microtest.php
-├── Mocker.php
 ├── PerformanceTest.php
-├── ScenarioRunner.php
 ├── SnapshotTest.php
-├── TestCase.php
-├── TestDataFactory.php
-└── unittest.php
 
 UX
 ├── ABTest.php
@@ -226,3 +125,5 @@ view
 ├── template.php
 ├── ThemeCustomizer.php
 └── ThemeManager.php
+
+
