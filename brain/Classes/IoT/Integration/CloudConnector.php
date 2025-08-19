@@ -1,1 +1,0 @@
-rem CloudConnector.php 

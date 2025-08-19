@@ -1,1 +1,0 @@
-rem DeviceShadow.php 

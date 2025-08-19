@@ -4,5 +4,6 @@
     "Registry": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Core\\Registry.php",
     "Router": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Core\\Router.php",
     "Routes": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Classes\\core\\Routes.php",
+    "Scheduler": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Classes\\core\\Scheduler.php",
     "config": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Classes\\core\\config.php"
 }

@@ -1,1 +1,0 @@
-rem DeploymentManager.php 
