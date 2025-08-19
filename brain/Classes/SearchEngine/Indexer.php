@@ -1,3 +1,3 @@
 <?php
 
-class Indexer{}
+class SearchIndexer{}
