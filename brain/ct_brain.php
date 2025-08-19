@@ -1,19 +1,17 @@
 <?php
 
+################################
+    # CyberTirah Framework #
+################################
+
 /**
- * CyberTirah Framework - Bootstrap + Env loader (fixed)
- *
- * - No Composer / PSR-4 autoloading used. This file scans and requires framework core
- *   and utility PHP files explicitly (custom framework loader).
- * - Defensive and clear error handling added.
- * - loadAllUtilityClasses now returns an array of loaded classes->paths.
- * - Safe checks before instantiating Registry.
- *
+ * Comfortable framework
+ * 
  * @version 1.4.1
- * @author CyberTirah Development Team (fixed)
+ * @author CyberTirah Development Team
  * @license MIT
  * @since PHP 8.0+
- */
+**/
 
 class MakingEnv
 {

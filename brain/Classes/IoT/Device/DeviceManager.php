@@ -1,0 +1,1 @@
+rem DeviceManager.php 
