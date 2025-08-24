@@ -14,6 +14,7 @@
     "DIR_BRAIN_CLASSES_CORE": "C:\\wamp64\\www\\me\\CT\\Frame\\Brain\\Classes\\core",
     "DIR_BRAIN_CLASSES_DATABASE": "C:\\wamp64\\www\\me\\CT\\Frame\\Brain\\Classes\\database",
     "DIR_BRAIN_CLASSES_EXCEPTIONS": "C:\\wamp64\\www\\me\\CT\\Frame\\Brain\\Classes\\Exceptions",
+    "DIR_BRAIN_CLASSES_FASTROUTES": "C:\\wamp64\\www\\me\\CT\\Frame\\Brain\\Classes\\FastRoutes",
     "DIR_BRAIN_CLASSES_HELPERS": "C:\\wamp64\\www\\me\\CT\\Frame\\Brain\\Classes\\Helpers",
     "DIR_BRAIN_CLASSES_HTTP": "C:\\wamp64\\www\\me\\CT\\Frame\\Brain\\Classes\\Http",
     "DIR_BRAIN_CLASSES_IOT": "C:\\wamp64\\www\\me\\CT\\Frame\\Brain\\Classes\\IoT",
@@ -48,6 +49,7 @@
     "DIR_STORAGE_LANG_MAIN": "C:\\wamp64\\www\\me\\CT\\Frame\\Storage\\lang\\main",
     "DIR_STORAGE_LANG_OTHER": "C:\\wamp64\\www\\me\\CT\\Frame\\Storage\\lang\\other",
     "DIR_STORAGE_LANG_SECONDARY": "C:\\wamp64\\www\\me\\CT\\Frame\\Storage\\lang\\secondary",
+    "DIR_STORAGE_LIBRARY": "C:\\wamp64\\www\\me\\CT\\Frame\\Storage\\library",
     "DIR_STORAGE_LOGS": "C:\\wamp64\\www\\me\\CT\\Frame\\Storage\\logs",
     "DIR_STORAGE_TEMP": "C:\\wamp64\\www\\me\\CT\\Frame\\Storage\\temp",
     "DIR_STORAGE_UPLOADS": "C:\\wamp64\\www\\me\\CT\\Frame\\Storage\\uploads"
