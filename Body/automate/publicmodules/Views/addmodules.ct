@@ -1,1 +1,21 @@
-ECHO is off.
+<div class="container">
+    <h1><?= htmlspecialchars($title ?? 'Add Module') ?></h1>
+    <p><?= htmlspecialchars($message ?? 'Module generator functionality') ?></p>
+    
+    <form method="POST" action="/public/automate/addmodules">
+        <div class="form-group">
+            <label for="module_name">Module Name:</label>
+            <input type="text" id="module_name" name="module_name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="role">Role:</label>
+            <select id="role" name="role" required>
+                <option value="admin">Admin</option>
+                <option value="public">Public</option>
+            </select>
+        </div>
+        
+        <button type="submit">Generate Module</button>
+    </form>
+</div>

@@ -1,0 +1,64 @@
+---
+alwaysApply: true
+---
+
+# CyberTirah Framework Project Structure
+
+This is a PHP-based MVC framework with a unique modular architecture. Understanding the project structure is essential for development.
+
+## Core Architecture
+
+The framework follows a "Body-Brain" architecture:
+- **Brain**: Core framework classes and utilities ([Brain/](mdc:Brain/))
+- **Body**: Application modules and business logic ([Body/](mdc:Body/))
+- **Index**: Entry point and routing ([Index/](mdc:Index/))
+
+## Key Directories
+
+### Core Framework
+- [Brain/ct_brain.php](mdc:Brain/ct_brain.php) - Main framework bootstrap and initialization
+- [Brain/Core/](mdc:Brain/Core/) - Core classes (Router, Registry, Controller, Model)
+- [Brain/Classes/](mdc:Brain/Classes/) - Framework utility classes organized by functionality
+
+### Application Modules
+- [Body/admin/](mdc:Body/admin/) - Admin panel modules
+- [Body/public/](mdc:Body/public/) - Public-facing modules
+- [Body/api/](mdc:Body/api/) - API endpoints
+- [Body/ai/](mdc:Body/ai/) - AI-related modules
+
+### Module Structure
+Each module follows MVC pattern:
+```
+ModuleName/
+├── routes.json          # Route definitions
+├── Controllers/         # Controller classes
+├── Models/             # Model classes
+└── Views/              # View templates (.ct files)
+```
+
+### Infrastructure & Services
+- [Services/](mdc:Services/) - Microservices (frontend, node-api, python-api, php-app)
+- [Infra/](mdc:Infra/) - Docker and deployment configurations
+- [Storage/](mdc:Storage/) - Static assets, cache, logs, uploads
+
+### Shared Resources
+- [Shared/](mdc:Shared/) - Shared data models, documentation, utilities
+- [Tests/](mdc:Tests/) - Test suites
+
+## Entry Points
+- [Index/index.php](mdc:Index/index.php) - Main application entry point
+- [frame_structure.json](mdc:frame_structure.json) - Project structure definition
+- [installed.lock](mdc:installed.lock) - Installation status indicator
+
+## Key Framework Files
+- [Brain/ct_brain.php](mdc:Brain/ct_brain.php) - Bootstrap class with environment loading
+- [Brain/Core/Router.php](mdc:Brain/Core/Router.php) - Routing system
+- [Brain/Core/Registry.php](mdc:Brain/Core/Registry.php) - Dependency injection container
+
+## Development Guidelines
+- Always follow the MVC pattern for new modules
+- Use the Registry for dependency injection
+- Place new classes in appropriate Brain/Classes subdirectories
+- Follow the established naming conventions
+- Use .ct files for view templates
+- Configure routes in routes.json files

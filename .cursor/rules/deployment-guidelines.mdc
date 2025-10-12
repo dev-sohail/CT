@@ -1,0 +1,105 @@
+---
+description: Deployment and infrastructure guidelines for the CyberTirah framework
+---
+
+# Deployment Guidelines
+
+## Infrastructure Setup
+The framework includes infrastructure configurations in [Infra/](mdc:Infra/):
+- [Infra/docker-compose.yml](mdc:Infra/docker-compose.yml) - Docker container orchestration
+- [Infra/nginx/](mdc:Infra/nginx/) - Nginx configuration files
+- [Infra/env/](mdc:Infra/env/) - Environment-specific configurations
+
+## Environment Configuration
+- Development: Use [Infra/env/.env.dev](mdc:Infra/env/.env.dev)
+- Production: Use [Infra/env/.env.prod](mdc:Infra/env/.env.prod)
+- Configure appropriate database connections
+- Set proper security settings
+- Configure logging levels
+
+## Docker Deployment
+The framework supports containerized deployment:
+- [Services/php-app/Dockerfile](mdc:Services/php-app/Dockerfile) - PHP application container
+- [Services/frontend/Dockerfile](mdc:Services/frontend/Dockerfile) - Frontend service container
+- [Services/node-api/Dockerfile](mdc:Services/node-api/Dockerfile) - Node.js API container
+- [Services/python-api/Dockerfile](mdc:Services/python-api/Dockerfile) - Python API container
+
+## Microservices Architecture
+The framework uses a microservices approach:
+- **PHP App**: Main application logic
+- **Frontend**: User interface and client-side logic
+- **Node API**: JavaScript-based API services
+- **Python API**: Python-based API services
+
+## Deployment Process
+
+### Pre-deployment Checklist
+- Run all tests successfully
+- Update version numbers
+- Review security configurations
+- Backup current deployment
+- Validate environment configurations
+
+### Deployment Steps
+1. Build Docker containers
+2. Deploy to staging environment
+3. Run integration tests
+4. Deploy to production
+5. Monitor deployment health
+6. Verify functionality
+
+### Post-deployment Validation
+- Check application health
+- Verify database connectivity
+- Test critical user flows
+- Monitor error logs
+- Validate performance metrics
+
+## Backup and Recovery
+- Implement automated database backups
+- Backup configuration files
+- Store backups in secure locations
+- Test recovery procedures
+- Document recovery processes
+
+## Monitoring and Logging
+- Use [Brain/Classes/logging/Logger.php](mdc:Brain/Classes/logging/Logger.php)
+- Implement application monitoring
+- Set up error tracking
+- Monitor performance metrics
+- Configure alert systems
+
+## Security Considerations
+- Use HTTPS in production
+- Implement proper firewall rules
+- Regular security updates
+- Monitor for vulnerabilities
+- Implement access controls
+
+## Performance Optimization
+- Configure caching mechanisms
+- Optimize database queries
+- Use CDN for static assets
+- Implement load balancing
+- Monitor resource usage
+
+## Scaling Considerations
+- Design for horizontal scaling
+- Implement database sharding
+- Use caching layers
+- Monitor resource utilization
+- Plan for traffic spikes
+
+## Maintenance Procedures
+- Regular security updates
+- Database maintenance
+- Log rotation and cleanup
+- Performance monitoring
+- Backup verification
+
+## Disaster Recovery
+- Implement backup strategies
+- Document recovery procedures
+- Test recovery processes
+- Maintain off-site backups
+- Plan for business continuity

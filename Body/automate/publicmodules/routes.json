@@ -1,0 +1,12 @@
+{
+  "routes": [
+    { "method": "GET", "path": "/public/automate/addcontroller", "handler": "public/automate/addcontroller@index" },
+    { "method": "POST", "path": "/public/automate/addcontroller", "handler": "public/automate/addcontroller@generate" },
+    { "method": "GET", "path": "/public/automate/addmodels", "handler": "public/automate/addmodels@index" },
+    { "method": "POST", "path": "/public/automate/addmodels", "handler": "public/automate/addmodels@generate" },
+    { "method": "GET", "path": "/public/automate/addmodules", "handler": "public/automate/addmodules@index" },
+    { "method": "POST", "path": "/public/automate/addmodules", "handler": "public/automate/addmodules@generate" },
+    { "method": "GET", "path": "/public/automate/addview", "handler": "public/automate/addview@index" },
+    { "method": "POST", "path": "/public/automate/addview", "handler": "public/automate/addview@generate" }
+  ]
+}

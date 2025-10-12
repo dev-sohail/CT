@@ -1,5 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * Database Class
+ * 
+ * PDO-based database abstraction layer for the framework
+ */
 class Database
 {
     private ?PDO $connection = null;
@@ -8,34 +15,61 @@ class Database
 
     /**
      * Connect to the database on construct.
+     * 
+     * @param array $config Database configuration
+     * @throws RuntimeException If connection fails
      */
     public function __construct(array $config = [])
     {
+        $this->initializeConnection($config);
+    }
+
+    /**
+     * Initialize database connection
+     * 
+     * @param array $config Database configuration
+     */
+    private function initializeConnection(array $config): void
+    {
         if (empty($config)) {
-            $config = [
-                'hostname' => DB_HOST,
-                'username' => DB_USERNAME,
-                'password' => DB_PASSWORD,
-                'database' => DB_DATABASE,
-                'port'     => DB_PORT,
-            ];
+            $config = $this->getDefaultConfig();
         }
-        $hostname = $config['hostname'];
-        $username = $config['username'];
-        $password = $config['password'];
-        $database = $config['database'];
-        $port     = $config['port'];
+
+        $hostname = $config['hostname'] ?? 'localhost';
+        $username = $config['username'] ?? 'root';
+        $password = $config['password'] ?? '';
+        $database = $config['database'] ?? '';
+        $port = $config['port'] ?? 3306;
+        $charset = $config['charset'] ?? 'utf8mb4';
 
         try {
-            $dsn = "mysql:host={$hostname};port={$port};dbname={$database};charset=utf8mb4";
+            $dsn = "mysql:host={$hostname};port={$port};dbname={$database};charset={$charset}";
             $this->connection = new PDO($dsn, $username, $password, [
-                PDO::ATTR_PERSISTENT         => true,
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_PERSISTENT => true,
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
             ]);
         } catch (PDOException $e) {
             throw new RuntimeException('Failed to connect to database: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Get default database configuration from constants
+     * 
+     * @return array Default configuration
+     */
+    private function getDefaultConfig(): array
+    {
+        return [
+            'hostname' => defined('DB_HOST') ? DB_HOST : 'localhost',
+            'username' => defined('DB_USERNAME') ? DB_USERNAME : 'root',
+            'password' => defined('DB_PASSWORD') ? DB_PASSWORD : '',
+            'database' => defined('DB_DATABASE') ? DB_DATABASE : 'ct_frame',
+            'port' => defined('DB_PORT') ? DB_PORT : 3306,
+            'charset' => defined('DB_CHARSET') ? DB_CHARSET : 'utf8mb4',
+        ];
     }
 
 

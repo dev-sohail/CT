@@ -1,0 +1,123 @@
+---
+description: AI integration patterns and guidelines for the CyberTirah framework
+---
+
+# AI Integration Guidelines
+
+## AI Classes and Components
+The framework includes comprehensive AI capabilities in [Brain/Classes/AI/](mdc:Brain/Classes/AI/):
+
+### Core AI Components
+- [Brain/Classes/AI/NLPProcessor.php](mdc:Brain/Classes/AI/NLPProcessor.php) - Natural Language Processing
+- [Brain/Classes/AI/SentimentAnalyzer.php](mdc:Brain/Classes/AI/SentimentAnalyzer.php) - Sentiment analysis
+- [Brain/Classes/AI/RecommendationEngine.php](mdc:Brain/Classes/AI/RecommendationEngine.php) - Recommendation systems
+- [Brain/Classes/AI/AnomalyDetector.php](mdc:Brain/Classes/AI/AnomalyDetector.php) - Anomaly detection
+- [Brain/Classes/AI/PredictiveCache.php](mdc:Brain/Classes/AI/PredictiveCache.php) - Predictive caching
+
+## AI Module Structure
+The framework includes an AI module in [Body/ai/](mdc:Body/ai/):
+- Controllers for AI operations
+- Models for AI data management
+- Views for AI interfaces
+- Route configurations for AI endpoints
+
+## Integration Patterns
+
+### Natural Language Processing
+- Use NLPProcessor for text analysis
+- Implement language detection
+- Process user queries and commands
+- Extract entities and intents
+- Generate natural language responses
+
+### Sentiment Analysis
+- Analyze user feedback and reviews
+- Monitor social media sentiment
+- Track customer satisfaction
+- Implement sentiment-based routing
+- Generate sentiment reports
+
+### Recommendation Systems
+- Implement collaborative filtering
+- Use content-based recommendations
+- Apply machine learning models
+- Personalize user experiences
+- Optimize recommendation algorithms
+
+### Anomaly Detection
+- Monitor system behavior
+- Detect unusual patterns
+- Implement fraud detection
+- Monitor security threats
+- Generate anomaly alerts
+
+### Predictive Caching
+- Predict user behavior
+- Preload frequently accessed data
+- Optimize cache strategies
+- Reduce server load
+- Improve response times
+
+## IoT Integration
+The framework includes IoT capabilities in [Brain/Classes/IoT/](mdc:Brain/Classes/IoT/):
+
+### IoT Data Processing
+- [Brain/Classes/IoT/Data/StreamProcessor.php](mdc:Brain/Classes/IoT/Data/StreamProcessor.php) - Real-time data processing
+- [Brain/Classes/IoT/Data/TelemetryCollector.php](mdc:Brain/Classes/IoT/Data/TelemetryCollector.php) - Data collection
+- [Brain/Classes/IoT/Data/TimeSeriesDB.php](mdc:Brain/Classes/IoT/Data/TimeSeriesDB.php) - Time series storage
+
+### IoT Intelligence
+- [Brain/Classes/IoT/Intelligence/EdgeAI.php](mdc:Brain/Classes/IoT/Intelligence/EdgeAI.php) - Edge computing AI
+- [Brain/Classes/IoT/Intelligence/PredictiveMaintenance.php](mdc:Brain/Classes/IoT/Intelligence/PredictiveMaintenance.php) - Predictive maintenance
+- [Brain/Classes/IoT/Intelligence/PatternRecognizer.php](mdc:Brain/Classes/IoT/Intelligence/PatternRecognizer.php) - Pattern recognition
+
+## Best Practices
+
+### Data Management
+- Implement proper data preprocessing
+- Use appropriate data formats
+- Implement data validation
+- Ensure data privacy and security
+- Implement data retention policies
+
+### Model Management
+- Version control AI models
+- Implement model testing
+- Monitor model performance
+- Implement model updates
+- Document model behavior
+
+### Performance Optimization
+- Optimize AI model inference
+- Implement caching strategies
+- Use appropriate hardware acceleration
+- Monitor resource usage
+- Implement load balancing
+
+### Security Considerations
+- Secure AI model endpoints
+- Implement access controls
+- Protect sensitive data
+- Monitor for adversarial attacks
+- Implement audit trails
+
+### Error Handling
+- Implement robust error handling
+- Provide meaningful error messages
+- Implement fallback mechanisms
+- Monitor AI system health
+- Implement recovery procedures
+
+## Integration with External Services
+- Implement API integrations
+- Handle rate limiting
+- Implement retry mechanisms
+- Monitor external service health
+- Implement fallback strategies
+
+## Monitoring and Analytics
+- Track AI model performance
+- Monitor prediction accuracy
+- Implement user feedback systems
+- Generate performance reports
+- Implement A/B testing for AI features

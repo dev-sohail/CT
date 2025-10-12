@@ -1,0 +1,58 @@
+---
+globs: *.php
+---
+
+# PHP Coding Standards for CyberTirah Framework
+
+## General PHP Standards
+- Use PHP 8.0+ features and syntax
+- Follow PSR-12 coding standard
+- Use strict typing where appropriate: `declare(strict_types=1);`
+- Use proper namespaces for all classes
+- Use meaningful variable and method names
+
+## Framework-Specific Conventions
+
+### Class Structure
+- All classes should extend appropriate base classes when available
+- Use dependency injection through the Registry system
+- Implement proper error handling with try-catch blocks
+- Use type hints for all method parameters and return types
+
+### File Organization
+- Controllers go in `Body/{module}/Controllers/`
+- Models go in `Body/{module}/Models/`
+- Views go in `Body/{module}/Views/` with `.ct` extension
+- Utility classes go in `Brain/Classes/{category}/`
+
+### Naming Conventions
+- Classes: PascalCase (e.g., `UserController`)
+- Methods: camelCase (e.g., `getUserData`)
+- Variables: camelCase (e.g., `$userData`)
+- Constants: UPPER_SNAKE_CASE (e.g., `DB_HOST`)
+- Files: lowercase with underscores (e.g., `user_controller.php`)
+
+### Database Interactions
+- Use the Database class from `Brain/Classes/database/Database.php`
+- Always use prepared statements
+- Implement proper error handling for database operations
+- Use transactions for multi-step operations
+
+### Security Best Practices
+- Always validate and sanitize user input
+- Use the framework's security classes from `Brain/Classes/security/`
+- Implement proper authentication and authorization
+- Use CSRF protection for forms
+- Escape output in views
+
+### Error Handling
+- Use the framework's exception handling system
+- Log errors appropriately using the Logger class
+- Provide meaningful error messages
+- Handle edge cases gracefully
+
+### Performance Considerations
+- Use caching mechanisms from `Brain/Classes/Cache/`
+- Optimize database queries
+- Use lazy loading where appropriate
+- Implement proper pagination for large datasets

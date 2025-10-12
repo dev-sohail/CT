@@ -1,0 +1,107 @@
+---
+description: Testing guidelines and patterns for the CyberTirah framework
+---
+
+# Testing Guidelines
+
+## Testing Framework
+The framework includes testing utilities in [Brain/Classes/Testing/](mdc:Brain/Classes/Testing/):
+- [Brain/Classes/Testing/TestCase.php](mdc:Brain/Classes/Testing/TestCase.php) - Base test case
+- [Brain/Classes/Testing/unittest.php](mdc:Brain/Classes/Testing/unittest.php) - Unit testing utilities
+- [Brain/Classes/Testing/microtest.php](mdc:Brain/Classes/Testing/microtest.php) - Micro testing framework
+- [Brain/Classes/Testing/PerformanceTest.php](mdc:Brain/Classes/Testing/PerformanceTest.php) - Performance testing
+
+## Test Organization
+Tests are organized in the [Tests/](mdc:Tests/) directory:
+- Unit tests for individual classes and methods
+- Integration tests for module interactions
+- Functional tests for complete workflows
+- Performance tests for optimization validation
+
+## Testing Patterns
+
+### Unit Testing
+- Test individual methods and classes
+- Use dependency injection for testability
+- Mock external dependencies
+- Test both success and failure scenarios
+- Validate input and output data
+
+### Integration Testing
+- Test module interactions
+- Validate database operations
+- Test API endpoints
+- Verify authentication flows
+- Test error handling scenarios
+
+### Functional Testing
+- Test complete user workflows
+- Validate end-to-end functionality
+- Test form submissions
+- Verify data persistence
+- Test user interface interactions
+
+## Test Data Management
+- Use [Brain/Classes/Testing/TestDataFactory.php](mdc:Brain/Classes/Testing/TestDataFactory.php)
+- Create realistic test data
+- Use database fixtures
+- Implement data cleanup
+- Use consistent test data across tests
+
+## Performance Testing
+- Use [Brain/Classes/Testing/PerformanceTest.php](mdc:Brain/Classes/Testing/PerformanceTest.php)
+- Measure response times
+- Test under load conditions
+- Monitor memory usage
+- Validate optimization improvements
+
+## Testing Best Practices
+
+### Test Structure
+- Follow Arrange-Act-Assert pattern
+- Use descriptive test names
+- Keep tests focused and simple
+- Avoid test interdependencies
+- Implement proper test isolation
+
+### Test Coverage
+- Aim for high code coverage
+- Test edge cases and error conditions
+- Validate security scenarios
+- Test performance requirements
+- Include accessibility testing
+
+### Continuous Integration
+- Run tests automatically on code changes
+- Implement test result reporting
+- Use automated deployment pipelines
+- Monitor test execution times
+- Implement test failure notifications
+
+## Security Testing
+- Test authentication mechanisms
+- Validate authorization controls
+- Test input validation
+- Verify CSRF protection
+- Test for common vulnerabilities
+
+## Database Testing
+- Use test database instances
+- Implement database fixtures
+- Test migration scripts
+- Validate data integrity
+- Test transaction handling
+
+## API Testing
+- Test all API endpoints
+- Validate request/response formats
+- Test error handling
+- Verify authentication
+- Test rate limiting
+
+## Documentation Testing
+- Validate code examples
+- Test installation procedures
+- Verify configuration examples
+- Test troubleshooting guides
+- Validate API documentation

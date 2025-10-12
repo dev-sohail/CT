@@ -1,0 +1,6 @@
+{
+  "routes": [
+    { "method": "GET", "path": "/api/health", "handler": "api/Health/HealthController@index" },
+    { "method": "GET", "path": "/api/version", "handler": "api/Version/VersionController@index" }
+  ]
+}

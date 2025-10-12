@@ -1,0 +1,7 @@
+<div class="admin-header">
+    <h1><?= htmlspecialchars($title ?? 'Admin Panel') ?></h1>
+    <nav>
+        <a href="/admin" style="color:#007bff;text-decoration:none">Dashboard</a>
+        <a href="/admin/blog" style="color:#007bff;text-decoration:none">Blog</a>
+    </nav>
+</div>

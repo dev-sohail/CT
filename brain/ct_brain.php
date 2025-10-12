@@ -1,59 +1,92 @@
 <?php
 
-################################
-    # CyberTirah Framework #
-################################
+declare(strict_types=1);
 
 /**
- * Comfortable framework
+ * CyberTirah Framework
+ * 
+ * A comprehensive PHP framework with modular architecture
  * 
  * @version 1.4.1
  * @author CyberTirah Development Team
  * @license MIT
  * @since PHP 8.0+
-**/
+ */
 
 class MakingEnv
 {
     private array $config = [];
 
-    public function __construct(string $envFile = ROOT . '/.env')
+    public function __construct(string $envFile = null)
     {
-        $this->phpversion();
+        $this->validatePhpVersion();
+        
+        $envFile = $envFile ?? (defined('ROOT') ? ROOT . '/.env' : __DIR__ . '/../.env');
 
         if (file_exists($envFile)) {
             $this->loadEnv($envFile);
-            error_log(".env file Loaded Successfully");
+            error_log("Environment file loaded successfully: " . basename($envFile));
         } else {
-            // Do not expose full path in production, but user asked explicit error.
-            exit('<center style="margin-top: 8rem; color: red;">' .
-                ".env file not found at:" . '</br>' . $envFile . '</br>' . " Using default values." .
-                '</center>');
+            $this->handleMissingEnvFile($envFile);
         }
     }
 
-    private function phpversion(): void
+    private function validatePhpVersion(): void
     {
         if (version_compare(PHP_VERSION, '8.0', '<')) {
             http_response_code(500);
-            exit('<center style="margin-top: 8rem;">This application requires at least PHP 8.0 or higher. Current version: ' . PHP_VERSION . '</center>');
+            $message = sprintf(
+                'This application requires PHP 8.0 or higher. Current version: %s',
+                PHP_VERSION
+            );
+            $this->displayError($message);
         }
+    }
+
+    private function handleMissingEnvFile(string $envFile): void
+    {
+        if (defined('APP_ENV') && APP_ENV === 'production') {
+            error_log("Environment file not found: " . basename($envFile));
+            $this->displayError('Application configuration error. Please contact administrator.');
+        } else {
+            error_log("Environment file not found: " . $envFile);
+            // Don't display error in development, just use defaults
+            $this->config = $this->getDefaultConfig();
+        }
+    }
+
+    private function displayError(string $message): void
+    {
+        echo '<div style="margin: 2rem auto; max-width: 600px; padding: 2rem; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.5rem; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">';
+        echo '<h2 style="color: #dc3545; margin-top: 0;">Framework Error</h2>';
+        echo '<p style="color: #6c757d; margin-bottom: 0;">' . htmlspecialchars($message) . '</p>';
+        echo '</div>';
+        exit;
     }
 
     private function loadEnv(string $file): void
     {
-        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if (!is_readable($file)) {
+            throw new RuntimeException("Environment file is not readable: " . $file);
+        }
 
-        foreach ($lines as $rawLine) {
+        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        
+        if ($lines === false) {
+            throw new RuntimeException("Failed to read environment file: " . $file);
+        }
+
+        foreach ($lines as $lineNumber => $rawLine) {
             $line = trim($rawLine);
 
-            // skip comments and empty lines
+            // Skip comments and empty lines
             if ($line === '' || str_starts_with($line, '#')) {
                 continue;
             }
 
-            // ignore lines that do not contain '='
-            if (strpos($line, '=') === false) {
+            // Ignore lines that do not contain '='
+            if (!str_contains($line, '=')) {
+                error_log("Invalid environment variable format at line " . ($lineNumber + 1) . ": " . $line);
                 continue;
             }
 
@@ -61,21 +94,44 @@ class MakingEnv
             $key = trim($key);
             $value = trim($value);
 
-            // strip surrounding quotes if present
-            if ((str_starts_with($value, '"') && str_ends_with($value, '"')) || (str_starts_with($value, "'") && str_ends_with($value, "'"))) {
-                $value = substr($value, 1, -1);
+            // Validate key format
+            if (!preg_match('/^[A-Z_][A-Z0-9_]*$/', $key)) {
+                error_log("Invalid environment variable name at line " . ($lineNumber + 1) . ": " . $key);
+                continue;
             }
 
+            // Strip surrounding quotes if present
+            $value = $this->unquoteValue($value);
+
             $this->config[$key] = $value;
-            // populate superglobals for compatibility
+            // Populate superglobals for compatibility
             $_ENV[$key] = $value;
             putenv("$key=$value");
         }
     }
 
-    public function get(string $key, $default = null)
+    private function unquoteValue(string $value): string
+    {
+        if ((str_starts_with($value, '"') && str_ends_with($value, '"')) || 
+            (str_starts_with($value, "'") && str_ends_with($value, "'"))) {
+            return substr($value, 1, -1);
+        }
+        return $value;
+    }
+
+    public function get(string $key, mixed $default = null): mixed
     {
         return $this->config[$key] ?? $_ENV[$key] ?? getenv($key) ?: $default;
+    }
+
+    public function has(string $key): bool
+    {
+        return isset($this->config[$key]) || isset($_ENV[$key]) || getenv($key) !== false;
+    }
+
+    public function all(): array
+    {
+        return $this->config;
     }
 }
 
@@ -89,6 +145,7 @@ class Bootstrap
     private array $loadedClasses = [];
     private array $coreFiles = [];
     private MakingEnv $config;
+    private static ?self $instance = null;
 
     private function __construct(MakingEnv $config)
     {
@@ -99,58 +156,103 @@ class Bootstrap
 
     public static function boot(): self
     {
+        if (self::$instance !== null) {
+            return self::$instance;
+        }
+
+        try {
+            self::$instance = self::createInstance();
+            return self::$instance;
+        } catch (Throwable $e) {
+            error_log("Framework bootstrap failed: " . $e->getMessage());
+            self::displayBootstrapError($e->getMessage());
+        }
+    }
+
+    private static function createInstance(): self
+    {
+        // Define core constants
+        self::defineCoreConstants();
+
+        // Load environment configuration
+        $envConfig = new MakingEnv();
+        $instance = new self($envConfig);
+
+        // Load core framework files
+        $instance->loadCoreFiles();
+
+        // Load utility classes
+        $instance->loadAllUtilityClasses();
+
+        // Initialize registry and auto-register utilities
+        $instance->initializeRegistry();
+
+        return $instance;
+    }
+
+    private static function defineCoreConstants(): void
+    {
         if (!defined('ROOT')) {
             define('ROOT', dirname(__DIR__));
         }
+        
         if (!defined('APP_START_TIME')) {
             define('APP_START_TIME', microtime(true));
         }
 
-        // Load environment first
-        $envconfig = new MakingEnv();
-        $instance = new self($envconfig);
+        if (!defined('DS')) {
+            define('DS', DIRECTORY_SEPARATOR);
+        }
+    }
+
+    private static function displayBootstrapError(string $message): void
+    {
+        echo '<div style="margin: 2rem auto; max-width: 600px; padding: 2rem; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.5rem; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">';
+        echo '<h2 style="color: #dc3545; margin-top: 0;">Framework Bootstrap Error</h2>';
+        echo '<p style="color: #6c757d; margin-bottom: 0;">' . htmlspecialchars($message) . '</p>';
+        echo '<p style="color: #6c757d; font-size: 0.9em; margin-top: 1rem;">Please check the error logs for more details.</p>';
+        echo '</div>';
+        exit;
+    }
+
+    private function initializeRegistry(): void
+    {
+        if (!class_exists('Registry')) {
+            error_log('Registry class not found after core files load.');
+            return;
+        }
 
         try {
-            $loadedCore = $instance->loadCoreFiles();
-        } catch (RuntimeException $e) {
-            error_log("Failed to load critical core files: " . $e->getMessage());
-            exit('<center style="margin-top: 8rem; color: red;">' . "Critical framework files failed to load. Please check the logs." . '</center>');
+            $registry = Registry::getInstance();
+            $this->autoRegisterUtilities($registry);
+            $GLOBALS['registry'] = $registry;
+        } catch (Throwable $e) {
+            error_log('Failed to initialize Registry: ' . $e->getMessage());
         }
+    }
 
-        // Load utility classes (no autoloader). We will require their files and keep a map.
-        $loadedUtilities = $instance->loadAllUtilityClasses();
+    private function autoRegisterUtilities(object $registry): void
+    {
+        foreach ($this->loadedClasses as $className => $path) {
+            if (!class_exists($className)) {
+                continue;
+            }
 
-        // Auto-register all utilities in Registry if available
-        if (class_exists('Registry')) {
             try {
-                $registry = new Registry();
+                $reflect = new ReflectionClass($className);
+                if ($reflect->isAbstract() || $reflect->isInterface() || $reflect->isTrait()) {
+                    continue;
+                }
 
-                foreach ($loadedUtilities as $className => $path) {
-                    if (!class_exists($className)) {
-                        continue;
-                    }
-
-                    $reflect = new ReflectionClass($className);
-                    if ($reflect->isAbstract() || $reflect->isInterface() || $reflect->isTrait()) {
-                        continue;
-                    }
-
-                    // Simple instantiation without constructor arguments
-                    try {
-                        $instanceObj = new $className();
-                        $registry->set(lcfirst($className), $instanceObj);
-                    } catch (Throwable $e) {
-                        error_log("Failed to instantiate utility class $className: " . $e->getMessage());
-                    }
+                // Try to instantiate without constructor arguments
+                if ($reflect->getConstructor() === null || $reflect->getConstructor()->getNumberOfRequiredParameters() === 0) {
+                    $instanceObj = new $className();
+                    $registry->set(lcfirst($className), $instanceObj);
                 }
             } catch (Throwable $e) {
-                error_log('Failed to instantiate Registry: ' . $e->getMessage());
+                error_log("Failed to instantiate utility class $className: " . $e->getMessage());
             }
-        } else {
-            error_log('Registry class not found after core files load.');
         }
-
-        return $instance;
     }
 
     private function initialize(): void
@@ -161,8 +263,8 @@ class Bootstrap
 
         $this->preventDirectAccess();
         $this->initializePaths();
-        // config (MakingEnv) is already provided in constructor
         $this->defineApplicationConstants();
+        $this->initializeMakingEnv();
         $this->initializeSession();
         $this->configurePHP();
         $this->defineCoreFiles();
@@ -179,7 +281,7 @@ class Bootstrap
 
     private function initializePaths(): void
     {
-        $dirs = ['brain', 'modules', 'storage'];
+        $dirs = ['Brain', 'Body', 'Storage'];
 
         foreach ($dirs as $dir) {
             $constName = 'DIR_' . strtoupper($dir);
@@ -231,7 +333,6 @@ class Bootstrap
 
     private function initializeMakingEnv(): void
     {
-        // Left for backward compatibility if needed; not used because constructor already loaded env.
         $this->dbConfig = [
             'DB_DRIVER' => $this->config->get('DB_DRIVER', 'mysql'),
             'DB_HOST' => $this->config->get('DB_HOST', 'localhost'),
@@ -446,19 +547,21 @@ class Bootstrap
 
         $forceHttps = filter_var($this->config->get('FORCE_HTTPS', false), FILTER_VALIDATE_BOOLEAN);
 
-        session_set_cookie_params([
-            'lifetime' => (int)$this->config->get('SESSION_LIFETIME', 0),
-            'path'     => $this->config->get('SESSION_PATH', '/'),
-            'domain'   => $this->config->get('SESSION_DOMAIN', ''),
-            'secure'   => ($isHttps || $forceHttps),
-            'httponly' => true,
-            'samesite' => $this->config->get('SESSION_SAMESITE', 'Strict')
-        ]);
+        if (!headers_sent()) {
+            session_set_cookie_params([
+                'lifetime' => (int)$this->config->get('SESSION_LIFETIME', 0),
+                'path'     => $this->config->get('SESSION_PATH', '/'),
+                'domain'   => $this->config->get('SESSION_DOMAIN', ''),
+                'secure'   => ($isHttps || $forceHttps),
+                'httponly' => true,
+                'samesite' => $this->config->get('SESSION_SAMESITE', 'Strict')
+            ]);
 
-        session_name($this->config->get('SESSION_NAME', 'CAFSESSID'));
+            session_name($this->config->get('SESSION_NAME', 'CAFSESSID'));
 
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
         }
     }
 
@@ -504,7 +607,7 @@ if (isset($bootstrap) && method_exists($bootstrap, 'loadAllUtilityClasses')) {
 
 if (class_exists('Registry')) {
     try {
-        $registry = new Registry();
+        $registry = Registry::getInstance();
     } catch (Throwable $e) {
         error_log('Failed to instantiate Registry: ' . $e->getMessage());
         $registry = null;

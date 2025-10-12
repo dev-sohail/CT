@@ -1,0 +1,6 @@
+{
+  "routes": [
+    { "method": "GET", "path": "/ai/status", "handler": "ai/Status/StatusController@index" },
+    { "method": "POST", "path": "/ai/process", "handler": "ai/Process/ProcessController@index" }
+  ]
+}

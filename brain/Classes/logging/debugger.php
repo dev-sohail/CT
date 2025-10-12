@@ -1,32 +1,33 @@
 <?php
-/****/
 
-    /**
-     * Class Debugger
-     *
-     * Centralized error, exception, shutdown handling, and logging/debugging utilities
-     * for the CyberAfridi Framework.
-     *
-     * Usage:
-     *  - Initialize early with Debugging::init('development', '/path/to/logfile.log');
-     *  - Automatically handles PHP errors, uncaught exceptions, and fatal shutdown errors.
-     *  - Logs all errors and exceptions to a log file.
-     *  - Displays detailed error info in development mode (colored output).
-     *  - Provides helper methods for dumping variables (dump, dd).
-     *  - Supports registering a custom database query logger callback.
-     *
-     * Public API:
-     *  - init(string $env, string|null $logFile): void
-     *      Initialize debugging environment ('development' or 'production') and log file path.
-     *
-     *  - dump(mixed ...$vars): void
-     *      Nicely output variables wrapped in styled <pre> tag.
-     *
-     *  - dd(mixed ...$vars): void
-     *      dump() + terminate script execution.
-     *
-     *  - setDBLogger(callable $callback): void
-     *      Register a callback to handle DB query logging.
+declare(strict_types=1);
+
+/**
+ * Class Debugger
+ *
+ * Centralized error, exception, shutdown handling, and logging/debugging utilities
+ * for the CyberTirah Framework.
+ *
+ * Usage:
+ *  - Initialize early with Debugger::init('development', '/path/to/logfile.log');
+ *  - Automatically handles PHP errors, uncaught exceptions, and fatal shutdown errors.
+ *  - Logs all errors and exceptions to a log file.
+ *  - Displays detailed error info in development mode (colored output).
+ *  - Provides helper methods for dumping variables (dump, dd).
+ *  - Supports registering a custom database query logger callback.
+ *
+ * Public API:
+ *  - init(string $env, string|null $logFile): void
+ *      Initialize debugging environment ('development' or 'production') and log file path.
+ *
+ *  - dump(mixed ...$vars): void
+ *      Nicely output variables wrapped in styled <pre> tag.
+ *
+ *  - dd(mixed ...$vars): void
+ *      dump() + terminate script execution.
+ *
+ *  - setDBLogger(callable $callback): void
+ *      Register a callback to handle DB query logging.
      *
      *  - logQuery(string $query, array $params = []): void
      *      Log database query and parameters using registered callback or default log.

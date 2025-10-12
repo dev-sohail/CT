@@ -1,1 +1,18 @@
-ECHO is off.
+<div class="container">
+    <h1><?= htmlspecialchars($title ?? 'Add Controller') ?></h1>
+    <p><?= htmlspecialchars($message ?? 'Controller generator functionality') ?></p>
+    
+    <form method="POST" action="/public/automate/addcontroller">
+        <div class="form-group">
+            <label for="controller_name">Controller Name:</label>
+            <input type="text" id="controller_name" name="controller_name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="module_name">Module Name:</label>
+            <input type="text" id="module_name" name="module_name" required>
+        </div>
+        
+        <button type="submit">Generate Controller</button>
+    </form>
+</div>

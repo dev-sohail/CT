@@ -1,0 +1,77 @@
+---
+globs: *.php
+description: Database interaction patterns and best practices
+---
+
+# Database Patterns and Best Practices
+
+## Database Configuration
+- Use environment variables for database configuration
+- Configuration is loaded through [Brain/ct_brain.php](mdc:Brain/ct_brain.php)
+- Database settings are defined in `.env` file
+
+## Core Database Classes
+- [Brain/Classes/database/Database.php](mdc:Brain/Classes/database/Database.php) - Main database connection
+- [Brain/Classes/database/DBORM.php](mdc:Brain/Classes/database/DBORM.php) - Object-Relational Mapping
+- [Brain/Classes/database/Transaction.php](mdc:Brain/Classes/database/Transaction.php) - Transaction management
+- [Brain/Classes/database/DBMigration.php](mdc:Brain/Classes/database/DBMigration.php) - Database migrations
+
+## Model Patterns
+
+### Basic Model Structure
+```php
+class UserModel extends Model
+{
+    protected $table = 'users';
+    protected $primaryKey = 'id';
+    protected $fillable = ['name', 'email', 'password'];
+    
+    // Define relationships
+    public function posts()
+    {
+        return $this->hasMany(PostModel::class);
+    }
+}
+```
+
+### Database Operations
+- Always use prepared statements
+- Use transactions for multi-step operations
+- Implement proper error handling
+- Use the ORM for complex queries when appropriate
+
+### Query Patterns
+```php
+// Using Database class directly
+$db = $registry->get('database');
+$users = $db->query("SELECT * FROM users WHERE status = ?", ['active']);
+
+// Using Model ORM
+$users = UserModel::where('status', 'active')->get();
+```
+
+## Migration Patterns
+- Use [Brain/Classes/database/DBMigration.php](mdc:Brain/Classes/database/DBMigration.php)
+- Create migration files for schema changes
+- Include both up and down methods
+- Test migrations in development environment
+
+## Caching Patterns
+- Use [Brain/Classes/database/CacheStore.php](mdc:Brain/Classes/database/CacheStore.php)
+- Cache frequently accessed data
+- Implement cache invalidation strategies
+- Use appropriate cache TTL values
+
+## Security Considerations
+- Always validate input data
+- Use parameterized queries
+- Implement proper access controls
+- Log database operations for auditing
+- Use connection pooling for performance
+
+## Performance Optimization
+- Use indexes appropriately
+- Optimize query performance
+- Implement query result caching
+- Use database connection pooling
+- Monitor slow queries

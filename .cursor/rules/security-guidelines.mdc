@@ -1,0 +1,92 @@
+---
+globs: *.php
+description: Security guidelines and best practices for the framework
+---
+
+# Security Guidelines
+
+## Framework Security Classes
+The framework provides comprehensive security classes in [Brain/Classes/security/](mdc:Brain/Classes/security/):
+
+### Core Security Components
+- [Brain/Classes/security/Acl.php](mdc:Brain/Classes/security/Acl.php) - Access Control Lists
+- [Brain/Classes/security/Auth.php](mdc:Brain/Classes/security/Auth.php) - Authentication system
+- [Brain/Classes/security/Csrf.php](mdc:Brain/Classes/security/Csrf.php) - CSRF protection
+- [Brain/Classes/security/encryption.php](mdc:Brain/Classes/security/encryption.php) - Data encryption
+- [Brain/Classes/security/Firewall.php](mdc:Brain/Classes/security/Firewall.php) - Application firewall
+- [Brain/Classes/security/Validator.php](mdc:Brain/Classes/security/Validator.php) - Input validation
+- [Brain/Classes/security/Sanitizer.php](mdc:Brain/Classes/security/Sanitizer.php) - Data sanitization
+
+## Authentication & Authorization
+
+### User Authentication
+- Use the Auth class for user authentication
+- Implement proper session management
+- Use secure password hashing (PHP's `password_hash()`)
+- Implement account lockout mechanisms
+- Use multi-factor authentication where appropriate
+
+### Access Control
+- Implement Role-Based Access Control (RBAC)
+- Use the Acl class for permission management
+- Validate permissions on every request
+- Implement proper session timeout
+- Use secure session configuration
+
+## Input Validation & Sanitization
+
+### Data Validation
+- Always validate user input using the Validator class
+- Implement both client-side and server-side validation
+- Use appropriate validation rules for different data types
+- Validate file uploads thoroughly
+- Implement input length limits
+
+### Data Sanitization
+- Use the Sanitizer class for data cleaning
+- Escape output in views to prevent XSS
+- Use prepared statements for database queries
+- Sanitize file names and paths
+- Validate and sanitize JSON input
+
+## CSRF Protection
+- Use the Csrf class for form protection
+- Include CSRF tokens in all forms
+- Validate CSRF tokens on form submission
+- Implement proper token rotation
+- Use SameSite cookies for additional protection
+
+## Data Encryption
+- Use the encryption class for sensitive data
+- Encrypt passwords and sensitive information
+- Use proper encryption algorithms
+- Implement key rotation policies
+- Secure encryption key storage
+
+## Security Headers
+- Implement proper HTTP security headers
+- Use Content Security Policy (CSP)
+- Set X-Frame-Options header
+- Implement X-XSS-Protection
+- Use Strict-Transport-Security for HTTPS
+
+## File Upload Security
+- Validate file types and sizes
+- Scan uploaded files for malware
+- Store uploaded files outside web root
+- Use secure file naming conventions
+- Implement file access controls
+
+## API Security
+- Implement proper API authentication
+- Use rate limiting for API endpoints
+- Validate API requests thoroughly
+- Implement proper error handling
+- Log API access and errors
+
+## Security Monitoring
+- Implement security logging
+- Monitor for suspicious activities
+- Use the framework's audit trail features
+- Implement intrusion detection
+- Regular security assessments

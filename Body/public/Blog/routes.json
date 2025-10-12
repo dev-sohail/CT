@@ -1,0 +1,7 @@
+{
+  "routes": [
+    { "method": "GET", "path": "/blog", "handler": "public/Blog/BlogController@index" },
+    { "method": "GET", "path": "/blog/{slug}", "handler": "public/Blog/BlogController@show" },
+    { "method": "GET", "path": "/blog/json", "handler": "public/Blog/BlogController@json" }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "routes": [
+    { "method": "GET", "path": "/admin/blog/table", "handler": "admin/Blog/BlogTableController@index" },
+    { "method": "POST", "path": "/admin/blog/table/toggle", "handler": "admin/Blog/BlogTableController@toggleStatus" },
+    { "method": "POST", "path": "/admin/blog/table/bulk", "handler": "admin/Blog/BlogTableController@bulkAction" },
+    { "method": "GET", "path": "/admin/blog/table/json", "handler": "admin/Blog/BlogTableController@json" },
+    { "method": "GET", "path": "/admin/blog/table/export", "handler": "admin/Blog/BlogTableController@export" },
+    { "method": "GET", "path": "/admin/blog/form", "handler": "admin/Blog/BlogFormController@index" },
+    { "method": "POST", "path": "/admin/blog/form/save", "handler": "admin/Blog/BlogFormController@save" },
+    { "method": "POST", "path": "/admin/blog/delete", "handler": "admin/Blog/BlogFormController@delete" },
+    { "method": "GET", "path": "/admin/blog/form/stats", "handler": "admin/Blog/BlogFormController@stats" }
+  ]
+}

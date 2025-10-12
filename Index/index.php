@@ -1,94 +1,262 @@
 <?php
 
+declare(strict_types=1);
+
 /**
- * Front controller
- * Application Index File
+ * CyberTirah Framework - Front Controller
+ * 
  * Main entry point for the application
+ * Handles request routing and application initialization
 */
 
+// Prevent direct access to this file
+if (basename($_SERVER['PHP_SELF']) === 'index.php' && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'GET') {
+    http_response_code(403);
+    exit('Direct access forbidden');
+}
 
 // Define core constants
-$try1 = realpath(__DIR__);
-$try2 = realpath(__DIR__ . '../../');
-if ($try1 && is_dir($try1) && file_exists($try1 . '/brain/ct_installation.php') && is_dir($try1 . '/brain')) {
-    define('ROOT', $try1);
-} elseif ($try2 && is_dir($try2) && file_exists($try2 . '/brain/ct_installation.php') && is_dir($try2 . '/brain')) {
-    define('ROOT', $try2);
-} else {
-    die("❌ Unable to determine ROOT path.".ROOT);
+try {
+    defineCoreConstants();
+} catch (RuntimeException $e) {
+    displayError('Framework initialization failed: ' . $e->getMessage());
 }
-define('DS', DIRECTORY_SEPARATOR);
+
+/**
+ * Define core framework constants
+ */
+function defineCoreConstants(): void
+{
+    // Determine ROOT path
+    $candidates = [
+        realpath(__DIR__),
+        realpath(__DIR__ . '/..'),
+        realpath(__DIR__ . '/../..'),
+    ];
+
+    $rootPath = null;
+    foreach ($candidates as $path) {
+        if ($path && is_dir($path) && file_exists($path . '/Brain/ct_brain.php')) {
+            $rootPath = $path;
+            break;
+        }
+    }
+
+    if (!$rootPath) {
+        throw new RuntimeException('Unable to determine framework root path');
+    }
+
+    // Define constants
+    if (!defined('ROOT')) {
+        define('ROOT', $rootPath);
+    }
+    
+    if (!defined('DS')) {
+        define('DS', DIRECTORY_SEPARATOR);
+    }
+
+    if (!defined('INSTALL_LOCK_FILE')) {
 define('INSTALL_LOCK_FILE', ROOT . DS . 'installed.lock');
-define('BRAIN_DIR', ROOT . DS . 'brain');
-define('BRAIN_FILENAME', 'ct_brain');
-define('BRAIN_FILE', BRAIN_DIR . DS . BRAIN_FILENAME . '.php');
+    }
+
+    if (!defined('BRAIN_DIR')) {
+        define('BRAIN_DIR', ROOT . DS . 'Brain');
+    }
+
+    if (!defined('BRAIN_FILE')) {
+        define('BRAIN_FILE', BRAIN_DIR . DS . 'ct_brain.php');
+    }
+
+    if (!defined('BODY_DIR')) {
+        define('BODY_DIR', ROOT . DS . 'Body');
+    }
+
+    if (!defined('STORAGE_DIR')) {
+        define('STORAGE_DIR', ROOT . DS . 'Storage');
+    }
+}
 
 /**
  * Check if application is installed
- * If not, redirect to installation process
  */
-
-// print($installationFile = BRAIN_DIR . DS . 'installation.php');exit;
 if (!file_exists(INSTALL_LOCK_FILE)) {
-    $installationFile = BRAIN_DIR . DS . 'installation.php';
-
-    if (file_exists($installationFile)) {
-        require_once($installationFile);
-    } else {
-        die('Installation file not found. Please ensure the installation system is properly configured.');
-    }
-    exit;
+    handleInstallation();
 }
 
 /**
  * Verify core brain file exists
  */
 if (!file_exists(BRAIN_FILE)) {
-    die('Core application file not found: ' . BRAIN_FILE);
+    displayError('Core application file not found: ' . basename(BRAIN_FILE));
 }
 
 /**
- * Load the core brain system
+ * Initialize and run the application
  */
 try {
-    require_once(BRAIN_FILE);
+    initializeApplication();
+    runApplication();
+} catch (Throwable $e) {
+    handleApplicationError($e);
+}
 
-    // Initialize the router with registry
-    if (!class_exists('router')) {
-        throw new Exception('Router class not found in brain file');
+/**
+ * Handle installation process
+ */
+function handleInstallation(): void
+{
+    $installationFile = BRAIN_DIR . DS . 'ct_installation.php';
+    
+    if (file_exists($installationFile)) {
+        require_once $installationFile;
+    } else {
+        displayError('Installation system not found. Please ensure the framework is properly installed.');
     }
+    
+    exit;
+}
 
-    if (!isset($registry)) {
-        throw new Exception('Registry object not available');
+/**
+ * Initialize the application
+ */
+function initializeApplication(): void
+{
+    // Load the core brain system
+    require_once BRAIN_FILE;
+    
+    // Verify essential classes are loaded
+    if (!class_exists('Bootstrap')) {
+        throw new RuntimeException('Bootstrap class not found');
     }
-
-    // Create and run the core system
-    $cores = new router($registry);
-    $cores->run();
-
-    // Get response handler and output
-    $response = $registry->get('response');
-
-    if (!$response) {
-        throw new Exception('Response handler not available');
+    
+    if (!class_exists('Registry')) {
+        throw new RuntimeException('Registry class not found');
     }
+    
+    if (!class_exists('Router')) {
+        throw new RuntimeException('Router class not found');
+    }
+}
 
-    $response->output();
-} catch (Exception $e) {
-    // Basic error handling
+/**
+ * Run the application
+ */
+function runApplication(): void
+{
+    // Get registry instance
+    $registry = $GLOBALS['registry'] ?? Registry::getInstance();
+    
+    if (!$registry) {
+        throw new RuntimeException('Registry not available');
+    }
+    
+    // Load module routes
+    loadModuleRoutes($registry);
+    
+    // Run the router
+    Router::run();
+}
+
+/**
+ * Load routes from all modules
+ */
+function loadModuleRoutes(object $registry): void
+{
+    if (!defined('BODY_DIR') || !is_dir(BODY_DIR)) {
+        return;
+    }
+    
+    $roles = ['admin', 'public', 'api', 'ai'];
+    
+    foreach ($roles as $role) {
+        $rolePath = BODY_DIR . DS . $role;
+        
+        if (!is_dir($rolePath)) {
+            continue;
+        }
+        
+        $modules = array_filter(scandir($rolePath), function($item) use ($rolePath) {
+            return $item !== '.' && $item !== '..' && is_dir($rolePath . DS . $item);
+        });
+        
+        foreach ($modules as $module) {
+            $routesFile = $rolePath . DS . $module . DS . 'routes.json';
+            
+            if (file_exists($routesFile)) {
+                Router::loadFromJson($routesFile);
+            }
+        }
+    }
+}
+
+/**
+ * Handle application errors
+ */
+function handleApplicationError(Throwable $e): void
+{
     http_response_code(500);
-    echo "Application Error: " . htmlspecialchars($e->getMessage());
-
-    // Log error if logging is available
-    if (function_exists('error_log')) {
-        error_log("Bootstrap Error: " . $e->getMessage());
+    
+    // Log the error
+    error_log("Application Error: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
+    
+    // Display error based on environment
+    if (defined('APP_ENV') && APP_ENV === 'development') {
+        displayDevelopmentError($e);
+    } else {
+        displayProductionError();
     }
+}
+
+/**
+ * Display development error
+ */
+function displayDevelopmentError(Throwable $e): void
+{
+    echo '<div style="margin: 2rem auto; max-width: 800px; padding: 2rem; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.5rem; font-family: monospace;">';
+    echo '<h2 style="color: #dc3545; margin-top: 0;">Application Error</h2>';
+    echo '<p style="color: #6c757d; margin-bottom: 1rem;"><strong>Message:</strong> ' . htmlspecialchars($e->getMessage()) . '</p>';
+    echo '<p style="color: #6c757d; margin-bottom: 1rem;"><strong>File:</strong> ' . htmlspecialchars($e->getFile()) . '</p>';
+    echo '<p style="color: #6c757d; margin-bottom: 1rem;"><strong>Line:</strong> ' . $e->getLine() . '</p>';
+    echo '<details style="margin-top: 1rem;">';
+    echo '<summary style="cursor: pointer; color: #6c757d;">Stack Trace</summary>';
+    echo '<pre style="background: #e9ecef; padding: 1rem; margin-top: 0.5rem; border-radius: 0.25rem; overflow-x: auto;">' . htmlspecialchars($e->getTraceAsString()) . '</pre>';
+    echo '</details>';
+    echo '</div>';
+}
+
+/**
+ * Display production error
+ */
+function displayProductionError(): void
+{
+    echo '<div style="margin: 2rem auto; max-width: 600px; padding: 2rem; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.5rem; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">';
+    echo '<h2 style="color: #dc3545; margin-top: 0;">Application Error</h2>';
+    echo '<p style="color: #6c757d; margin-bottom: 0;">An error occurred while processing your request. Please try again later.</p>';
+    echo '</div>';
+}
+
+/**
+ * Display general error
+ */
+function displayError(string $message): void
+{
+    echo '<div style="margin: 2rem auto; max-width: 600px; padding: 2rem; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 0.5rem; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;">';
+    echo '<h2 style="color: #dc3545; margin-top: 0;">Framework Error</h2>';
+    echo '<p style="color: #6c757d; margin-bottom: 0;">' . htmlspecialchars($message) . '</p>';
+    echo '</div>';
+    exit;
 }
 
 /**
  * Development/Debugging Section
  * Uncomment as needed for development purposes
  */
+
+// Uncomment the following lines for debugging:
+
+/*
+// Display all user-defined classes
 $allClasses = get_declared_classes();
 $myClasses = [];
 
@@ -101,9 +269,17 @@ foreach ($allClasses as $class) {
 
 echo '<pre>';
 print_r($myClasses);
+echo '</pre>';
+*/
 
-// echo password_hash('admin2025', PASSWORD_DEFAULT);
-// echo md5('admin2025'); // Note: MD5 is not recommended for passwords
+/*
+// Generate password hash
+echo password_hash('admin2025', PASSWORD_DEFAULT);
+*/
 
-// echo "ROOT: " . ROOT . "\n";
-// var_dump(BRAIN_FILE);
+/*
+// Display framework information
+echo "ROOT: " . ROOT . "\n";
+echo "BRAIN_FILE: " . BRAIN_FILE . "\n";
+echo "BODY_DIR: " . BODY_DIR . "\n";
+*/

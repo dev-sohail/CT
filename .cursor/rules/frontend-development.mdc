@@ -1,0 +1,94 @@
+---
+globs: *.js,*.css,*.html,*.ct
+description: Frontend development guidelines and patterns
+---
+
+# Frontend Development Guidelines
+
+## View Templates (.ct files)
+- Use the framework's templating system for views
+- Follow the established layout patterns
+- Implement proper escaping for security
+- Use components for reusable UI elements
+- Maintain consistent styling and structure
+
+## CSS Organization
+The framework includes CSS files in [Storage/css/](mdc:Storage/css/):
+- [Storage/css/bootstrap.css](mdc:Storage/css/bootstrap.css) - Bootstrap framework
+- [Storage/css/custom.css](mdc:Storage/css/custom.css) - Custom styles
+- [Storage/css/tailwind.css](mdc:Storage/css/tailwind.css) - Tailwind CSS
+
+### CSS Best Practices
+- Use consistent naming conventions
+- Implement responsive design
+- Follow mobile-first approach
+- Use CSS variables for theming
+- Minimize CSS specificity conflicts
+- Implement proper accessibility features
+
+## JavaScript Organization
+JavaScript files are located in [Storage/js/](mdc:Storage/js/):
+- [Storage/js/bootstrap.js](mdc:Storage/js/bootstrap.js) - Bootstrap JavaScript
+- [Storage/js/custom.js](mdc:Storage/js/custom.js) - Custom JavaScript
+
+### JavaScript Best Practices
+- Use modern ES6+ syntax
+- Implement proper error handling
+- Use async/await for asynchronous operations
+- Follow consistent code formatting
+- Implement proper event handling
+- Use modules for code organization
+
+## Frontend Services
+The framework includes microservices in [Services/](mdc:Services/):
+- [Services/frontend/](mdc:Services/frontend/) - Frontend service
+- [Services/node-api/](mdc:Services/node-api/) - Node.js API service
+
+### Service Integration
+- Use proper API endpoints
+- Implement error handling for API calls
+- Use appropriate HTTP methods
+- Implement loading states
+- Handle network errors gracefully
+
+## Asset Management
+- Use the framework's asset management system
+- Implement proper asset versioning
+- Optimize asset loading
+- Use CDN for static assets when appropriate
+- Implement proper caching strategies
+
+## Responsive Design
+- Design for mobile-first
+- Use flexible grid systems
+- Implement proper breakpoints
+- Test across different devices
+- Ensure touch-friendly interfaces
+
+## Accessibility
+- Follow WCAG guidelines
+- Implement proper ARIA labels
+- Ensure keyboard navigation
+- Use semantic HTML elements
+- Test with screen readers
+
+## Performance Optimization
+- Minimize HTTP requests
+- Implement lazy loading
+- Optimize images and assets
+- Use efficient CSS selectors
+- Minimize JavaScript execution time
+
+## Browser Compatibility
+- Test across major browsers
+- Use progressive enhancement
+- Implement fallbacks for older browsers
+- Use feature detection
+- Follow web standards
+
+## Security Considerations
+- Sanitize user input
+- Implement proper CSP headers
+- Validate client-side data
+- Use secure communication protocols
+- Implement proper session management

@@ -32,7 +32,7 @@ class Session {
     public function __construct(array $config = []) {
         $this->config = array_merge($this->config, $config);
 
-        if (!session_id()) {
+        if (!session_id() && !headers_sent()) {
             ini_set('session.use_cookies', '1');
             ini_set('session.use_trans_sid', '0');
             session_set_cookie_params([

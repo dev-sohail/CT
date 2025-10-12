@@ -1,0 +1,8 @@
+<div class="public-header">
+    <h1><?= htmlspecialchars($title ?? 'CyberTirah Framework') ?></h1>
+    <nav>
+        <a href="/" style="color:#007bff;text-decoration:none">Home</a>
+        <a href="/blog" style="color:#007bff;text-decoration:none">Blog</a>
+        <a href="/about" style="color:#007bff;text-decoration:none">About</a>
+    </nav>
+</div>
