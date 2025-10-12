@@ -1,7 +1,7 @@
 {
   "routes": [
     { "method": "GET", "path": "/", "handler": "public/Home/HomeController@index" },
-    { "method": "GET", "path": "/header", "handler": "public/Common/HeaderController@index" },
+    { "method": "GET", "path": "/", "handler": "public/Common/HeaderController@index" },
     { "method": "GET", "path": "/footer", "handler": "public/Common/FooterController@index" }
   ]
 }

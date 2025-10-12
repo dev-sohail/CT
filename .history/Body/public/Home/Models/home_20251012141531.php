@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+require_once ROOT . '/Brain/Core/Model.php';
+
+/**
+ * Public Home Model
+ * 
+ * Handles public home data operations
+ */
+class HomeModel extends Model
+{
+    protected string $table = 'public_home';
+
+    /**
+     * Get footer data
+     */
+    public function getFooterData(): array
+    {
+        return [
+            'copyright' => '© ' . date('Y') . ' CyberTirah Framework',
+            'version' => '2.0.0',
+            'social_links' => [
+                'GitHub' => 'https://github.com/cybertirah/framework',
+                'Twitter' => 'https://twitter.com/cybertirah',
+                'LinkedIn' => 'https://linkedin.com/company/cybertirah'
+            ]
+        ];
+    }
+}
