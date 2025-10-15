@@ -1,5 +1,6 @@
 {
     "Controller": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Core\\Controller.php",
+    "Loader": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Core\\Loader.php",
     "Model": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Core\\Model.php",
     "Registry": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Core\\Registry.php",
     "Router": "C:\\wamp64\\www\\me\\CT\\Frame\\brain\\Core\\Router.php",

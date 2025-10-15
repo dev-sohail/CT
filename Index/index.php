@@ -9,8 +9,8 @@ declare(strict_types=1);
  * Handles request routing and application initialization
 */
 
-// Prevent direct access to this file
-if (basename($_SERVER['PHP_SELF']) === 'index.php' && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] !== 'GET') {
+// Prevent direct browsing to index.php itself (allow Router to handle all HTTP methods)
+if (basename($_SERVER['PHP_SELF']) === 'index.php' && isset($_SERVER['REQUEST_URI']) && preg_match('#/(Index/)?index\.php$#i', $_SERVER['REQUEST_URI'])) {
     http_response_code(403);
     exit('Direct access forbidden');
 }
@@ -163,10 +163,27 @@ function runApplication(): void
 function loadModuleRoutes(object $registry): void
 {
     if (!defined('BODY_DIR') || !is_dir(BODY_DIR)) {
+        error_log('Body directory not defined or not found');
         return;
     }
     
-    $roles = ['admin', 'public', 'api', 'ai'];
+    // Enable route caching for better performance
+    $cacheFile = defined('DIR_STORAGE_CACHE') ? DIR_STORAGE_CACHE . DS . 'routes.php' : null;
+    $isDevelopment = (defined('APP_DEBUG') && APP_DEBUG) || 
+                     (defined('APP_ENV') && APP_ENV === 'development') ||
+                     (defined('DEV_MODE') && DEV_MODE);
+    
+    // Disable caching in development mode
+    if ($isDevelopment) {
+        Router::disableCache();
+    } elseif ($cacheFile) {
+        Router::enableCache($cacheFile);
+    }
+    
+    // Define roles to scan for modules
+    $roles = ['admin', 'public', 'api', 'ai', 'automate'];
+    $loadedRoutes = 0;
+    $errors = [];
     
     foreach ($roles as $role) {
         $rolePath = BODY_DIR . DS . $role;
@@ -175,15 +192,56 @@ function loadModuleRoutes(object $registry): void
             continue;
         }
         
-        $modules = array_filter(scandir($rolePath), function($item) use ($rolePath) {
-            return $item !== '.' && $item !== '..' && is_dir($rolePath . DS . $item);
-        });
-        
-        foreach ($modules as $module) {
-            $routesFile = $rolePath . DS . $module . DS . 'routes.json';
+        try {
+            $modules = @scandir($rolePath);
+            if ($modules === false) {
+                $errors[] = "Failed to scan directory: $rolePath";
+                continue;
+            }
             
-            if (file_exists($routesFile)) {
-                Router::loadFromJson($routesFile);
+            $modules = array_filter($modules, function($item) use ($rolePath) {
+                return $item !== '.' && $item !== '..' && is_dir($rolePath . DS . $item);
+            });
+            
+            foreach ($modules as $module) {
+                $routesFile = $rolePath . DS . $module . DS . 'routes.json';
+                
+                if (file_exists($routesFile)) {
+                    if (Router::loadFromJson($routesFile)) {
+                        $loadedRoutes++;
+                    } else {
+                        $errors[] = "Failed to load routes from: $routesFile";
+                    }
+                }
+            }
+        } catch (Throwable $e) {
+            $errors[] = "Error scanning role $role: " . $e->getMessage();
+            error_log("Error loading routes for role $role: " . $e->getMessage());
+        }
+    }
+    
+    // Save route cache if enabled
+    if (!$isDevelopment && $loadedRoutes > 0) {
+        Router::saveCache();
+    }
+    
+    // Log all routes to JSON (for both logging and caching)
+    if ($loadedRoutes > 0) {
+        Router::enableLogging();
+        Router::logRoutes();
+    }
+    
+    // Log route loading summary
+    if ($isDevelopment) {
+        error_log("Loaded $loadedRoutes route files");
+        
+        // Get and log statistics
+        $stats = Router::getRouteStatistics();
+        error_log("Total routes: {$stats['total_routes']} | Named: {$stats['named_routes']} | With middleware: {$stats['with_middleware']}");
+        
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                error_log("Route loading error: $error");
             }
         }
     }
@@ -201,7 +259,7 @@ function handleApplicationError(Throwable $e): void
     error_log("Stack trace: " . $e->getTraceAsString());
     
     // Display error based on environment
-    if (defined('APP_ENV') && APP_ENV === 'development') {
+    if (defined('APP_DEBUG') && APP_DEBUG || defined('APP_ENV') && APP_ENV === 'development') {
         displayDevelopmentError($e);
     } else {
         displayProductionError();

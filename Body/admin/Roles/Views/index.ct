@@ -1,0 +1,116 @@
+<div class="admin-topbar">
+    <div class="topbar-left">
+        <h2><i class="fas fa-user-shield"></i> Role Management</h2>
+        <p>Manage system roles and permissions</p>
+    </div>
+    <div class="topbar-right">
+        <a href="/admin/roles/create" class="topbar-btn">
+            <i class="fas fa-plus"></i> Create New Role
+        </a>
+    </div>
+</div>
+
+<div class="admin-content">
+    
+    <!-- Success/Error Messages -->
+    <?php if (!empty($success)): ?>
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> <?= htmlspecialchars($success) ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (!empty($error)): ?>
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?>
+        </div>
+    <?php endif; ?>
+    
+    <!-- Roles Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-list"></i> All Roles</h3>
+            <span style="color:#7f8c8d;"><?= count($roles) ?> total roles</span>
+        </div>
+        
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:60px;">ID</th>
+                        <th>Icon</th>
+                        <th>Role Name</th>
+                        <th>Slug</th>
+                        <th>Display Name</th>
+                        <th style="width:100px;">Color</th>
+                        <th style="width:100px;">Status</th>
+                        <th style="width:200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($roles)): ?>
+                        <?php foreach ($roles as $role): ?>
+                            <tr>
+                                <td><strong>#<?= $role['role_id'] ?></strong></td>
+                                <td style="font-size:1.5em;"><?= htmlspecialchars($role['icon']) ?></td>
+                                <td><strong><?= htmlspecialchars($role['role_name']) ?></strong></td>
+                                <td><code><?= htmlspecialchars($role['role_slug']) ?></code></td>
+                                <td><?= htmlspecialchars($role['display_name']) ?></td>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <span style="display:inline-block;width:30px;height:20px;border-radius:4px;background:<?= htmlspecialchars($role['color']) ?>;border:1px solid #ddd;"></span>
+                                        <code style="font-size:0.85em;"><?= htmlspecialchars($role['color']) ?></code>
+                                    </div>
+                                </td>
+                                <td>
+                                    <?php if ($role['is_active']): ?>
+                                        <span class="badge badge-success"><i class="fas fa-check"></i> Active</span>
+                                    <?php else: ?>
+                                        <span class="badge badge-danger"><i class="fas fa-times"></i> Inactive</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                                        <a href="/admin/roles/edit?id=<?= $role['role_id'] ?>" class="btn btn-sm btn-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="/admin/roles/toggle?id=<?= $role['role_id'] ?>" class="btn btn-sm btn-warning" title="Toggle Status">
+                                            <i class="fas fa-toggle-on"></i>
+                                        </a>
+                                        <a href="/admin/roles/delete?id=<?= $role['role_id'] ?>" class="btn btn-sm btn-danger confirm-delete" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d;">
+                                <i class="fas fa-inbox" style="font-size:3em;opacity:0.3;margin-bottom:15px;display:block;"></i>
+                                No roles found. Create your first role to get started!
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Information Card -->
+    <div class="card" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;">
+        <h3 style="color:white;margin-bottom:15px;"><i class="fas fa-info-circle"></i> About Roles</h3>
+        <p style="margin-bottom:10px;">Roles define user permissions and access levels in the system. Each role can have:</p>
+        <ul style="margin-left:20px;line-height:1.8;">
+            <li>Custom name and display text</li>
+            <li>Unique slug identifier for database queries</li>
+            <li>Icon emoji for visual identification</li>
+            <li>Custom color for UI theming</li>
+            <li>Active/Inactive status</li>
+        </ul>
+        <p style="margin-top:15px;opacity:0.9;">
+            <i class="fas fa-lightbulb"></i> <strong>Tip:</strong> You cannot delete a role that is assigned to users. Deactivate it instead.
+        </p>
+    </div>
+    
+</div>
+

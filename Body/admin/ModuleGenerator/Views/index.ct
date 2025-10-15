@@ -1,0 +1,110 @@
+<div class="admin-topbar">
+    <div class="topbar-left">
+        <h2><i class="fas fa-cogs"></i> Module Generator</h2>
+        <p>Generate new modules automatically</p>
+    </div>
+</div>
+
+<div class="admin-content">
+    <?php if (!empty($success)): ?><div class="alert alert-success"><i class="fas fa-check-circle"></i> <?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if (!empty($error)): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div><?php endif; ?>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-plus-circle"></i> Generate New Module</h3>
+            </div>
+            <form method="POST" action="/admin/module-generator/generate">
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Module Name *</label>
+                    <input type="text" name="module_name" class="form-control" required placeholder="e.g., Products, Services, Portfolio">
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;">Use PascalCase (e.g., MyModule)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-layer-group"></i> Module Type *</label>
+                    <select name="module_type" class="form-control">
+                        <option value="public">Public (frontend)</option>
+                        <option value="admin" selected>Admin (backend)</option>
+                        <option value="api">API</option>
+                        <option value="user">User Portal</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                        <input type="checkbox" name="include_model" checked style="width:auto;">
+                        <span><i class="fas fa-database"></i> Include Model</span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                        <input type="checkbox" name="include_view" checked style="width:auto;">
+                        <span><i class="fas fa-eye"></i> Include View</span>
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                        <input type="checkbox" name="create_crud" checked style="width:auto;">
+                        <span><i class="fas fa-list"></i> Create CRUD Operations</span>
+                    </label>
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;margin-left:30px;">Generate Create, Read, Update, Delete methods</small>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-table"></i> Database Table Name (optional)</label>
+                    <input type="text" name="table_name" class="form-control" placeholder="Leave empty to use module name">
+                </div>
+                
+                <div style="margin-top:30px;padding-top:20px;border-top:2px solid #ecf0f1;">
+                    <button type="submit" class="btn btn-success" style="width:100%;padding:15px;font-size:1.1em;">
+                        <i class="fas fa-magic"></i> Generate Module
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div>
+            <div class="card" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;">
+                <h3 style="color:white;margin-bottom:15px;"><i class="fas fa-info-circle"></i> How It Works</h3>
+                <p style="margin-bottom:15px;line-height:1.8;opacity:0.9;">The Module Generator creates a complete module structure with:</p>
+                <ul style="list-style:none;padding:0;line-height:2;">
+                    <li><i class="fas fa-check" style="color:#2ecc71;"></i> Controller with all necessary methods</li>
+                    <li><i class="fas fa-check" style="color:#2ecc71;"></i> Model with database interactions</li>
+                    <li><i class="fas fa-check" style="color:#2ecc71;"></i> Views for listing and forms</li>
+                    <li><i class="fas fa-check" style="color:#2ecc71;"></i> Routes configuration</li>
+                    <li><i class="fas fa-check" style="color:#2ecc71;"></i> Proper MVC structure</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3><i class="fas fa-lightbulb"></i> Generated Structure</h3>
+                <pre style="background:#f8f9fa;padding:15px;border-radius:6px;overflow-x:auto;font-family:monospace;font-size:0.9em;color:#2c3e50;">Body/
+└── [type]/
+    └── [ModuleName]/
+        ├── Controllers/
+        │   └── [modulename].php
+        ├── Models/
+        │   └── [ModuleName]Model.php
+        ├── Views/
+        │   ├── index.ct
+        │   ├── create.ct (if CRUD)
+        │   └── edit.ct (if CRUD)
+        └── routes.json</pre>
+            </div>
+            
+            <div class="card" style="background:#fff3cd;border-left:4px solid #ffc107;">
+                <h4 style="color:#856404;margin-bottom:10px;"><i class="fas fa-exclamation-triangle"></i> Important Notes</h4>
+                <ul style="color:#856404;line-height:1.8;padding-left:20px;">
+                    <li>Route cache will be automatically cleared</li>
+                    <li>Generated code follows framework conventions</li>
+                    <li>Customize generated files as needed</li>
+                    <li>Database table should exist before using CRUD</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,66 +1,140 @@
 <?php
-/**
- * Class Url
- *
- * Utility class for handling and manipulating URLs.
- */
+
+declare(strict_types=1);
+
+namespace Brain\Classes\Helpers;
+
+use Brain\Core\Router;
+
 class Url
 {
-    /**
-     * Build a URL from a base and query parameters.
-     */
-    public static function build(string $base, array $params = []): string
+    public static function base(string $path = ''): string
     {
-        if (empty($params)) {
-            return $base;
+        $base = defined('APP_ROOT_URL') ? rtrim(APP_ROOT_URL, '/') : '';
+        return $base . '/' . ltrim($path, '/');
+    }
+
+    public static function asset(string $path = ''): string
+    {
+        $base = defined('APP_ASSETS_URL') ? rtrim(APP_ASSETS_URL, '/') : '/Storage';
+        return $base . '/' . ltrim($path, '/');
+    }
+
+    public static function storage(string $path = ''): string
+    {
+        $base = defined('APP_STORAGE_URL') ? rtrim(APP_STORAGE_URL, '/') : '/Storage';
+        return $base . '/' . ltrim($path, '/');
+    }
+
+    public static function admin(string $path = ''): string
+    {
+        $base = defined('APP_ADMIN_URL') ? rtrim(APP_ADMIN_URL, '/') : '/admin';
+        return $base . '/' . ltrim($path, '/');
+    }
+
+    public static function api(string $path = ''): string
+    {
+        $base = defined('APP_API_URL') ? rtrim(APP_API_URL, '/') : '/api';
+        return $base . '/' . ltrim($path, '/');
+    }
+
+    public static function current(): string
+    {
+        return defined('CURRENT_URL') ? CURRENT_URL : self::getCurrentUrl();
+    }
+
+    public static function currentUri(): string
+    {
+        return defined('CURRENT_URI') ? CURRENT_URI : ($_SERVER['REQUEST_URI'] ?? '/');
+    }
+
+    public static function route(string $name, array $params = [], array $query = []): string
+    {
+        if (class_exists('\Brain\Core\Router', false)) {
+            return Router::url($name, $params, $query);
         }
-        return $base . '?' . http_build_query($params);
+        return self::base(implode('/', $params) . ($query ? '?' . http_build_query($query) : ''));
     }
 
-    /**
-     * Get a specific component from a URL.
-     */
-    public static function getPart(string $url, int $component): ?string
+    public static function isCurrent(string $path, bool $strict = false): bool
     {
-        $part = parse_url($url, $component);
-        return $part !== false ? $part : null;
+        $current = parse_url(self::currentUri(), PHP_URL_PATH);
+        $current = rtrim($current, '/');
+        $path = rtrim($path, '/');
+        return $strict ? ($current === $path) : str_starts_with($current, $path);
     }
 
-    /**
-     * Add or update a query parameter in a URL.
-     */
-    public static function withQueryParam(string $url, string $key, string $value): string
+    public static function redirect(string $url, int $code = 302): void
     {
-        $parts = parse_url($url);
-        parse_str($parts['query'] ?? '', $query);
-        $query[$key] = $value;
-        $parts['query'] = http_build_query($query);
-
-        return self::unparseUrl($parts);
+        header('Location: ' . $url, true, $code);
+        exit;
     }
 
-    /**
-     * Remove a query parameter from a URL.
-     */
-    public static function withoutQueryParam(string $url, string $key): string
+    public static function protocol(): string
     {
-        $parts = parse_url($url);
-        parse_str($parts['query'] ?? '', $query);
-        unset($query[$key]);
-        $parts['query'] = http_build_query($query);
-
-        return self::unparseUrl($parts);
+        return defined('APP_PROTOCOL') ? APP_PROTOCOL : (self::isHttps() ? 'https://' : 'http://');
     }
 
-    /**
-     * Rebuild URL from parsed parts.
-     */
-    protected static function unparseUrl(array $parts): string
+    public static function host(): string
     {
-        return ($parts['scheme'] ?? '') . '://' . ($parts['host'] ?? '')
-            . (isset($parts['port']) ? ":{$parts['port']}" : '')
-            . ($parts['path'] ?? '')
-            . (!empty($parts['query']) ? "?{$parts['query']}" : '')
-            . (!empty($parts['fragment']) ? "#{$parts['fragment']}" : '');
+        return defined('APP_HOST') ? APP_HOST : ($_SERVER['HTTP_HOST'] ?? 'localhost');
+    }
+
+    public static function basePath(): string
+    {
+        return defined('APP_BASE_PATH') ? APP_BASE_PATH : '/';
+    }
+
+    public static function isHttps(): bool
+    {
+        if (defined('APP_IS_HTTPS')) {
+            return APP_IS_HTTPS;
+        }
+        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+    }
+
+    private static function getCurrentUrl(): string
+    {
+        $protocol = self::protocol();
+        $host = self::host();
+        $uri = $_SERVER['REQUEST_URI'] ?? '/';
+        return $protocol . $host . $uri;
+    }
+}
+
+if (!function_exists('url')) {
+    function url(string $path = ''): string {
+        return \Brain\Classes\Helpers\Url::base($path);
+    }
+}
+
+if (!function_exists('asset')) {
+    function asset(string $path = ''): string {
+        return \Brain\Classes\Helpers\Url::asset($path);
+    }
+}
+
+if (!function_exists('admin_url')) {
+    function admin_url(string $path = ''): string {
+        return \Brain\Classes\Helpers\Url::admin($path);
+    }
+}
+
+if (!function_exists('api_url')) {
+    function api_url(string $path = ''): string {
+        return \Brain\Classes\Helpers\Url::api($path);
+    }
+}
+
+if (!function_exists('current_url')) {
+    function current_url(): string {
+        return \Brain\Classes\Helpers\Url::current();
+    }
+}
+
+if (!function_exists('redirect_to')) {
+    function redirect_to(string $url, int $code = 302): void {
+        \Brain\Classes\Helpers\Url::redirect($url, $code);
     }
 }

@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {"method": "GET", "path": "/admin/pages", "handler": "admin/Pages/Pages@index", "name": "admin.pages.index"},
+    {"method": "GET", "path": "/admin/pages/create", "handler": "admin/Pages/Pages@create", "name": "admin.pages.create"},
+    {"method": "POST", "path": "/admin/pages/store", "handler": "admin/Pages/Pages@store", "name": "admin.pages.store"},
+    {"method": "GET", "path": "/admin/pages/edit", "handler": "admin/Pages/Pages@edit", "name": "admin.pages.edit"},
+    {"method": "POST", "path": "/admin/pages/update", "handler": "admin/Pages/Pages@update", "name": "admin.pages.update"},
+    {"method": "GET", "path": "/admin/pages/delete", "handler": "admin/Pages/Pages@delete", "name": "admin.pages.delete"},
+    {"method": "GET", "path": "/admin/pages/toggle", "handler": "admin/Pages/Pages@toggle", "name": "admin.pages.toggle"}
+  ]
+}
+

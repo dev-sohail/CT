@@ -1,21 +1,42 @@
 <?php
-/**
- * Class RateLimiter
- *
- * A simple in-memory rate limiter.
- */
+
+declare(strict_types=1);
+
 class RateLimiter
 {
     protected array $attempts = [];
+    protected string $storageFile = '';
 
-    /**
-     * Check if a given key is allowed based on max attempts and time window.
-     */
-    public function allow(string $key, int $maxAttempts, int $decaySeconds): bool
+    public function __construct(?string $storageFile = null)
+    {
+        if ($storageFile) {
+            $this->storageFile = $storageFile;
+            $this->loadFromStorage();
+        }
+    }
+
+    public function attempt(string $key, int $maxAttempts = 5, int $decaySeconds = 60): bool
+    {
+        $this->cleanup();
+        
+        if (!$this->tooManyAttempts($key, $maxAttempts)) {
+            $this->hit($key, $decaySeconds);
+            return true;
+        }
+
+        return false;
+    }
+
+    public function tooManyAttempts(string $key, int $maxAttempts): bool
+    {
+        $attempts = $this->attempts($key);
+        return $attempts >= $maxAttempts;
+    }
+
+    public function hit(string $key, int $decaySeconds = 60): int
     {
         $now = time();
-
-        // Initialize if not set
+        
         if (!isset($this->attempts[$key])) {
             $this->attempts[$key] = [
                 'count' => 0,
@@ -23,40 +44,87 @@ class RateLimiter
             ];
         }
 
-        // Reset if expired
         if ($this->attempts[$key]['expires_at'] <= $now) {
             $this->attempts[$key] = [
-                'count' => 0,
+                'count' => 1,
                 'expires_at' => $now + $decaySeconds
             ];
-        }
-
-        // Check limit
-        if ($this->attempts[$key]['count'] < $maxAttempts) {
+        } else {
             $this->attempts[$key]['count']++;
-            return true;
         }
 
-        return false;
+        $this->saveToStorage();
+        return $this->attempts[$key]['count'];
     }
 
-    /**
-     * Get remaining attempts for a given key.
-     */
+    public function attempts(string $key): int
+    {
+        if (!isset($this->attempts[$key])) {
+            return 0;
+        }
+
+        if ($this->attempts[$key]['expires_at'] <= time()) {
+            return 0;
+        }
+
+        return $this->attempts[$key]['count'];
+    }
+
     public function remaining(string $key, int $maxAttempts): int
     {
-        return isset($this->attempts[$key])
-            ? max(0, $maxAttempts - $this->attempts[$key]['count'])
-            : $maxAttempts;
+        return max(0, $maxAttempts - $this->attempts($key));
     }
 
-    /**
-     * Get seconds until the limit resets.
-     */
-    public function retryAfter(string $key): int
+    public function availableIn(string $key): int
     {
-        return isset($this->attempts[$key])
-            ? max(0, $this->attempts[$key]['expires_at'] - time())
-            : 0;
+        if (!isset($this->attempts[$key])) {
+            return 0;
+        }
+
+        return max(0, $this->attempts[$key]['expires_at'] - time());
+    }
+
+    public function clear(string $key): void
+    {
+        unset($this->attempts[$key]);
+        $this->saveToStorage();
+    }
+
+    public function clearAll(): void
+    {
+        $this->attempts = [];
+        $this->saveToStorage();
+    }
+
+    protected function cleanup(): void
+    {
+        $now = time();
+        foreach ($this->attempts as $key => $data) {
+            if ($data['expires_at'] <= $now) {
+                unset($this->attempts[$key]);
+            }
+        }
+    }
+
+    protected function loadFromStorage(): void
+    {
+        if ($this->storageFile && file_exists($this->storageFile)) {
+            $data = @file_get_contents($this->storageFile);
+            if ($data) {
+                $this->attempts = json_decode($data, true) ?? [];
+            }
+        }
+    }
+
+    protected function saveToStorage(): void
+    {
+        if ($this->storageFile) {
+            @file_put_contents($this->storageFile, json_encode($this->attempts), LOCK_EX);
+        }
+    }
+
+    public function __destruct()
+    {
+        $this->saveToStorage();
     }
 }

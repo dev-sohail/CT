@@ -1,0 +1,47 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/login",
+      "handler": "public/Auth/AuthController@login",
+      "name": "auth.login"
+    },
+    {
+      "method": "POST",
+      "path": "/login",
+      "handler": "public/Auth/AuthController@login",
+      "name": "auth.login.post"
+    },
+    {
+      "method": "GET",
+      "path": "/register",
+      "handler": "public/Auth/AuthController@register",
+      "name": "auth.register"
+    },
+    {
+      "method": "POST",
+      "path": "/register",
+      "handler": "public/Auth/AuthController@register",
+      "name": "auth.register.post"
+    },
+    {
+      "method": "GET",
+      "path": "/logout",
+      "handler": "public/Auth/AuthController@logout",
+      "name": "auth.logout"
+    },
+    {
+      "method": "GET",
+      "path": "/forgot-password",
+      "handler": "public/Auth/AuthController@forgotPassword",
+      "name": "auth.forgot"
+    },
+    {
+      "method": "POST",
+      "path": "/forgot-password",
+      "handler": "public/Auth/AuthController@forgotPassword",
+      "name": "auth.forgot.post"
+    }
+  ]
+}
+

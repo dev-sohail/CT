@@ -1,0 +1,31 @@
+<div class="admin-topbar">
+    <div class="topbar-left"><h2><i class="fas fa-edit"></i> Edit Page</h2><p>Update page content</p></div>
+    <div class="topbar-right"><a href="/admin/pages" class="topbar-btn secondary"><i class="fas fa-arrow-left"></i> Back to Pages</a></div>
+</div>
+
+<div class="admin-content">
+    <?php if (!empty($error)): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div><?php endif; ?>
+    
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-edit"></i> Page Content</h3><span style="color:#7f8c8d;">Page ID: #<?= $page['page_id'] ?></span></div>
+        <form method="POST" action="/admin/pages/update">
+            <input type="hidden" name="page_id" value="<?= $page['page_id'] ?>">
+            <div class="form-group"><label><i class="fas fa-heading"></i> Title *</label><input type="text" name="title" class="form-control" required value="<?= htmlspecialchars($page['title']) ?>"></div>
+            <div class="form-group"><label><i class="fas fa-link"></i> Slug *</label><input type="text" name="slug" class="form-control" required value="<?= htmlspecialchars($page['slug']) ?>" style="font-family:monospace;"></div>
+            <div class="form-group"><label><i class="fas fa-file-alt"></i> Content</label><textarea name="content" class="form-control" rows="15"><?= htmlspecialchars($page['content']) ?></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="form-group"><label><i class="fas fa-search"></i> Meta Description</label><textarea name="meta_description" class="form-control" rows="3"><?= htmlspecialchars($page['meta_description']) ?></textarea></div>
+                <div class="form-group"><label><i class="fas fa-tags"></i> Meta Keywords</label><textarea name="meta_keywords" class="form-control" rows="3"><?= htmlspecialchars($page['meta_keywords']) ?></textarea></div>
+            </div>
+            <div class="form-group"><label><i class="fas fa-toggle-on"></i> Status *</label><select name="status" class="form-control"><option value="draft" <?= $page['status'] === 'draft' ? 'selected' : '' ?>>Draft</option><option value="published" <?= $page['status'] === 'published' ? 'selected' : '' ?>>Published</option></select></div>
+            <div style="margin-top:30px;padding-top:20px;border-top:2px solid #ecf0f1;display:flex;gap:10px;justify-content:space-between;">
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Update Page</button>
+                    <a href="/admin/pages" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+                <a href="/admin/pages/delete?id=<?= $page['page_id'] ?>" class="btn btn-danger confirm-delete"><i class="fas fa-trash"></i> Delete Page</a>
+            </div>
+        </form>
+    </div>
+</div>
+

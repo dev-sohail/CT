@@ -1,0 +1,33 @@
+<div class="admin-topbar">
+    <div class="topbar-left"><h2><i class="fas fa-plus-circle"></i> Create New Page</h2><p>Add a new page to the website</p></div>
+    <div class="topbar-right"><a href="/admin/pages" class="topbar-btn secondary"><i class="fas fa-arrow-left"></i> Back to Pages</a></div>
+</div>
+
+<div class="admin-content">
+    <?php if (!empty($error)): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div><?php endif; ?>
+    
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-edit"></i> Page Content</h3></div>
+        <form method="POST" action="/admin/pages/store">
+            <div class="form-group"><label><i class="fas fa-heading"></i> Title *</label><input type="text" name="title" class="form-control" required placeholder="Page Title" id="page-title"></div>
+            <div class="form-group"><label><i class="fas fa-link"></i> Slug *</label><input type="text" name="slug" class="form-control" required placeholder="page-slug" id="page-slug" style="font-family:monospace;"></div>
+            <div class="form-group"><label><i class="fas fa-file-alt"></i> Content</label><textarea name="content" class="form-control" rows="15" placeholder="Page content (HTML allowed)"></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="form-group"><label><i class="fas fa-search"></i> Meta Description</label><textarea name="meta_description" class="form-control" rows="3" placeholder="SEO meta description"></textarea></div>
+                <div class="form-group"><label><i class="fas fa-tags"></i> Meta Keywords</label><textarea name="meta_keywords" class="form-control" rows="3" placeholder="keyword1, keyword2, keyword3"></textarea></div>
+            </div>
+            <div class="form-group"><label><i class="fas fa-toggle-on"></i> Status *</label><select name="status" class="form-control"><option value="draft" selected>Draft</option><option value="published">Published</option></select></div>
+            <div style="margin-top:30px;padding-top:20px;border-top:2px solid #ecf0f1;display:flex;gap:10px;">
+                <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Create Page</button>
+                <a href="/admin/pages" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+document.getElementById('page-title').addEventListener('input', function(e) {
+    const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    document.getElementById('page-slug').value = slug;
+});
+</script>
+

@@ -1,0 +1,98 @@
+<div class="admin-topbar">
+    <div class="topbar-left">
+        <h2><i class="fas fa-globe"></i> Public Content Management</h2>
+        <p>Control what appears on the public website</p>
+    </div>
+    <div class="topbar-right">
+        <a href="/admin/public-content/settings" class="topbar-btn"><i class="fas fa-cog"></i> Public Site Settings</a>
+    </div>
+</div>
+
+<div class="admin-content">
+    <?php if (!empty($success)): ?><div class="alert alert-success"><i class="fas fa-check-circle"></i> <?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if (!empty($error)): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div><?php endif; ?>
+    
+    <div class="stats-grid">
+        <div class="stat-card primary"><div class="stat-card-icon"><i class="fas fa-puzzle-piece"></i></div><div class="stat-card-value"><?= $stats['total_modules'] ?></div><div class="stat-card-label">Public Modules</div></div>
+        <div class="stat-card success"><div class="stat-card-icon"><i class="fas fa-file-alt"></i></div><div class="stat-card-value"><?= $stats['published_pages'] ?></div><div class="stat-card-label">Published Pages</div></div>
+        <div class="stat-card warning"><div class="stat-card-icon"><i class="fas fa-cube"></i></div><div class="stat-card-value"><?= $stats['active_blocks'] ?></div><div class="stat-card-label">Active Blocks</div></div>
+        <div class="stat-card purple"><div class="stat-card-icon"><i class="fas fa-eye"></i></div><div class="stat-card-value"><?= $stats['total_pages'] ?></div><div class="stat-card-label">Total Pages</div></div>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
+        <div class="card">
+            <div class="card-header"><h3><i class="fas fa-cube"></i> Active HTML Blocks</h3><a href="/admin/blocks" style="font-size:0.9em;color:#3498db;text-decoration:none;"><i class="fas fa-cog"></i> Manage</a></div>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Block</th><th>Location</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        <?php if (!empty($activeBlocks)): foreach ($activeBlocks as $block): ?>
+                            <tr>
+                                <td><strong><?= htmlspecialchars($block['block_name']) ?></strong><br><code style="font-size:0.85em;"><?= htmlspecialchars($block['block_slug']) ?></code></td>
+                                <td><span class="badge badge-info"><?= htmlspecialchars($block['location']) ?></span></td>
+                                <td><a href="/admin/blocks/edit?id=<?= $block['block_id'] ?>" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a></td>
+                            </tr>
+                        <?php endforeach; else: ?>
+                            <tr><td colspan="3" style="text-align:center;padding:20px;color:#7f8c8d;">No active blocks</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header"><h3><i class="fas fa-file-alt"></i> Published Pages</h3><a href="/admin/pages" style="font-size:0.9em;color:#3498db;text-decoration:none;"><i class="fas fa-cog"></i> Manage</a></div>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>Page</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        <?php if (!empty($publishedPages)): foreach ($publishedPages as $page): ?>
+                            <tr>
+                                <td><strong><?= htmlspecialchars($page['title']) ?></strong><br><code style="font-size:0.85em;">/<?= htmlspecialchars($page['slug']) ?></code></td>
+                                <td><a href="/admin/pages/edit?id=<?= $page['page_id'] ?>" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a></td>
+                            </tr>
+                        <?php endforeach; else: ?>
+                            <tr><td colspan="2" style="text-align:center;padding:20px;color:#7f8c8d;">No published pages</td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-puzzle-piece"></i> Public Modules</h3><span style="color:#7f8c8d;"><?= count($publicModules) ?> modules</span></div>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>Module</th><th>Components</th><th>Routes</th><th>Status</th></tr></thead>
+                <tbody>
+                    <?php if (!empty($publicModules)): foreach ($publicModules as $module): ?>
+                        <tr>
+                            <td><strong><?= htmlspecialchars($module['name']) ?></strong><br><small style="color:#7f8c8d;"><?= htmlspecialchars($module['path']) ?></small></td>
+                            <td>
+                                <?php if ($module['has_controller']): ?><span class="badge badge-primary" title="Controller">C</span> <?php endif; ?>
+                                <?php if ($module['has_view']): ?><span class="badge badge-info" title="View">V</span> <?php endif; ?>
+                                <?php if ($module['has_routes']): ?><span class="badge badge-warning" title="Routes">R</span> <?php endif; ?>
+                            </td>
+                            <td><span class="badge badge-success"><?= $module['route_count'] ?> routes</span></td>
+                            <td><span class="badge badge-success">Active</span></td>
+                        </tr>
+                    <?php endforeach; else: ?>
+                        <tr><td colspan="4" style="text-align:center;padding:40px;color:#7f8c8d;">No public modules found</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="card" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;">
+        <h3 style="color:white;margin-bottom:15px;"><i class="fas fa-lightbulb"></i> Quick Management Links</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;">
+            <a href="/admin/pages/create" class="btn" style="background:rgba(255,255,255,0.2);color:white;justify-content:center;border:2px solid rgba(255,255,255,0.3);"><i class="fas fa-plus"></i> Create Page</a>
+            <a href="/admin/blocks/create" class="btn" style="background:rgba(255,255,255,0.2);color:white;justify-content:center;border:2px solid rgba(255,255,255,0.3);"><i class="fas fa-cube"></i> Create Block</a>
+            <a href="/admin/module-generator" class="btn" style="background:rgba(255,255,255,0.2);color:white;justify-content:center;border:2px solid rgba(255,255,255,0.3);"><i class="fas fa-cogs"></i> Generate Module</a>
+            <a href="/" target="_blank" class="btn" style="background:rgba(255,255,255,0.2);color:white;justify-content:center;border:2px solid rgba(255,255,255,0.3);"><i class="fas fa-external-link-alt"></i> View Public Site</a>
+        </div>
+    </div>
+</div>
+

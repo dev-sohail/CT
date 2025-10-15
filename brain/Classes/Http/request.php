@@ -1,154 +1,218 @@
 <?php
 
+declare(strict_types=1);
+
 class Request
 {
-    public array $get     = [];
-    public array $post    = [];
-    public array $request = [];
-    public array $cookie  = [];
-    public array $files   = [];
-    public array $server  = [];
+    protected array $get;
+    protected array $post;
+    protected array $request;
+    protected array $cookie;
+    protected array $files;
+    protected array $server;
+    protected array $headers;
 
-    protected ?object $registry = null;
-
-    public function __construct(?object $registry = null)
+    public function __construct()
     {
-        $this->registry = $registry;
-
-        $this->get     = $_GET;
-        $this->post    = $_POST;
+        $this->get = $_GET;
+        $this->post = $_POST;
         $this->request = $_REQUEST;
-        $this->cookie  = $_COOKIE;
-        $this->files   = $_FILES;
-        $this->server  = $_SERVER;
-
-        $this->forceHttpsIfEnabled();
+        $this->cookie = $_COOKIE;
+        $this->files = $_FILES;
+        $this->server = $_SERVER;
+        $this->headers = $this->parseHeaders();
     }
 
-    public static function method(): string
+    public function get(string $key, mixed $default = null): mixed
     {
-        return $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        return $this->get[$key] ?? $default;
     }
 
-    public static function uri(): string
+    public function post(string $key, mixed $default = null): mixed
     {
-        return strtok($_SERVER['REQUEST_URI'] ?? '/', '?');
+        return $this->post[$key] ?? $default;
     }
 
-    public static function queryString(): string
+    public function input(string $key, mixed $default = null): mixed
     {
-        return $_SERVER['QUERY_STRING'] ?? '';
+        return $this->post[$key] ?? $this->get[$key] ?? $default;
     }
 
-    public static function query(): array
+    public function cookie(string $key, mixed $default = null): mixed
     {
-        return $_GET;
+        return $this->cookie[$key] ?? $default;
     }
 
-    public static function get(string $key, mixed $default = null): mixed
+    public function file(string $key): ?array
     {
-        return $_GET[$key] ?? $default;
+        return $this->files[$key] ?? null;
     }
 
-    public static function post(string $key, mixed $default = null): mixed
+    public function header(string $key, mixed $default = null): mixed
     {
-        return $_POST[$key] ?? $default;
+        $key = strtolower(str_replace('_', '-', $key));
+        return $this->headers[$key] ?? $default;
     }
 
-    public static function all(): array
+    public function server(string $key, mixed $default = null): mixed
     {
-        return array_merge($_GET, $_POST, self::input());
+        return $this->server[$key] ?? $default;
     }
 
-    public static function raw(): string
+    public function method(): string
     {
-        return file_get_contents('php://input');
+        return strtoupper($this->server['REQUEST_METHOD'] ?? 'GET');
     }
 
-    public static function input(): array
+    public function isMethod(string $method): bool
     {
-        $contentType = self::header('Content-Type');
-        $raw = self::raw();
+        return $this->method() === strtoupper($method);
+    }
 
-        if (str_contains($contentType, 'application/json')) {
-            return json_decode($raw, true) ?? [];
+    public function isGet(): bool
+    {
+        return $this->method() === 'GET';
+    }
+
+    public function isPost(): bool
+    {
+        return $this->method() === 'POST';
+    }
+
+    public function isPut(): bool
+    {
+        return $this->method() === 'PUT';
+    }
+
+    public function isDelete(): bool
+    {
+        return $this->method() === 'DELETE';
+    }
+
+    public function isAjax(): bool
+    {
+        return strtolower($this->header('X-Requested-With', '')) === 'xmlhttprequest';
+    }
+
+    public function isSecure(): bool
+    {
+        return (!empty($this->server['HTTPS']) && $this->server['HTTPS'] !== 'off')
+            || (isset($this->server['SERVER_PORT']) && (int)$this->server['SERVER_PORT'] === 443);
+    }
+
+    public function ip(): string
+    {
+        if (!empty($this->server['HTTP_CLIENT_IP'])) {
+            return $this->server['HTTP_CLIENT_IP'];
         }
-
-        parse_str($raw, $parsed);
-        return $parsed;
+        if (!empty($this->server['HTTP_X_FORWARDED_FOR'])) {
+            return explode(',', $this->server['HTTP_X_FORWARDED_FOR'])[0];
+        }
+        return $this->server['REMOTE_ADDR'] ?? '0.0.0.0';
     }
 
-    public static function headers(): array
+    public function userAgent(): string
     {
-        if (function_exists('getallheaders')) {
-            return getallheaders();
-        }
+        return $this->server['HTTP_USER_AGENT'] ?? '';
+    }
 
+    public function uri(): string
+    {
+        return parse_url($this->server['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    }
+
+    public function url(): string
+    {
+        $protocol = $this->isSecure() ? 'https' : 'http';
+        $host = $this->server['HTTP_HOST'] ?? 'localhost';
+        return $protocol . '://' . $host . $this->uri();
+    }
+
+    public function fullUrl(): string
+    {
+        return $this->url() . ($this->queryString() ? '?' . $this->queryString() : '');
+    }
+
+    public function queryString(): string
+    {
+        return $this->server['QUERY_STRING'] ?? '';
+    }
+
+    public function all(): array
+    {
+        return array_merge($this->get, $this->post);
+    }
+
+    public function only(array $keys): array
+    {
+        $data = [];
+        foreach ($keys as $key) {
+            $data[$key] = $this->input($key);
+        }
+        return $data;
+    }
+
+    public function except(array $keys): array
+    {
+        $data = $this->all();
+        foreach ($keys as $key) {
+            unset($data[$key]);
+        }
+        return $data;
+    }
+
+    public function has(string $key): bool
+    {
+        return isset($this->get[$key]) || isset($this->post[$key]);
+    }
+
+    public function json(string $key = null, mixed $default = null): mixed
+    {
+        $data = json_decode(file_get_contents('php://input'), true) ?? [];
+        return $key ? ($data[$key] ?? $default) : $data;
+    }
+
+    public function wantsJson(): bool
+    {
+        return str_contains($this->header('Accept', ''), 'application/json');
+    }
+
+    protected function parseHeaders(): array
+    {
         $headers = [];
-        foreach ($_SERVER as $key => $value) {
+        foreach ($this->server as $key => $value) {
             if (str_starts_with($key, 'HTTP_')) {
-                $header = str_replace('_', '-', strtolower(substr($key, 5)));
-                $headers[ucwords($header, '-')] = $value;
+                $header = strtolower(str_replace('_', '-', substr($key, 5)));
+                $headers[$header] = $value;
             }
         }
         return $headers;
     }
 
-    public static function header(string $name, mixed $default = null): mixed
+    public function getHeaders(): array
     {
-        $headers = self::headers();
-        return $headers[$name] ?? $default;
+        return $this->headers;
     }
 
-    public static function isAjax(): bool
+    public function validate(array $rules): array
     {
-        return strtolower(self::header('X-Requested-With')) === 'xmlhttprequest';
-    }
-
-    public static function ip(): string
-    {
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-            return $_SERVER['HTTP_CLIENT_IP'];
+        $errors = [];
+        foreach ($rules as $field => $rule) {
+            $value = $this->input($field);
+            if (str_contains($rule, 'required') && empty($value)) {
+                $errors[$field] = "$field is required";
+            }
         }
-
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-            return trim($ips[0]);
-        }
-
-        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        return $errors;
     }
 
-    public static function files(): array
+    public function __get(string $key): mixed
     {
-        return $_FILES;
+        return $this->input($key);
     }
 
-    public static function file(string $key): mixed
+    public function __isset(string $key): bool
     {
-        return $_FILES[$key] ?? null;
-    }
-
-    public static function is(string $method): bool
-    {
-        return strtoupper(self::method()) === strtoupper($method);
-    }
-
-    protected function forceHttpsIfEnabled(): void
-    {
-        if (!$this->registry) return;
-
-        $config = $this->registry->get('config');
-        if (!$config || !$config->get('force_https')) return;
-
-        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
-                    $_SERVER['SERVER_PORT'] == 443;
-
-        if (!$isSecure) {
-            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $uri  = $_SERVER['REQUEST_URI'] ?? '/';
-            header("Location: https://{$host}{$uri}", true, 301);
-            exit;
-        }
+        return $this->has($key);
     }
 }

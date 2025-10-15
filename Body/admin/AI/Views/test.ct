@@ -1,0 +1,46 @@
+<div class="admin-topbar">
+    <div class="topbar-left"><h2><i class="fas fa-vial"></i> Test AI Assistant</h2><p>Test AI processing capabilities</p></div>
+    <div class="topbar-right"><a href="/admin/ai" class="topbar-btn secondary"><i class="fas fa-arrow-left"></i> Back to AI</a></div>
+</div>
+
+<div class="admin-content">
+    <?php if (!empty($_SESSION['error_message'])): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($_SESSION['error_message']); unset($_SESSION['error_message']); ?></div><?php endif; ?>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
+        <div class="card">
+            <div class="card-header"><h3><i class="fas fa-edit"></i> AI Prompt</h3></div>
+            <form method="POST" action="/admin/ai/process">
+                <div class="form-group">
+                    <label><i class="fas fa-comment"></i> Enter Your Prompt</label>
+                    <textarea name="prompt" class="form-control" rows="8" required placeholder="Type your AI prompt here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;padding:15px;font-size:1.1em;"><i class="fas fa-paper-plane"></i> Process with AI</button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <div class="card-header"><h3><i class="fas fa-robot"></i> AI Response</h3></div>
+            <?php if (!empty($_SESSION['ai_response'])): ?>
+                <div style="background:#f8f9fa;padding:20px;border-radius:6px;min-height:200px;">
+                    <p style="white-space:pre-wrap;line-height:1.8;color:#2c3e50;"><?= htmlspecialchars($_SESSION['ai_response']); unset($_SESSION['ai_response']); ?></p>
+                </div>
+            <?php else: ?>
+                <div style="text-align:center;padding:60px 20px;color:#7f8c8d;">
+                    <i class="fas fa-robot" style="font-size:4em;opacity:0.3;margin-bottom:20px;display:block;"></i>
+                    <p>AI response will appear here after processing your prompt.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    
+    <div class="card" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;">
+        <h3 style="color:white;margin-bottom:15px;"><i class="fas fa-lightbulb"></i> Sample Prompts</h3>
+        <ul style="list-style:none;padding:0;line-height:2.5;">
+            <li><i class="fas fa-check" style="color:#2ecc71;"></i> "Explain the benefits of using an MVC framework"</li>
+            <li><i class="fas fa-check" style="color:#2ecc71;"></i> "Generate a SQL query to find all active users"</li>
+            <li><i class="fas fa-check" style="color:#2ecc71;"></i> "Write a PHP function to validate email addresses"</li>
+            <li><i class="fas fa-check" style="color:#2ecc71;"></i> "Suggest improvements for website performance"</li>
+        </ul>
+    </div>
+</div>
+

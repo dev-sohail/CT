@@ -1,0 +1,23 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/automate",
+      "handler": "automate/Generator/Generator@index",
+      "name": "automate.index"
+    },
+    {
+      "method": "POST",
+      "path": "/automate/generate",
+      "handler": "automate/Generator/Generator@generate",
+      "name": "automate.generate"
+    },
+    {
+      "method": "GET",
+      "path": "/automate/list",
+      "handler": "automate/Generator/Generator@list",
+      "name": "automate.list"
+    }
+  ]
+}
+

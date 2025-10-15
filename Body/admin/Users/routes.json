@@ -1,0 +1,53 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/admin/users",
+      "handler": "admin/Users/Users@index",
+      "name": "admin.users.index"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/users/create",
+      "handler": "admin/Users/Users@create",
+      "name": "admin.users.create"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/users/store",
+      "handler": "admin/Users/Users@store",
+      "name": "admin.users.store"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/users/edit",
+      "handler": "admin/Users/Users@edit",
+      "name": "admin.users.edit"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/users/update",
+      "handler": "admin/Users/Users@update",
+      "name": "admin.users.update"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/users/delete",
+      "handler": "admin/Users/Users@delete",
+      "name": "admin.users.delete"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/users/toggle",
+      "handler": "admin/Users/Users@toggle",
+      "name": "admin.users.toggle"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/users/view",
+      "handler": "admin/Users/Users@view",
+      "name": "admin.users.view"
+    }
+  ]
+}
+

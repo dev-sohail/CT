@@ -5,7 +5,18 @@ declare(strict_types=1);
 /**
  * Base Controller Class
  * 
+ * OpenCart/CodeIgniter-style base controller
  * Provides common functionality for all controllers in the framework
+ * 
+ * @property-read Loader $load Loader instance for loading models, libraries, helpers
+ * @property-read object $db Database instance
+ * @property-read object $session Session instance
+ * @property-read object $request Request instance
+ * @property-read object $response Response instance
+ * @property-read object $cache Cache instance
+ * @property-read object $config Config instance
+ * 
+ * @version 2.0.0
  */
 abstract class Controller
 {
@@ -15,6 +26,40 @@ abstract class Controller
     public function __construct(object $registry)
     {
         $this->registry = $registry;
+    }
+
+    /**
+     * Magic getter for OpenCart-style access to registry services
+     * Allows $this->load, $this->db, $this->session, etc.
+     * 
+     * @param string $key Service name
+     * @return mixed Service instance
+     */
+    public function __get(string $key): mixed
+    {
+        return $this->registry->get($key);
+    }
+
+    /**
+     * Magic setter for registry services
+     * 
+     * @param string $key Service name
+     * @param mixed $value Service instance
+     */
+    public function __set(string $key, mixed $value): void
+    {
+        $this->registry->set($key, $value);
+    }
+
+    /**
+     * Magic isset for registry services
+     * 
+     * @param string $key Service name
+     * @return bool True if service exists
+     */
+    public function __isset(string $key): bool
+    {
+        return $this->registry->has($key);
     }
 
     /**

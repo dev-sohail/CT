@@ -1,157 +1,177 @@
 <?php
 
+declare(strict_types=1);
+
 class Response
 {
-    private static array $headers = [];
-    private $level;
-    private $output;
+    protected int $statusCode = 200;
+    protected array $headers = [];
+    protected string $content = '';
+    protected static array $statusTexts = [
+        200 => 'OK',
+        201 => 'Created',
+        204 => 'No Content',
+        301 => 'Moved Permanently',
+        302 => 'Found',
+        304 => 'Not Modified',
+        400 => 'Bad Request',
+        401 => 'Unauthorized',
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        405 => 'Method Not Allowed',
+        422 => 'Unprocessable Entity',
+        500 => 'Internal Server Error',
+        503 => 'Service Unavailable',
+    ];
 
-    /**
-     * Send a 404 Not Found response and exit.
-     */
-    public static function send404(string $message = '404 Not Found'): void
+    public function setStatusCode(int $code): self
     {
-        http_response_code(404);
-        self::sendContent($message);
+        $this->statusCode = $code;
+        return $this;
     }
 
-    /**
-     * Send a 500 Internal Server Error response and exit.
-     */
-    public static function send500(string $message = '500 Internal Server Error'): void
+    public function getStatusCode(): int
     {
-        http_response_code(500);
-        self::sendContent($message);
+        return $this->statusCode;
     }
 
-    /**
-     * Send a 403 Forbidden response and exit.
-     */
-    public static function send403(string $message = '403 Forbidden'): void
+    public function setContent(string $content): self
     {
-        http_response_code(403);
-        self::sendContent($message);
+        $this->content = $content;
+        return $this;
     }
 
-    /**
-     * Send JSON response with given data.
-     *
-     * @param mixed $data
-     * @param int $statusCode HTTP status code, default 200 OK
-     */
-    public static function json($data, int $statusCode = 200): void
+    public function getContent(): string
     {
-        http_response_code($statusCode);
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        return $this->content;
+    }
+
+    public function setHeader(string $name, string $value): self
+    {
+        $this->headers[$name] = $value;
+        return $this;
+    }
+
+    public function getHeaders(): array
+    {
+        return $this->headers;
+    }
+
+    public function json(mixed $data, int $status = 200, int $options = 0): self
+    {
+        $this->statusCode = $status;
+        $this->headers['Content-Type'] = 'application/json; charset=utf-8';
+        $this->content = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | $options);
+        return $this;
+    }
+
+    public function html(string $content, int $status = 200): self
+    {
+        $this->statusCode = $status;
+        $this->headers['Content-Type'] = 'text/html; charset=utf-8';
+        $this->content = $content;
+        return $this;
+    }
+
+    public function text(string $content, int $status = 200): self
+    {
+        $this->statusCode = $status;
+        $this->headers['Content-Type'] = 'text/plain; charset=utf-8';
+        $this->content = $content;
+        return $this;
+    }
+
+    public function xml(string $content, int $status = 200): self
+    {
+        $this->statusCode = $status;
+        $this->headers['Content-Type'] = 'application/xml; charset=utf-8';
+        $this->content = $content;
+        return $this;
+    }
+
+    public function redirect(string $url, int $status = 302): void
+    {
+        $this->statusCode = $status;
+        $this->headers['Location'] = $url;
+        $this->send();
         exit;
     }
 
-    public function setCompression(int $level): void
+    public function download(string $filePath, ?string $name = null, array $headers = []): void
     {
-        $this->level = $level;
-    }
-
-    public function setOutput(string $output): void
-    {
-        $this->output = $output;
-    }
-
-    // public function view(string $role, string $module, string $template, array $data = []): string
-    // {
-    //     if (!defined('DS')) {
-    //         define('DS', DIRECTORY_SEPARATOR);
-    //     }
-
-    //     $file = DIR_MODULES . DS . $role . DS . $module . DS . 'Views' . DS . $template;
-
-    //     if (file_exists($file)) {
-    //         extract($data, EXTR_SKIP);
-    //         ob_start();
-    //         require($file);
-    //         return ob_get_clean();
-    //     } else {
-    //         trigger_error('Error: Could not load template ' . $file . '!', E_USER_ERROR);
-    //         exit();
-    //     }
-    // }
-
-
-    private function compress(string $data, int $level = 0): string
-    {
-        $encoding = null;
-        if (isset($_SERVER['HTTP_ACCEPT_ENCODING'])) {
-            if (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
-                $encoding = 'gzip';
-            } elseif (strpos($_SERVER['HTTP_ACCEPT_ENCODING'], 'x-gzip') !== false) {
-                $encoding = 'x-gzip';
-            }
+        if (!file_exists($filePath)) {
+            throw new RuntimeException("File not found: $filePath");
         }
 
-        if (!$encoding || !extension_loaded('zlib') || ini_get('zlib.output_compression') || headers_sent() || connection_status()) {
-            return $data;
+        $name = $name ?? basename($filePath);
+        $this->headers['Content-Type'] = 'application/octet-stream';
+        $this->headers['Content-Disposition'] = 'attachment; filename="' . $name . '"';
+        $this->headers['Content-Length'] = (string)filesize($filePath);
+        
+        foreach ($headers as $key => $value) {
+            $this->headers[$key] = $value;
         }
 
-        $this->addHeader('Content-Encoding: ' . $encoding);
-        return gzencode($data, $level);
+        $this->sendHeaders();
+        readfile($filePath);
+        exit;
     }
 
-    public function output(): void
+    public function send(): void
     {
-        if ($this->output) {
-            $output = $this->level ? $this->compress($this->output, $this->level) : $this->output;
+        $this->sendHeaders();
+        echo $this->content;
+    }
 
-            if (!headers_sent()) {
-                foreach (self::$headers as $header) {
-                    header($header, true);
-                }
-            }
-            echo $output;
+    protected function sendHeaders(): void
+    {
+        if (headers_sent()) {
+            return;
+        }
+
+        $statusText = self::$statusTexts[$this->statusCode] ?? 'Unknown';
+        header("HTTP/1.1 {$this->statusCode} {$statusText}");
+
+        foreach ($this->headers as $name => $value) {
+            header("$name: $value");
         }
     }
 
-    public function jsonResponse(array $data = []): void
+    public function withCookie(string $name, string $value, int $expire = 0, string $path = '/', string $domain = '', bool $secure = false, bool $httponly = true): self
     {
-        header('Access-Control-Allow-Origin: *');
-        header('Content-Type: application/json');
-        echo json_encode($data);
-        exit;
+        setcookie($name, $value, [
+            'expires' => $expire,
+            'path' => $path,
+            'domain' => $domain,
+            'secure' => $secure,
+            'httponly' => $httponly,
+            'samesite' => 'Lax'
+        ]);
+        return $this;
     }
 
-    /**
-     * Send plain text or HTML content and exit.
-     */
-    public static function sendContent(string $content): void
+    public function noCache(): self
     {
-        header('Content-Type: text/html; charset=utf-8');
-        echo $content;
-        exit;
+        $this->headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        $this->headers['Pragma'] = 'no-cache';
+        $this->headers['Expires'] = '0';
+        return $this;
     }
 
-    /**
-     * Sets the HTTP status code (e.g. 200, 404).
-     */
-    public static function setStatusCode(int $code): void
+    public function cache(int $seconds): self
     {
-        http_response_code($code);
+        $this->headers['Cache-Control'] = "public, max-age=$seconds";
+        $this->headers['Expires'] = gmdate('D, d M Y H:i:s', time() + $seconds) . ' GMT';
+        return $this;
     }
 
-    /**
-     * Adds a custom HTTP header to the response.
-     */
-    public static function addHeader(string $header): void
+    public static function make(string $content, int $status = 200): self
     {
-        self::$headers[] = $header;
-        header($header);
+        return (new self())->setContent($content)->setStatusCode($status);
     }
 
-    /**
-     * Redirect to another URL and exit.
-     */
-    public static function redirect(string $url, int $statusCode = 302): void
+    public function __toString(): string
     {
-        http_response_code($statusCode);
-        header('Location: ' . $url);
-        exit;
+        return $this->content;
     }
 }

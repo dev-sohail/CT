@@ -1,0 +1,30 @@
+<div class="admin-topbar">
+    <div class="topbar-left"><h2><i class="fas fa-edit"></i> Edit Block</h2><p>Update block content</p></div>
+    <div class="topbar-right"><a href="/admin/blocks" class="topbar-btn secondary"><i class="fas fa-arrow-left"></i> Back to Blocks</a></div>
+</div>
+
+<div class="admin-content">
+    <?php if (!empty($error)): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div><?php endif; ?>
+    
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-cube"></i> Block Details</h3><span style="color:#7f8c8d;">Block ID: #<?= $block['block_id'] ?></span></div>
+        <form method="POST" action="/admin/blocks/update">
+            <input type="hidden" name="block_id" value="<?= $block['block_id'] ?>">
+            <div class="form-group"><label><i class="fas fa-heading"></i> Block Name *</label><input type="text" name="block_name" class="form-control" required value="<?= htmlspecialchars($block['block_name']) ?>"></div>
+            <div class="form-group"><label><i class="fas fa-link"></i> Block Slug *</label><input type="text" name="block_slug" class="form-control" required value="<?= htmlspecialchars($block['block_slug']) ?>" style="font-family:monospace;"></div>
+            <div class="form-group"><label><i class="fas fa-code"></i> Content</label><textarea name="content" class="form-control" rows="10"><?= htmlspecialchars($block['content']) ?></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Location</label><select name="location" class="form-control"><option value="global" <?= $block['location'] === 'global' ? 'selected' : '' ?>>Global</option><option value="header" <?= $block['location'] === 'header' ? 'selected' : '' ?>>Header</option><option value="footer" <?= $block['location'] === 'footer' ? 'selected' : '' ?>>Footer</option><option value="sidebar" <?= $block['location'] === 'sidebar' ? 'selected' : '' ?>>Sidebar</option><option value="content" <?= $block['location'] === 'content' ? 'selected' : '' ?>>Content</option></select></div>
+                <div class="form-group"><label><i class="fas fa-toggle-on"></i> Status *</label><select name="status" class="form-control"><option value="inactive" <?= $block['status'] === 'inactive' ? 'selected' : '' ?>>Inactive</option><option value="active" <?= $block['status'] === 'active' ? 'selected' : '' ?>>Active</option></select></div>
+            </div>
+            <div style="margin-top:30px;padding-top:20px;border-top:2px solid #ecf0f1;display:flex;gap:10px;justify-content:space-between;">
+                <div style="display:flex;gap:10px;">
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Update Block</button>
+                    <a href="/admin/blocks" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+                </div>
+                <a href="/admin/blocks/delete?id=<?= $block['block_id'] ?>" class="btn btn-danger confirm-delete"><i class="fas fa-trash"></i> Delete Block</a>
+            </div>
+        </form>
+    </div>
+</div>
+

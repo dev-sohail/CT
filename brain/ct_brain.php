@@ -224,10 +224,63 @@ class Bootstrap
 
         try {
             $registry = Registry::getInstance();
+            
+            // Initialize database and register it
+            $this->initializeDatabase($registry);
+            
             $this->autoRegisterUtilities($registry);
             $GLOBALS['registry'] = $registry;
         } catch (Throwable $e) {
             error_log('Failed to initialize Registry: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Initialize database connection and register in Registry
+     */
+    private function initializeDatabase(object $registry): void
+    {
+        try {
+            $dsn = sprintf(
+                "%s:host=%s;port=%s;dbname=%s;charset=%s",
+                $this->dbConfig['DB_DRIVER'],
+                $this->dbConfig['DB_HOST'],
+                $this->dbConfig['DB_PORT'],
+                $this->dbConfig['DB_DATABASE'],
+                $this->dbConfig['DB_CHARSET']
+            );
+            
+            $options = [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                \PDO::ATTR_EMULATE_PREPARES => false,
+            ];
+            
+            $pdo = new \PDO(
+                $dsn,
+                $this->dbConfig['DB_USERNAME'],
+                $this->dbConfig['DB_PASSWORD'],
+                $options
+            );
+            
+            // Register in Registry
+            if (method_exists($registry, 'set')) {
+                $registry->set('db', $pdo);
+                $registry->set('pdo', $pdo);
+                $registry->set('database', $pdo);
+            }
+            
+            // Make available globally for backward compatibility
+            $GLOBALS['pdo'] = $pdo;
+            
+        } catch (\PDOException $e) {
+            $isDev = filter_var($this->config->get('DEV_MODE', true), FILTER_VALIDATE_BOOLEAN);
+            $message = "Database connection failed: " . ($isDev ? $e->getMessage() : 'Please contact administrator');
+            error_log("Database connection error: " . $e->getMessage());
+            
+            if ($isDev) {
+                throw new \RuntimeException($message);
+            }
         }
     }
 
@@ -265,11 +318,107 @@ class Bootstrap
         $this->initializePaths();
         $this->defineApplicationConstants();
         $this->initializeMakingEnv();
+        $this->defineLegacyConstants(); // Backward compatibility
         $this->initializeSession();
         $this->configurePHP();
         $this->defineCoreFiles();
 
         $this->isInitialized = true;
+    }
+    
+    /**
+     * Define URL constants for comprehensive URL management
+     * Handles both full URLs (with protocol/domain) and URI paths
+     */
+    private function defineLegacyConstants(): void
+    {
+        // Detect protocol (http or https)
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+            || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+            || filter_var($this->config->get('FORCE_HTTPS', false), FILTER_VALIDATE_BOOLEAN);
+        
+        $protocol = $isHttps ? 'https://' : 'http://';
+        
+        // Get host (domain)
+        $host = $_SERVER['HTTP_HOST'] ?? $this->config->get('APP_HOST', 'localhost');
+        
+        // Get base path (for subdirectory installations)
+        $basePath = $this->config->get('APP_BASE_PATH', '');
+        $basePath = trim($basePath, '/');
+        $basePath = $basePath ? '/' . $basePath : '';
+        
+        // Build full URLs
+        $fullBaseUrl = $protocol . $host . $basePath;
+        $fullBaseUrl = rtrim($fullBaseUrl, '/') . '/';
+        
+        // === FULL URLs (with protocol and domain) ===
+        $this->defineIfNotExists('APP_ROOT_URL', $fullBaseUrl);
+        $this->defineIfNotExists('APP_URL', $fullBaseUrl); // Alias
+        $this->defineIfNotExists('APP_BASE_URL', $fullBaseUrl); // Alias
+        $this->defineIfNotExists('APP_STORAGE_URL', $fullBaseUrl . 'Storage/');
+        $this->defineIfNotExists('APP_ADMIN_URL', $fullBaseUrl . 'admin');
+        $this->defineIfNotExists('APP_API_URL', $fullBaseUrl . 'api');
+        $this->defineIfNotExists('APP_ASSETS_URL', $fullBaseUrl . 'Storage/');
+        
+        // === URI Paths (without protocol/domain) ===
+        $uriBase = $basePath ?: '/';
+        $this->defineIfNotExists('APP_ROOT_URI', $uriBase);
+        $this->defineIfNotExists('APP_BASE_URI', $uriBase);
+        $this->defineIfNotExists('APP_STORAGE_URI', $uriBase . 'Storage/');
+        $this->defineIfNotExists('APP_ADMIN_URI', $uriBase . 'admin');
+        $this->defineIfNotExists('APP_API_URI', $uriBase . 'api');
+        
+        // === Protocol and Host (for manual URL building) ===
+        $this->defineIfNotExists('APP_PROTOCOL', $protocol);
+        $this->defineIfNotExists('APP_HOST', $host);
+        $this->defineIfNotExists('APP_BASE_PATH', $basePath);
+        $this->defineIfNotExists('APP_IS_HTTPS', $isHttps);
+        
+        // === Asset URLs (specific resources) ===
+        $this->defineIfNotExists('APP_CSS_URL', $fullBaseUrl . 'Storage/css/');
+        $this->defineIfNotExists('APP_JS_URL', $fullBaseUrl . 'Storage/js/');
+        $this->defineIfNotExists('APP_IMAGES_URL', $fullBaseUrl . 'Storage/images/');
+        $this->defineIfNotExists('APP_FONTS_URL', $fullBaseUrl . 'Storage/fonts/');
+        $this->defineIfNotExists('APP_UPLOADS_URL', $fullBaseUrl . 'Storage/uploads/');
+        
+        // === Current URL Information ===
+        $currentUri = $_SERVER['REQUEST_URI'] ?? '/';
+        $currentUrl = $protocol . $host . $currentUri;
+        $this->defineIfNotExists('CURRENT_URL', $currentUrl);
+        $this->defineIfNotExists('CURRENT_URI', $currentUri);
+        
+        // Legacy SMS compatibility (only if explicitly enabled)
+        $enableLegacy = filter_var($this->config->get('ENABLE_LEGACY_SMS_PATHS', false), FILTER_VALIDATE_BOOLEAN);
+        
+        if (!$enableLegacy) {
+            return;
+        }
+        
+        // === LEGACY SMS PATHS (backward compatibility) ===
+        $docRoot = $_SERVER["DOCUMENT_ROOT"] ?? '';
+        $legacyPath = $this->config->get('LEGACY_SMS_ROOT_PATH', '/SMS');
+        $legacyFullUrl = $protocol . $host . $legacyPath . '/';
+        
+        $this->defineIfNotExists('LEGACY_ROOT', $docRoot . $legacyPath);
+        $this->defineIfNotExists('LEGACY_ROOT_URL', $legacyFullUrl);
+        $this->defineIfNotExists('LEGACY_ROOT_URI', $legacyPath);
+        
+        if (defined('LEGACY_ROOT')) {
+            $this->defineIfNotExists('LEGACY_VIEWS', LEGACY_ROOT . '/views');
+            $this->defineIfNotExists('LEGACY_STORAGE', LEGACY_ROOT . '/storage');
+            $this->defineIfNotExists('LEGACY_STORAGE_URL', $legacyFullUrl . 'storage/');
+        }
+    }
+    
+    /**
+     * Define constant if it doesn't exist
+     */
+    private function defineIfNotExists(string $name, $value): void
+    {
+        if (!defined($name)) {
+            define($name, $value);
+        }
     }
 
     private function preventDirectAccess(): void

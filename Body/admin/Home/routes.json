@@ -1,6 +1,16 @@
 {
   "routes": [
-    { "method": "GET", "path": "/admin", "handler": "admin/Home/AdminHeaderController@index" },
-    { "method": "GET", "path": "/admin/footer", "handler": "admin/Home/AdminFooterController@index" }
+    {
+      "method": "GET",
+      "path": "/admin",
+      "handler": "admin/Home/AdminHeaderController@index",
+      "name": "admin.home"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/footer",
+      "handler": "admin/Home/AdminFooterController@index",
+      "name": "admin.footer"
+    }
   ]
 }

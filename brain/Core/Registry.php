@@ -5,7 +5,10 @@ declare(strict_types=1);
 /**
  * Registry Class
  * 
- * Dependency injection container for the framework
+ * OpenCart/CodeIgniter-style dependency injection container
+ * Provides centralized access to framework services and components
+ * 
+ * @version 2.0.0
  */
 final class Registry
 {
@@ -17,6 +20,13 @@ final class Registry
     private array $data = [];
 
     /**
+     * Lazy-loaded services
+     *
+     * @var array<string, callable>
+     */
+    private array $factories = [];
+
+    /**
      * Singleton instance
      */
     private static ?self $instance = null;
@@ -26,6 +36,7 @@ final class Registry
      */
     private function __construct()
     {
+        $this->registerCoreServices();
     }
 
     /**
@@ -42,14 +53,83 @@ final class Registry
     }
 
     /**
-     * Retrieve an item by key
+     * Register core framework services
+     */
+    private function registerCoreServices(): void
+    {
+        // Register loader service (lazy loaded)
+        $this->factories['load'] = function() {
+            $loaderPath = __DIR__ . '/Loader.php';
+            if (!class_exists('Loader', false) && file_exists($loaderPath)) {
+                require_once $loaderPath;
+            }
+            if (class_exists('Loader', false)) {
+                return new Loader($this);
+            }
+            throw new RuntimeException('Loader class not found');
+        };
+
+        // Register router service (already initialized)
+        if (class_exists('Router', false)) {
+            $this->data['router'] = 'Router';
+        }
+    }
+
+    /**
+     * Retrieve an item by key (OpenCart/CodeIgniter style)
+     * Supports lazy loading of services
      *
      * @param string $key The key to fetch
      * @return mixed|null Returns stored value or null if key not found
      */
     public function get(string $key): mixed
     {
-        return $this->data[$key] ?? null;
+        // Check if already loaded
+        if (isset($this->data[$key])) {
+            return $this->data[$key];
+        }
+
+        // Check if factory exists
+        if (isset($this->factories[$key])) {
+            $this->data[$key] = call_user_func($this->factories[$key]);
+            return $this->data[$key];
+        }
+
+        return null;
+    }
+
+    /**
+     * Magic getter for OpenCart-style access
+     * Allows $registry->db instead of $registry->get('db')
+     *
+     * @param string $key The key to fetch
+     * @return mixed The value or null
+     */
+    public function __get(string $key): mixed
+    {
+        return $this->get($key);
+    }
+
+    /**
+     * Magic setter for OpenCart-style access
+     *
+     * @param string $key The key
+     * @param mixed $value The value
+     */
+    public function __set(string $key, mixed $value): void
+    {
+        $this->set($key, $value);
+    }
+
+    /**
+     * Magic isset for OpenCart-style access
+     *
+     * @param string $key The key to check
+     * @return bool True if exists
+     */
+    public function __isset(string $key): bool
+    {
+        return $this->has($key) || isset($this->factories[$key]);
     }
 
     /**

@@ -1,0 +1,91 @@
+<div class="about-page" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px;">
+    
+    <!-- Hero Section -->
+    <section class="hero" style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; margin-bottom: 40px;">
+        <h1 style="font-size: 3em; margin-bottom: 20px; font-weight: bold;"><?= htmlspecialchars($heading ?? 'About Us') ?></h1>
+        <p style="font-size: 1.3em; max-width: 800px; margin: 0 auto; line-height: 1.6;"><?= htmlspecialchars($content ?? '') ?></p>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 60px;">
+        <?php if (!empty($stats)): ?>
+            <?php foreach ($stats as $stat): ?>
+                <div class="stat-card" style="background: #f8f9fa; padding: 30px; text-align: center; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="font-size: 2.5em; font-weight: bold; color: #667eea; margin-bottom: 10px;">
+                        <?= htmlspecialchars($stat['number'] ?? '') ?>
+                    </div>
+                    <div style="font-size: 1.2em; font-weight: 600; margin-bottom: 8px; color: #333;">
+                        <?= htmlspecialchars($stat['label'] ?? '') ?>
+                    </div>
+                    <div style="font-size: 0.9em; color: #6c757d;">
+                        <?= htmlspecialchars($stat['description'] ?? '') ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </section>
+
+    <!-- Mission & Vision -->
+    <section class="mission-vision" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 60px;">
+        <div class="mission" style="background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h2 style="color: #667eea; font-size: 2em; margin-bottom: 20px; display: flex; align-items: center;">
+                <span style="font-size: 1.5em; margin-right: 10px;">🎯</span> Our Mission
+            </h2>
+            <p style="font-size: 1.1em; line-height: 1.8; color: #333;">
+                <?= htmlspecialchars($mission ?? '') ?>
+            </p>
+        </div>
+        
+        <div class="vision" style="background: #fff; padding: 40px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <h2 style="color: #764ba2; font-size: 2em; margin-bottom: 20px; display: flex; align-items: center;">
+                <span style="font-size: 1.5em; margin-right: 10px;">🌟</span> Our Vision
+            </h2>
+            <p style="font-size: 1.1em; line-height: 1.8; color: #333;">
+                <?= htmlspecialchars($vision ?? '') ?>
+            </p>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <?php if (!empty($team)): ?>
+    <section class="team" style="margin-bottom: 60px;">
+        <h2 style="text-align: center; font-size: 2.5em; margin-bottom: 40px; color: #333;">Meet Our Team</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+            <?php foreach ($team as $member): ?>
+                <div class="team-member" style="background: #fff; padding: 30px; text-align: center; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.3s;">
+                    <div style="font-size: 4em; margin-bottom: 15px;">
+                        <?= $member['avatar'] ?? '👤' ?>
+                    </div>
+                    <h3 style="font-size: 1.5em; margin-bottom: 8px; color: #333;">
+                        <?= htmlspecialchars($member['name'] ?? '') ?>
+                    </h3>
+                    <div style="color: #667eea; font-weight: 600; margin-bottom: 15px;">
+                        <?= htmlspecialchars($member['role'] ?? '') ?>
+                    </div>
+                    <p style="color: #6c757d; line-height: 1.6;">
+                        <?= htmlspecialchars($member['bio'] ?? '') ?>
+                    </p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- CTA Section -->
+    <section class="cta" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 40px; text-align: center; border-radius: 10px; color: white;">
+        <h2 style="font-size: 2.5em; margin-bottom: 20px;">Ready to Get Started?</h2>
+        <p style="font-size: 1.2em; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Join the CyberTirah community and start building amazing applications today!
+        </p>
+        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <a href="<?= function_exists('safeRouteUrl') ? safeRouteUrl('home') : '/' ?>" style="background: white; color: #667eea; padding: 15px 40px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 1.1em;">
+                Get Started
+            </a>
+            <a href="/about/contact" style="background: transparent; color: white; padding: 15px 40px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 1.1em; border: 2px solid white;">
+                Contact Us
+            </a>
+        </div>
+    </section>
+
+</div>
+

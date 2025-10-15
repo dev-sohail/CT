@@ -1,64 +1,171 @@
 <?php
-/**
- * Class File
- *
- * Utility class for file handling operations.
- */
+
+declare(strict_types=1);
+
 class File
 {
-    /**
-     * Check if a file exists.
-     */
     public static function exists(string $path): bool
     {
         return file_exists($path);
     }
 
-    /**
-     * Read file contents.
-     */
-    public static function read(string $path): ?string
+    public static function missing(string $path): bool
+    {
+        return !self::exists($path);
+    }
+
+    public static function get(string $path): ?string
     {
         return self::exists($path) ? file_get_contents($path) : null;
     }
 
-    /**
-     * Write contents to a file.
-     */
-    public static function write(string $path, string $content): bool
+    public static function put(string $path, string $contents, bool $lock = false): int|false
     {
-        return file_put_contents($path, $content) !== false;
+        return file_put_contents($path, $contents, $lock ? LOCK_EX : 0);
     }
 
-    /**
-     * Append contents to a file.
-     */
-    public static function append(string $path, string $content): bool
+    public static function append(string $path, string $data): int|false
     {
-        return file_put_contents($path, $content, FILE_APPEND) !== false;
+        return file_put_contents($path, $data, FILE_APPEND | LOCK_EX);
     }
 
-    /**
-     * Delete a file.
-     */
-    public static function delete(string $path): bool
+    public static function prepend(string $path, string $data): int|false
     {
-        return self::exists($path) ? unlink($path) : false;
+        if (self::exists($path)) {
+            return self::put($path, $data . self::get($path));
+        }
+
+        return self::put($path, $data);
     }
 
-    /**
-     * Get file size in bytes.
-     */
-    public static function size(string $path): ?int
+    public static function delete(string|array $paths): bool
     {
-        return self::exists($path) ? filesize($path) : null;
+        $paths = is_array($paths) ? $paths : func_get_args();
+        $success = true;
+
+        foreach ($paths as $path) {
+            if (!@unlink($path)) {
+                $success = false;
+            }
+        }
+
+        return $success;
     }
 
-    /**
-     * Get the file's last modified time.
-     */
-    public static function lastModified(string $path): ?int
+    public static function move(string $path, string $target): bool
     {
-        return self::exists($path) ? filemtime($path) : null;
+        return rename($path, $target);
+    }
+
+    public static function copy(string $path, string $target): bool
+    {
+        return copy($path, $target);
+    }
+
+    public static function name(string $path): string
+    {
+        return pathinfo($path, PATHINFO_FILENAME);
+    }
+
+    public static function basename(string $path): string
+    {
+        return pathinfo($path, PATHINFO_BASENAME);
+    }
+
+    public static function dirname(string $path): string
+    {
+        return pathinfo($path, PATHINFO_DIRNAME);
+    }
+
+    public static function extension(string $path): string
+    {
+        return pathinfo($path, PATHINFO_EXTENSION);
+    }
+
+    public static function type(string $path): string|false
+    {
+        return filetype($path);
+    }
+
+    public static function mimeType(string $path): string|false
+    {
+        return finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
+    }
+
+    public static function size(string $path): int
+    {
+        return filesize($path);
+    }
+
+    public static function lastModified(string $path): int
+    {
+        return filemtime($path);
+    }
+
+    public static function isDirectory(string $path): bool
+    {
+        return is_dir($path);
+    }
+
+    public static function isFile(string $path): bool
+    {
+        return is_file($path);
+    }
+
+    public static function isReadable(string $path): bool
+    {
+        return is_readable($path);
+    }
+
+    public static function isWritable(string $path): bool
+    {
+        return is_writable($path);
+    }
+
+    public static function makeDirectory(string $path, int $mode = 0755, bool $recursive = false): bool
+    {
+        return mkdir($path, $mode, $recursive);
+    }
+
+    public static function deleteDirectory(string $directory): bool
+    {
+        if (!self::isDirectory($directory)) {
+            return false;
+        }
+
+        $items = new \FilesystemIterator($directory);
+
+        foreach ($items as $item) {
+            if ($item->isDir() && !$item->isLink()) {
+                self::deleteDirectory($item->getPathname());
+            } else {
+                @unlink($item->getPathname());
+            }
+        }
+
+        return @rmdir($directory);
+    }
+
+    public static function files(string $directory): array
+    {
+        $glob = glob($directory . '/*');
+        return $glob === false ? [] : array_filter($glob, 'is_file');
+    }
+
+    public static function allFiles(string $directory): array
+    {
+        $result = [];
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($items as $item) {
+            if ($item->isFile()) {
+                $result[] = $item->getPathname();
+            }
+        }
+
+        return $result;
     }
 }

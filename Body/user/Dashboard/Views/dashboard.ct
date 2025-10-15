@@ -1,0 +1,122 @@
+<div class="user-topbar">
+    <div class="topbar-left">
+        <h2><i class="fas fa-home"></i> Welcome, <?= htmlspecialchars($user['full_name']) ?>!</h2>
+        <p><?= ucfirst($role) ?> Portal Dashboard</p>
+    </div>
+    <div class="topbar-right">
+        <span style="padding:10px 20px;background:#f8f9fa;border-radius:6px;"><i class="fas fa-user-circle"></i> <?= htmlspecialchars($role) ?></span>
+    </div>
+</div>
+
+<div class="user-content">
+    <div class="stats-grid">
+        <?php foreach ($stats as $stat): ?>
+            <div class="stat-card <?= $stat['color'] ?>">
+                <div class="stat-card-icon"><i class="fas <?= $stat['icon'] ?>"></i></div>
+                <div class="stat-card-value"><?= $stat['value'] ?></div>
+                <div class="stat-card-label"><?= $stat['label'] ?></div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:30px;">
+        <div>
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-link"></i> Quick Links</h3></div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:15px;">
+                    <?php foreach ($quickLinks as $link): ?>
+                        <a href="<?= $link['url'] ?>" class="quick-link-card" style="background:linear-gradient(135deg,var(--color-<?= $link['color'] ?>-light),var(--color-<?= $link['color'] ?>));">
+                            <i class="fas <?= $link['icon'] ?>" style="font-size:2em;margin-bottom:10px;"></i>
+                            <span style="font-weight:600;"><?= $link['title'] ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-info-circle"></i> <?= ucfirst($role) ?> Information</h3></div>
+                <p style="line-height:1.8;color:#2c3e50;">
+                    <?php if ($role === 'student'): ?>
+                        As a student, you can access your courses, view assignments, check grades, and manage your academic schedule. Stay on top of your education!
+                    <?php elseif ($role === 'teacher'): ?>
+                        Welcome to your teaching dashboard! Manage your classes, grade students, share materials, and track attendance all in one place.
+                    <?php elseif ($role === 'parent'): ?>
+                        Monitor your children's academic progress, communicate with teachers, stay informed about events, and receive important notifications.
+                    <?php elseif ($role === 'staff'): ?>
+                        Access administrative tools, manage your assigned tasks, view departmental information, and generate reports as needed.
+                    <?php endif; ?>
+                </p>
+            </div>
+        </div>
+        
+        <div>
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-user"></i> Profile</h3></div>
+                <div style="text-align:center;padding:20px 0;">
+                    <div style="width:100px;height:100px;margin:0 auto 15px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:2.5em;color:white;font-weight:bold;">
+                        <?= strtoupper(substr($user['full_name'], 0, 1)) ?>
+                    </div>
+                    <h4 style="margin:10px 0 5px;"><?= htmlspecialchars($user['full_name']) ?></h4>
+                    <p style="color:#7f8c8d;margin:0 0 15px;">@<?= htmlspecialchars($user['username']) ?></p>
+                    <span class="badge badge-<?= $role === 'student' ? 'primary' : ($role === 'teacher' ? 'success' : ($role === 'parent' ? 'info' : 'warning')) ?>" style="font-size:0.9em;padding:6px 15px;">
+                        <?= ucfirst($role) ?>
+                    </span>
+                </div>
+                <hr style="border:none;border-top:1px solid #ecf0f1;margin:20px 0;">
+                <div style="padding:0 10px;">
+                    <p style="margin:8px 0;color:#7f8c8d;"><i class="fas fa-envelope" style="width:20px;"></i> <?= htmlspecialchars($user['email']) ?></p>
+                    <p style="margin:8px 0;color:#7f8c8d;"><i class="fas fa-id-badge" style="width:20px;"></i> ID: <?= $user['id'] ?></p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-history"></i> Recent Activity</h3></div>
+                <?php foreach ($recentActivity as $activity): ?>
+                    <div style="padding:12px 0;border-bottom:1px solid #ecf0f1;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <i class="fas <?= $activity['icon'] ?>" style="color:#7f8c8d;"></i>
+                            <div style="flex:1;">
+                                <p style="margin:0;font-weight:500;"><?= $activity['action'] ?></p>
+                                <small style="color:#7f8c8d;"><?= date('M d, Y H:i', strtotime($activity['timestamp'])) ?></small>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --color-primary-light: #e3f2fd;
+    --color-primary: #3498db;
+    --color-success-light: #e8f5e9;
+    --color-success: #2ecc71;
+    --color-warning-light: #fff3e0;
+    --color-warning: #f39c12;
+    --color-info-light: #e1f5fe;
+    --color-info: #17a2b8;
+    --color-secondary-light: #f5f5f5;
+    --color-secondary: #95a5a6;
+}
+
+.quick-link-card {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:25px 15px;
+    border-radius:10px;
+    color:white;
+    text-decoration:none;
+    transition:all 0.3s;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+.quick-link-card:hover {
+    transform:translateY(-5px);
+    box-shadow:0 6px 20px rgba(0,0,0,0.15);
+}
+</style>
+

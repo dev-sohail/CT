@@ -1,0 +1,58 @@
+<div class="admin-topbar">
+    <div class="topbar-left">
+        <h2><i class="fas fa-file-alt"></i> Page Management</h2>
+        <p>Manage website pages and content</p>
+    </div>
+    <div class="topbar-right">
+        <a href="/admin/pages/create" class="topbar-btn"><i class="fas fa-plus"></i> Create New Page</a>
+    </div>
+</div>
+
+<div class="admin-content">
+    <?php if (!empty($success)): ?><div class="alert alert-success"><i class="fas fa-check-circle"></i> <?= htmlspecialchars($success) ?></div><?php endif; ?>
+    <?php if (!empty($error)): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div><?php endif; ?>
+    
+    <div class="stats-grid">
+        <div class="stat-card primary"><div class="stat-card-icon"><i class="fas fa-file-alt"></i></div><div class="stat-card-value"><?= $stats['total'] ?></div><div class="stat-card-label">Total Pages</div></div>
+        <div class="stat-card success"><div class="stat-card-icon"><i class="fas fa-check-circle"></i></div><div class="stat-card-value"><?= $stats['published'] ?></div><div class="stat-card-label">Published</div></div>
+        <div class="stat-card warning"><div class="stat-card-icon"><i class="fas fa-edit"></i></div><div class="stat-card-value"><?= $stats['draft'] ?></div><div class="stat-card-label">Drafts</div></div>
+    </div>
+    
+    <div class="card">
+        <form method="GET" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;align-items:end;">
+            <div class="form-group" style="margin:0;"><label><i class="fas fa-search"></i> Search</label><input type="text" name="search" class="form-control" placeholder="Title, slug, content..." value="<?= htmlspecialchars($searchQuery) ?>"></div>
+            <div class="form-group" style="margin:0;"><label><i class="fas fa-toggle-on"></i> Status</label><select name="status" class="form-control"><option value="">All Status</option><option value="published" <?= $statusFilter === 'published' ? 'selected' : '' ?>>Published</option><option value="draft" <?= $statusFilter === 'draft' ? 'selected' : '' ?>>Draft</option></select></div>
+            <div><button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filter</button><a href="/admin/pages" class="btn btn-secondary"><i class="fas fa-redo"></i> Reset</a></div>
+        </form>
+    </div>
+    
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-list"></i> All Pages</h3><span style="color:#7f8c8d;"><?= count($pages) ?> pages</span></div>
+        <div class="table-responsive">
+            <table>
+                <thead><tr><th>ID</th><th>Title</th><th>Slug</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+                <tbody>
+                    <?php if (!empty($pages)): foreach ($pages as $page): ?>
+                        <tr>
+                            <td><strong>#<?= $page['page_id'] ?></strong></td>
+                            <td><strong><?= htmlspecialchars($page['title']) ?></strong></td>
+                            <td><code><?= htmlspecialchars($page['slug']) ?></code></td>
+                            <td><?= $page['status'] === 'published' ? '<span class="badge badge-success">Published</span>' : '<span class="badge badge-warning">Draft</span>' ?></td>
+                            <td><?= date('M d, Y', strtotime($page['created_at'])) ?></td>
+                            <td>
+                                <div style="display:flex;gap:5px;flex-wrap:wrap;">
+                                    <a href="/admin/pages/edit?id=<?= $page['page_id'] ?>" class="btn btn-sm btn-primary" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <a href="/admin/pages/toggle?id=<?= $page['page_id'] ?>" class="btn btn-sm btn-warning" title="Toggle Status"><i class="fas fa-toggle-on"></i></a>
+                                    <a href="/admin/pages/delete?id=<?= $page['page_id'] ?>" class="btn btn-sm btn-danger confirm-delete" title="Delete"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; else: ?>
+                        <tr><td colspan="6" style="text-align:center;padding:40px;color:#7f8c8d;"><i class="fas fa-inbox" style="font-size:3em;opacity:0.3;margin-bottom:15px;display:block;"></i>No pages found. Create your first page!</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,354 @@
+---
+description: Registry and Loader patterns for dependency injection
+globs: **/Controller.php,**/Model.php
+---
+
+# Registry and Loader Patterns
+
+## Registry Pattern (OpenCart/CodeIgniter Style)
+
+The Registry provides centralized service management with magic accessors.
+
+### Accessing Services
+
+#### In Controllers
+```php
+class MyController extends Controller
+{
+    public function index(): void
+    {
+        // Database access
+        $users = $this->db->query("SELECT * FROM users")->fetchAll();
+        
+        // Session access
+        $userId = $this->session->get('user_id');
+        $this->session->set('key', 'value');
+        
+        // Cache access
+        $data = $this->cache->get('cache_key');
+        $this->cache->set('cache_key', $data, 3600);
+        
+        // Loader access
+        $this->load->model('public/User/User');
+        $this->load->library('security/Validator');
+        $this->load->view('public/User/index', $data);
+    }
+}
+```
+
+#### In Models
+```php
+class UserModel extends Model
+{
+    public function getAllUsers(): array
+    {
+        // Database is available via $this->db
+        $query = "SELECT * FROM users";
+        return $this->db->query($query)->fetchAll();
+    }
+    
+    public function getCachedUsers(): array
+    {
+        // Cache access
+        if ($cached = $this->cache->get('all_users')) {
+            return $cached;
+        }
+        
+        $users = $this->getAllUsers();
+        $this->cache->set('all_users', $users, 3600);
+        return $users;
+    }
+}
+```
+
+### Available Services
+
+| Service | Access | Description |
+|---------|--------|-------------|
+| Database | `$this->db` | Database connection and queries |
+| Session | `$this->session` | Session management |
+| Cache | `$this->cache` | Caching system |
+| Loader | `$this->load` | Component loader |
+| Router | `$this->router` | Router instance |
+| Request | `$this->request` | HTTP request data |
+| Response | `$this->response` | HTTP response |
+
+### Registering Custom Services
+
+#### In Bootstrap/Index
+```php
+$registry = Registry::getInstance();
+
+// Register as singleton
+$registry->singleton('mailer', function() {
+    return new MailerService();
+});
+
+// Register with factory
+$registry->register('logger', function() {
+    return new Logger();
+});
+
+// Direct registration
+$registry->set('config', $configObject);
+```
+
+#### Accessing Custom Services
+```php
+// In controller
+$this->mailer->send($to, $subject, $message);
+$this->logger->info('User logged in');
+$config = $this->config->get('app.name');
+```
+
+## Loader Pattern (CodeIgniter Style)
+
+The Loader provides convenient methods for loading framework components.
+
+### Loading Models
+
+#### Basic Model Loading
+```php
+// Load model
+$this->load->model('public/Blog/Blog');
+
+// Access model (auto-named with 'model_' prefix and lowercase)
+$posts = $this->model_blog->getAllPosts();
+```
+
+#### Multiple Models
+```php
+$this->load->model('public/Blog/Blog');
+$this->load->model('public/User/User');
+$this->load->model('public/Comment/Comment');
+
+$posts = $this->model_blog->getAllPosts();
+$user = $this->model_user->getById(1);
+$comments = $this->model_comment->getByPost($postId);
+```
+
+#### Model Naming Convention
+```php
+// Load 'public/Blog/Blog' → Access via $this->model_blog
+// Load 'admin/User/User' → Access via $this->model_user
+// Load 'api/Product/Product' → Access via $this->model_product
+```
+
+### Loading Views
+
+#### Single View
+```php
+$this->load->view('public/Blog/index', $data);
+```
+
+#### Multiple Views (Common Pattern)
+```php
+$data = ['title' => 'Blog'];
+
+$this->load->view('public/Common/header', $data);
+$this->load->view('public/Blog/index', $data);
+$this->load->view('public/Common/footer', $data);
+```
+
+#### View Path Format
+```
+"{role}/{module}/{viewname}"
+
+Examples:
+- "public/Home/home"      → Body/public/Home/Views/home.ct
+- "admin/Dashboard/index" → Body/admin/Dashboard/Views/index.ct
+- "public/Common/header"  → Body/public/Common/Views/header.ct
+```
+
+### Loading Libraries
+
+#### Framework Libraries
+```php
+// Load library
+$this->load->library('security/Validator');
+
+// Use library
+if ($this->validator->validate($data, $rules)) {
+    // Valid
+}
+```
+
+#### Custom Parameters
+```php
+// Load with constructor parameters
+$this->load->library('Mailer', [
+    'host' => 'smtp.example.com',
+    'port' => 587
+]);
+
+$this->mailer->send($email);
+```
+
+#### Library Aliasing
+```php
+// Load with custom alias
+$this->load->library('security/Validator', [], 'inputValidator');
+
+// Access via alias
+$this->inputValidator->validate($data);
+```
+
+### Loading Helpers
+
+```php
+// Load helper file
+$this->load->helper('url');
+
+// Helper functions now available globally
+$url = base_url('path');
+$link = anchor('path', 'Link Text');
+```
+
+## File Naming Conventions
+
+### Controller Files
+The framework supports multiple naming patterns:
+- `about.php` (preferred - lowercase)
+- `About.php`
+- `AboutController.php`
+- `aboutController.php`
+
+Class name must be: `AboutController`
+
+### Model Files
+The framework supports:
+- `AboutModel.php` (preferred - PascalCase)
+- `About.php`
+- `about.php`
+- `about_model.php`
+
+Class name must be: `AboutModel` or `About`
+
+### View Files
+Always lowercase with `.ct` extension:
+- `index.ct`
+- `about.ct`
+- `show.ct`
+
+## Dependency Injection
+
+### Constructor Injection (Automatic)
+```php
+class BlogController extends Controller
+{
+    // Registry automatically injected by framework
+    public function __construct($registry)
+    {
+        parent::__construct($registry);
+        // Additional initialization
+    }
+}
+```
+
+### Service Resolution
+```php
+// The framework automatically:
+// 1. Creates Registry instance
+// 2. Registers core services
+// 3. Injects Registry into controllers
+// 4. Provides magic accessors
+
+class MyController extends Controller
+{
+    public function index(): void
+    {
+        // All services available via magic accessors
+        $this->db;      // Database
+        $this->session; // Session
+        $this->load;    // Loader
+    }
+}
+```
+
+## Best Practices
+
+1. **Use magic accessors**: `$this->db` instead of `$this->registry->get('db')`
+2. **Load models early**: Load at top of controller method
+3. **Reuse models**: Load once, use multiple times in same request
+4. **Name models consistently**: Follow role/module/model pattern
+5. **Pass data to views**: Always prepare data array in controller
+6. **Use Loader for components**: Don't require files manually
+7. **Register services once**: In bootstrap/index, not per request
+8. **Lazy load services**: Use factories for expensive operations
+9. **Cache model data**: Use `$this->cache` for frequently accessed data
+10. **Type hint services**: When extending classes, maintain type hints
+
+## Common Patterns
+
+### Controller with Multiple Models
+```php
+class DashboardController extends Controller
+{
+    public function index(): void
+    {
+        // Load multiple models
+        $this->load->model('admin/User/User');
+        $this->load->model('admin/Post/Post');
+        $this->load->model('admin/Comment/Comment');
+        
+        // Get data from each
+        $data = [
+            'users' => $this->model_user->getRecentUsers(),
+            'posts' => $this->model_post->getRecentPosts(),
+            'comments' => $this->model_comment->getPendingComments()
+        ];
+        
+        // Render view
+        $this->load->view('admin/Dashboard/index', $data);
+    }
+}
+```
+
+### Model with Caching
+```php
+class PostModel extends Model
+{
+    public function getAllPosts(): array
+    {
+        $cacheKey = 'all_posts';
+        
+        // Try cache first
+        if ($cached = $this->cache->get($cacheKey)) {
+            return $cached;
+        }
+        
+        // Get from database
+        $posts = $this->db->query("SELECT * FROM posts")->fetchAll();
+        
+        // Cache for 1 hour
+        $this->cache->set($cacheKey, $posts, 3600);
+        
+        return $posts;
+    }
+}
+```
+
+### Service with Session
+```php
+class AuthController extends Controller
+{
+    public function login(): void
+    {
+        // Validate credentials
+        $this->load->model('public/User/User');
+        $user = $this->model_user->authenticate($_POST['email'], $_POST['password']);
+        
+        if ($user) {
+            // Set session
+            $this->session->set('user_id', $user['id']);
+            $this->session->set('role', $user['role']);
+            
+            // Redirect
+            Router::redirectToRoute('dashboard');
+        } else {
+            $this->session->set('error', 'Invalid credentials');
+            Router::redirectToRoute('login');
+        }
+    }
+}
+```

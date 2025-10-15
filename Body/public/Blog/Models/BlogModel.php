@@ -5,236 +5,149 @@ declare(strict_types=1);
 require_once ROOT . '/Brain/Core/Model.php';
 
 /**
- * Public Blog Model
+ * Blog Model
  * 
- * Handles public blog data operations
+ * Handles blog post data
  */
 class BlogModel extends Model
 {
-    protected string $table = 'blogs';
-    protected string $primaryKey = 'id';
-
+    protected string $table = 'blog_posts';
+    private int $perPage = 10;
+    
     /**
-     * Find published blogs with search functionality
+     * Get all published posts
      * 
-     * @param array $conditions Search conditions
-     * @param int $limit Query limit
-     * @param int $offset Query offset
-     * @return array Blogs
+     * @param int $page Current page number
+     * @return array List of posts
      */
-    public function findAll(array $conditions = [], int $limit = 0, int $offset = 0): array
+    public function getAllPosts(int $page = 1): array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE status = 'published'";
-        $params = [];
-        $whereClause = [];
-
-        // Handle search condition
-        if (isset($conditions['search']) && !empty($conditions['search'])) {
-            $whereClause[] = "(title LIKE ? OR content LIKE ? OR excerpt LIKE ?)";
-            $searchTerm = '%' . $conditions['search'] . '%';
-            $params[] = $searchTerm;
-            $params[] = $searchTerm;
-            $params[] = $searchTerm;
-            unset($conditions['search']);
-        }
-
-        // Handle tag condition
-        if (isset($conditions['tag']) && !empty($conditions['tag'])) {
-            $whereClause[] = "tags LIKE ?";
-            $params[] = '%' . $conditions['tag'] . '%';
-            unset($conditions['tag']);
-        }
-
-        // Handle other conditions
-        foreach ($conditions as $field => $value) {
-            if ($field !== 'search' && $field !== 'tag') {
-                $whereClause[] = "{$field} = ?";
-                $params[] = $value;
-            }
-        }
-
-        if (!empty($whereClause)) {
-            $sql .= " AND " . implode(' AND ', $whereClause);
-        }
-
-        $sql .= " ORDER BY created_at DESC";
-
-        if ($limit > 0) {
-            $sql .= " LIMIT {$limit}";
-            if ($offset > 0) {
-                $sql .= " OFFSET {$offset}";
-            }
-        }
-
-        $result = $this->query($sql, $params);
-
-        if (is_object($result) && method_exists($result, 'rows')) {
-            return $result->rows;
-        }
-
-        return [];
+        // For now, return sample data
+        // In production, this would query the database
+        return $this->getSamplePosts();
     }
-
+    
     /**
-     * Count published blogs with search functionality
+     * Get single post by ID
      * 
-     * @param array $conditions Search conditions
-     * @return int Count
+     * @param int $id Post ID
+     * @return array|null Post data
      */
-    public function count(array $conditions = []): int
+    public function getPostById(int $id): ?array
     {
-        $sql = "SELECT COUNT(*) as count FROM {$this->table} WHERE status = 'published'";
-        $params = [];
-        $whereClause = [];
-
-        // Handle search condition
-        if (isset($conditions['search']) && !empty($conditions['search'])) {
-            $whereClause[] = "(title LIKE ? OR content LIKE ? OR excerpt LIKE ?)";
-            $searchTerm = '%' . $conditions['search'] . '%';
-            $params[] = $searchTerm;
-            $params[] = $searchTerm;
-            $params[] = $searchTerm;
-            unset($conditions['search']);
-        }
-
-        // Handle tag condition
-        if (isset($conditions['tag']) && !empty($conditions['tag'])) {
-            $whereClause[] = "tags LIKE ?";
-            $params[] = '%' . $conditions['tag'] . '%';
-            unset($conditions['tag']);
-        }
-
-        // Handle other conditions
-        foreach ($conditions as $field => $value) {
-            if ($field !== 'search' && $field !== 'tag') {
-                $whereClause[] = "{$field} = ?";
-                $params[] = $value;
+        $posts = $this->getSamplePosts();
+        foreach ($posts as $post) {
+            if ($post['id'] === $id) {
+                return $post;
             }
         }
-
-        if (!empty($whereClause)) {
-            $sql .= " AND " . implode(' AND ', $whereClause);
-        }
-
-        $result = $this->query($sql, $params);
-
-        if (is_object($result) && method_exists($result, 'row')) {
-            return (int) $result->row['count'];
-        }
-
-        return 0;
-    }
-
-    /**
-     * Find blog by slug
-     * 
-     * @param string $slug Blog slug
-     * @return array|null Blog data or null
-     */
-    public function findBySlug(string $slug): ?array
-    {
-        $sql = "SELECT * FROM {$this->table} WHERE slug = ? AND status = 'published'";
-        $result = $this->query($sql, [$slug]);
-
-        if (is_object($result) && method_exists($result, 'row')) {
-            return $result->row;
-        }
-
         return null;
     }
-
+    
     /**
-     * Find related blogs
+     * Get posts by category
      * 
-     * @param int $blogId Current blog ID
-     * @param int $limit Number of related blogs
-     * @return array Related blogs
+     * @param string $category Category slug
+     * @return array List of posts
      */
-    public function findRelated(int $blogId, int $limit = 5): array
+    public function getPostsByCategory(string $category): array
     {
-        // Get current blog tags
-        $blog = $this->findById($blogId);
-        if (!$blog || empty($blog['tags'])) {
-            return [];
-        }
-
-        $tags = explode(',', $blog['tags']);
-        $tagConditions = [];
-        $params = [];
-
-        foreach ($tags as $tag) {
-            $tagConditions[] = "tags LIKE ?";
-            $params[] = '%' . trim($tag) . '%';
-        }
-
-        $sql = "SELECT * FROM {$this->table} 
-                WHERE id != ? AND status = 'published' AND (" . implode(' OR ', $tagConditions) . ")
-                ORDER BY created_at DESC LIMIT {$limit}";
-
-        array_unshift($params, $blogId);
-
-        $result = $this->query($sql, $params);
-
-        if (is_object($result) && method_exists($result, 'rows')) {
-            return $result->rows;
-        }
-
-        return [];
+        $allPosts = $this->getSamplePosts();
+        return array_filter($allPosts, function($post) use ($category) {
+            return $post['category'] === $category;
+        });
     }
-
+    
     /**
-     * Find published blogs
+     * Get related posts
      * 
-     * @param int $limit Query limit
-     * @param int $offset Query offset
-     * @return array Published blogs
+     * @param int $currentId Current post ID
+     * @param int $limit Number of posts to return
+     * @return array List of related posts
      */
-    public function findPublished(int $limit = 0, int $offset = 0): array
+    public function getRelatedPosts(int $currentId, int $limit = 3): array
     {
-        return $this->findAll(['status' => 'published'], $limit, $offset);
+        $posts = $this->getSamplePosts();
+        $related = array_filter($posts, function($post) use ($currentId) {
+            return $post['id'] !== $currentId;
+        });
+        return array_slice($related, 0, $limit);
     }
-
+    
     /**
-     * Get recent blogs
+     * Get total pages for pagination
      * 
-     * @param int $limit Number of recent blogs
-     * @return array Recent blogs
+     * @return int Total pages
      */
-    public function getRecent(int $limit = 5): array
+    public function getTotalPages(): int
     {
-        return $this->findPublished($limit);
+        return ceil(count($this->getSamplePosts()) / $this->perPage);
     }
-
+    
     /**
-     * Get popular blogs (by view count if available)
+     * Get sample blog posts (for demonstration)
      * 
-     * @param int $limit Number of popular blogs
-     * @return array Popular blogs
+     * @return array Sample posts
      */
-    public function getPopular(int $limit = 5): array
+    private function getSamplePosts(): array
     {
-        $sql = "SELECT * FROM {$this->table} 
-                WHERE status = 'published' 
-                ORDER BY view_count DESC, created_at DESC 
-                LIMIT {$limit}";
-
-        $result = $this->query($sql);
-
-        if (is_object($result) && method_exists($result, 'rows')) {
-            return $result->rows;
-        }
-
-        return [];
-    }
-
-    /**
-     * Increment view count
-     * 
-     * @param int $id Blog ID
-     */
-    public function incrementViewCount(int $id): void
-    {
-        $sql = "UPDATE {$this->table} SET view_count = view_count + 1 WHERE id = ?";
-        $this->query($sql, [$id]);
+        return [
+            [
+                'id' => 1,
+                'title' => 'Getting Started with CyberTirah Framework',
+                'slug' => 'getting-started-cybertirah',
+                'excerpt' => 'Learn how to set up and start building applications with CyberTirah Framework. This guide covers installation, configuration, and your first module.',
+                'content' => 'CyberTirah Framework is a modern PHP framework that combines the best patterns from OpenCart and CodeIgniter. In this article, we\'ll walk through the basics of getting started...',
+                'category' => 'tutorials',
+                'author' => 'CyberTirah Team',
+                'published_at' => '2025-01-10',
+                'image' => '🚀'
+            ],
+            [
+                'id' => 2,
+                'title' => 'Understanding the Registry Pattern',
+                'slug' => 'understanding-registry-pattern',
+                'excerpt' => 'Deep dive into the Registry pattern and how CyberTirah implements OpenCart-style dependency injection.',
+                'content' => 'The Registry pattern is at the heart of CyberTirah Framework. It provides centralized service management...',
+                'category' => 'architecture',
+                'author' => 'CyberTirah Team',
+                'published_at' => '2025-01-08',
+                'image' => '🔧'
+            ],
+            [
+                'id' => 3,
+                'title' => 'Building RESTful APIs',
+                'slug' => 'building-restful-apis',
+                'excerpt' => 'Learn how to create powerful RESTful APIs using CyberTirah\'s routing system and JSON responses.',
+                'content' => 'APIs are crucial for modern web applications. CyberTirah makes it easy to build robust APIs...',
+                'category' => 'tutorials',
+                'author' => 'CyberTirah Team',
+                'published_at' => '2025-01-05',
+                'image' => '🌐'
+            ],
+            [
+                'id' => 4,
+                'title' => 'Performance Optimization Tips',
+                'slug' => 'performance-optimization',
+                'excerpt' => 'Discover how to optimize your CyberTirah applications for maximum performance with caching and lazy loading.',
+                'content' => 'Performance is critical for user experience. Here are the best practices for optimizing your applications...',
+                'category' => 'performance',
+                'author' => 'CyberTirah Team',
+                'published_at' => '2025-01-03',
+                'image' => '⚡'
+            ],
+            [
+                'id' => 5,
+                'title' => 'Security Best Practices',
+                'slug' => 'security-best-practices',
+                'excerpt' => 'Essential security practices every CyberTirah developer should follow to build secure applications.',
+                'content' => 'Security is not optional. Learn about XSS prevention, CSRF protection, and input validation...',
+                'category' => 'security',
+                'author' => 'CyberTirah Team',
+                'published_at' => '2025-01-01',
+                'image' => '🛡️'
+            ]
+        ];
     }
 }
+

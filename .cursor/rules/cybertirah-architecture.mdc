@@ -1,0 +1,76 @@
+---
+alwaysApply: true
+description: CyberTirah Framework architecture and core patterns
+---
+
+# CyberTirah Framework Architecture
+
+## Core Structure
+
+The framework follows a **"Body-Brain"** architecture:
+
+- **Brain/** - Core framework classes and utilities
+  - [Brain/Core/Router.php](mdc:Brain/Core/Router.php) - Enhanced routing with caching, named routes, groups, middleware
+  - [Brain/Core/Registry.php](mdc:Brain/Core/Registry.php) - OpenCart/CodeIgniter-style dependency injection
+  - [Brain/Core/Loader.php](mdc:Brain/Core/Loader.php) - CodeIgniter-style component loader
+  - [Brain/Core/Controller.php](mdc:Brain/Core/Controller.php) - Base controller with magic accessors
+  - [Brain/Core/Model.php](mdc:Brain/Core/Model.php) - Base model with registry integration
+  - [Brain/Classes/](mdc:Brain/Classes/) - Framework utility classes
+
+- **Body/** - Application modules (MVC structure)
+  - [Body/public/](mdc:Body/public/) - Public-facing modules
+  - [Body/admin/](mdc:Body/admin/) - Admin panel modules
+  - [Body/api/](mdc:Body/api/) - API endpoints
+  - [Body/ai/](mdc:Body/ai/) - AI-related modules
+
+- **Index/** - Entry point and routing
+  - [Index/index.php](mdc:Index/index.php) - Front controller with route loading and caching
+
+## Key Patterns
+
+### 1. OpenCart/CodeIgniter Style
+- Use Registry for dependency injection
+- Magic accessors: `$this->db`, `$this->session`, `$this->load`
+- Loader for components: `$this->load->model()`, `$this->load->library()`, `$this->load->view()`
+
+### 2. Named Routes
+```php
+// Define in routes.json
+{"path": "/blog/{id}", "handler": "...", "name": "blog.show"}
+
+// Use in code
+$url = Router::url('blog.show', ['id' => 123]);
+Router::redirectToRoute('blog.show', ['id' => 123]);
+```
+
+### 3. Module Structure
+```
+ModuleName/
+├── routes.json          # Route definitions
+├── Controllers/         # Controller classes (lowercase filename: about.php)
+│   └── about.php       # Class: AboutController
+├── Models/             # Model classes (PascalCase: AboutModel.php)
+│   └── AboutModel.php  # Class: AboutModel
+└── Views/              # View templates (.ct files)
+    └── about.ct        # View file
+```
+
+### 4. Route Caching
+- Automatic in production (when APP_ENV != 'development')
+- Routes cached in [Storage/cache/routes.php](mdc:Storage/cache/routes.php)
+- Clear cache by deleting the file
+
+## Best Practices
+
+1. **Controllers**: Use lowercase filenames (e.g., `about.php`), PascalCase class names (e.g., `AboutController`)
+2. **Models**: Use PascalCase filenames (e.g., `AboutModel.php`), PascalCase class names
+3. **Views**: Use lowercase filenames with `.ct` extension
+4. **Routes**: Always define `name` for routes to enable URL generation
+5. **Services**: Access via Registry magic accessors (`$this->db`, `$this->session`)
+
+## File Naming Flexibility
+
+The framework supports multiple naming conventions:
+- Controllers: `about.php`, `About.php`, `AboutController.php`, `aboutController.php`
+- Models: `About.php`, `AboutModel.php`, `about.php`, `about_model.php`
+- Both uppercase/lowercase directories: `Controllers/` or `controllers/`, `Models/` or `models/`

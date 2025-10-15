@@ -1,0 +1,98 @@
+<div class="contact-page" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px;">
+    
+    <!-- Page Header -->
+    <section class="page-header" style="text-align: center; padding: 40px 20px; margin-bottom: 40px;">
+        <h1 style="font-size: 3em; margin-bottom: 15px; color: #333;"><?= htmlspecialchars($heading ?? 'Contact Us') ?></h1>
+        <p style="font-size: 1.2em; color: #6c757d; max-width: 700px; margin: 0 auto;">
+            We'd love to hear from you! Reach out to us using any of the methods below.
+        </p>
+    </section>
+
+    <!-- Contact Information -->
+    <section class="contact-info" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 60px;">
+        
+        <!-- Email -->
+        <div class="contact-card" style="background: #fff; padding: 40px; text-align: center; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="font-size: 3em; margin-bottom: 20px;">📧</div>
+            <h3 style="font-size: 1.5em; margin-bottom: 15px; color: #333;">Email Us</h3>
+            <a href="mailto:<?= htmlspecialchars($contact['email'] ?? 'info@cybertirah.com') ?>" style="color: #667eea; text-decoration: none; font-size: 1.1em;">
+                <?= htmlspecialchars($contact['email'] ?? 'info@cybertirah.com') ?>
+            </a>
+            <p style="color: #6c757d; margin-top: 15px; line-height: 1.6;">
+                Send us an email anytime. We'll respond as quickly as possible!
+            </p>
+        </div>
+
+        <!-- Phone -->
+        <div class="contact-card" style="background: #fff; padding: 40px; text-align: center; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="font-size: 3em; margin-bottom: 20px;">📞</div>
+            <h3 style="font-size: 1.5em; margin-bottom: 15px; color: #333;">Call Us</h3>
+            <a href="tel:<?= str_replace([' ', '(', ')', '-'], '', $contact['phone'] ?? '+15551234567') ?>" style="color: #667eea; text-decoration: none; font-size: 1.1em;">
+                <?= htmlspecialchars($contact['phone'] ?? '+1 (555) 123-4567') ?>
+            </a>
+            <p style="color: #6c757d; margin-top: 15px; line-height: 1.6;">
+                Monday - Friday: 9am - 5pm EST
+            </p>
+        </div>
+
+        <!-- Address -->
+        <div class="contact-card" style="background: #fff; padding: 40px; text-align: center; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="font-size: 3em; margin-bottom: 20px;">📍</div>
+            <h3 style="font-size: 1.5em; margin-bottom: 15px; color: #333;">Visit Us</h3>
+            <p style="color: #667eea; font-size: 1.1em; margin-bottom: 15px;">
+                <?= htmlspecialchars($contact['address'] ?? '123 Framework Street') ?>
+            </p>
+            <p style="color: #6c757d; line-height: 1.6;">
+                Come visit our office during business hours
+            </p>
+        </div>
+
+    </section>
+
+    <!-- Social Media / Additional -->
+    <section class="social-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 40px; text-align: center; border-radius: 15px; color: white; margin-bottom: 40px;">
+        <h2 style="font-size: 2.5em; margin-bottom: 20px;">Connect With Us</h2>
+        <p style="font-size: 1.2em; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            Follow us on social media and stay updated with the latest news and updates!
+        </p>
+        <div style="display: flex; gap: 20px; justify-content: center; font-size: 2em;">
+            <a href="#" style="color: white; text-decoration: none; transition: transform 0.3s;">🐦</a>
+            <a href="#" style="color: white; text-decoration: none; transition: transform 0.3s;">💼</a>
+            <a href="#" style="color: white; text-decoration: none; transition: transform 0.3s;">📘</a>
+            <a href="#" style="color: white; text-decoration: none; transition: transform 0.3s;">🐙</a>
+        </div>
+    </section>
+
+    <!-- Contact Form (Optional) -->
+    <section class="contact-form-section" style="background: #fff; padding: 60px 40px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <h2 style="text-align: center; font-size: 2.5em; margin-bottom: 40px; color: #333;">Send Us a Message</h2>
+        
+        <form method="POST" action="/about/contact" style="max-width: 600px; margin: 0 auto;">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 600;">Name</label>
+                <input type="text" name="name" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 5px; font-size: 1em;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 600;">Email</label>
+                <input type="email" name="email" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 5px; font-size: 1em;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 600;">Subject</label>
+                <input type="text" name="subject" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 5px; font-size: 1em;">
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 600;">Message</label>
+                <textarea name="message" rows="6" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 5px; font-size: 1em; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border: none; border-radius: 5px; font-size: 1.1em; font-weight: bold; cursor: pointer;">
+                Send Message
+            </button>
+        </form>
+    </section>
+
+</div>
+

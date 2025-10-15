@@ -1,0 +1,262 @@
+---
+description: CyberTirah Framework routing system usage and patterns
+globs: **/routes.json,**/*Controller.php
+---
+
+# Routing System Guide
+
+## Route Definition
+
+Routes are defined in `routes.json` files within each module at [Body/{role}/{module}/routes.json](mdc:Body).
+
+### Basic Route Structure
+```json
+{
+  "routes": [
+    {
+      "method": "GET|POST|PUT|DELETE|PATCH",
+      "path": "/path",
+      "handler": "role/Module/Controller@method",
+      "name": "route.name",
+      "middleware": ["optional", "middleware"]
+    }
+  ]
+}
+```
+
+### Handler Format
+```
+"handler": "{role}/{Module}/{Controller}@{method}"
+
+Examples:
+- "public/Home/Home@index"
+- "admin/Dashboard/Dashboard@show"
+- "api/User/User@create"
+```
+
+## Route Parameters
+
+### Dynamic Parameters
+```json
+{
+  "path": "/blog/{id}",
+  "path": "/blog/{id:\\d+}",
+  "path": "/user/{username:[a-z0-9_]+}",
+  "path": "/post/{year:\\d{4}}/{month:\\d{2}}/{slug}"
+}
+```
+
+### Accessing Parameters
+```php
+public function show(): void
+{
+    $id = $_GET['id'] ?? null;
+    $username = $_GET['username'] ?? null;
+    
+    // Use the parameters
+    $this->load->model('public/Blog/Blog');
+    $post = $this->model_blog->getById((int)$id);
+}
+```
+
+## Named Routes
+
+### Definition
+```json
+{
+  "path": "/blog/{id:\\d+}",
+  "handler": "public/Blog/Blog@show",
+  "name": "blog.show"
+}
+```
+
+### URL Generation
+```php
+// In controllers
+$url = Router::url('blog.show', ['id' => 123]);
+// Returns: /blog/123
+
+// In views
+<a href="<?= Router::url('blog.show', ['id' => $post['id']]) ?>">Read More</a>
+
+// With query parameters
+$url = Router::url('blog.index', [], ['page' => 2, 'sort' => 'date']);
+// Returns: /blog?page=2&sort=date
+```
+
+### Redirects
+```php
+// Redirect to named route
+Router::redirectToRoute('blog.show', ['id' => 123]);
+
+// Regular redirect
+Router::redirect('/blog');
+```
+
+## Route Groups
+
+### Group Definition
+```php
+Router::group(['prefix' => '/admin', 'middleware' => 'auth'], function() {
+    Router::get('/dashboard', 'admin/Dashboard@index');
+    Router::get('/users', 'admin/User@index');
+});
+```
+
+### Nested Groups
+```php
+Router::group(['prefix' => '/api'], function() {
+    Router::group(['prefix' => '/v1', 'middleware' => 'api'], function() {
+        Router::get('/users', 'api/User@index');
+        Router::post('/users', 'api/User@create');
+    });
+});
+```
+
+## Middleware
+
+### Route-Specific Middleware
+```json
+{
+  "path": "/admin/dashboard",
+  "handler": "admin/Dashboard@index",
+  "middleware": ["auth", "admin"]
+}
+```
+
+### Global Middleware
+```php
+// In Index/index.php
+Router::middleware(['csrf', 'session']);
+```
+
+### Middleware Class
+```php
+<?php
+
+class AuthMiddleware
+{
+    public function handle(): bool
+    {
+        $registry = Registry::getInstance();
+        $session = $registry->get('session');
+        
+        if (!$session->has('user_id')) {
+            Router::redirectToRoute('login');
+            return false;
+        }
+        
+        return true;
+    }
+}
+```
+
+## Route Methods
+
+### HTTP Method Shortcuts
+```php
+Router::get('/path', 'Controller@method');
+Router::post('/path', 'Controller@method');
+Router::put('/path', 'Controller@method');
+Router::delete('/path', 'Controller@method');
+Router::patch('/path', 'Controller@method');
+```
+
+### Any Method
+```php
+Router::any('/path', 'Controller@method');
+```
+
+### Multiple Methods
+```php
+Router::match(['GET', 'POST'], '/path', 'Controller@method');
+```
+
+## Route Caching
+
+### Enable Caching
+```php
+// In Index/index.php
+Router::enableCache();
+Router::setCacheFile(ROOT . '/Storage/cache/routes.php');
+```
+
+### Automatic Caching
+Caching is automatic in production (when `APP_ENV` != 'development').
+
+### Clear Cache
+```php
+Router::clearCache();
+// Or manually delete: Storage/cache/routes.php
+```
+
+### Save Cache
+```php
+// After loading routes
+Router::saveCache();
+```
+
+## Route Information
+
+### Get Current Route
+```php
+$currentRoute = Router::getCurrentRoute();
+```
+
+### Check Route Exists
+```php
+if (Router::hasRoute('blog.show')) {
+    // Route exists
+}
+```
+
+### Get All Named Routes
+```php
+$routes = Router::getNamedRoutes();
+```
+
+### Route Statistics
+```php
+$stats = Router::getStats();
+// Returns: ['total' => 15, 'named' => 12, 'cached' => true]
+```
+
+## Common Patterns
+
+### Resource Routes
+```json
+{
+  "routes": [
+    {"method": "GET", "path": "/posts", "handler": "Blog@index", "name": "posts.index"},
+    {"method": "GET", "path": "/posts/create", "handler": "Blog@create", "name": "posts.create"},
+    {"method": "POST", "path": "/posts", "handler": "Blog@store", "name": "posts.store"},
+    {"method": "GET", "path": "/posts/{id}", "handler": "Blog@show", "name": "posts.show"},
+    {"method": "GET", "path": "/posts/{id}/edit", "handler": "Blog@edit", "name": "posts.edit"},
+    {"method": "PUT", "path": "/posts/{id}", "handler": "Blog@update", "name": "posts.update"},
+    {"method": "DELETE", "path": "/posts/{id}", "handler": "Blog@destroy", "name": "posts.destroy"}
+  ]
+}
+```
+
+### API Routes
+```json
+{
+  "routes": [
+    {"method": "GET", "path": "/api/users", "handler": "api/User@index", "name": "api.users.index"},
+    {"method": "GET", "path": "/api/users/{id}", "handler": "api/User@show", "name": "api.users.show"},
+    {"method": "POST", "path": "/api/users", "handler": "api/User@store", "name": "api.users.store"},
+    {"method": "PUT", "path": "/api/users/{id}", "handler": "api/User@update", "name": "api.users.update"},
+    {"method": "DELETE", "path": "/api/users/{id}", "handler": "api/User@destroy", "name": "api.users.destroy"}
+  ]
+}
+```
+
+## Best Practices
+
+1. **Always use named routes** for easier URL management
+2. **Use route parameters with regex** for validation
+3. **Group related routes** with common prefixes
+4. **Apply middleware** for authentication and authorization
+5. **Cache routes** in production for performance
+6. **Use RESTful naming** for consistent API design
+7. **Document complex routes** in comments

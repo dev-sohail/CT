@@ -1,0 +1,82 @@
+<div class="auth-page" style="min-height:80vh;display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+    
+    <div class="auth-container" style="max-width:500px;width:100%;background:white;border-radius:15px;box-shadow:0 10px 40px rgba(0,0,0,0.1);padding:40px;">
+        
+        <!-- Logo/Header -->
+        <div style="text-align:center;margin-bottom:30px;">
+            <h1 style="font-size:2.5em;margin-bottom:10px;color:#667eea;">🔑</h1>
+            <h2 style="font-size:1.8em;margin-bottom:10px;color:#333;">Forgot Password</h2>
+            <p style="color:#6c757d;">Reset your account password</p>
+        </div>
+
+        <!-- Error/Success Messages -->
+        <?php if (!empty($error)): ?>
+            <div style="padding:15px;background:#f8d7da;border:1px solid #f5c2c7;border-radius:8px;margin-bottom:20px;color:#842029;">
+                <strong>❌ Error:</strong> <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($success)): ?>
+            <div style="padding:15px;background:#d1e7dd;border:1px solid #badbcc;border-radius:8px;margin-bottom:20px;color:#0f5132;">
+                <strong>✅ Success:</strong> <?= htmlspecialchars($success) ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Instructions -->
+        <div style="padding:15px;background:#f8f9fa;border-radius:8px;margin-bottom:25px;">
+            <p style="color:#6c757d;font-size:0.95em;line-height:1.6;margin:0;">
+                Enter your email address and select your role. We'll send you a temporary password to access your account.
+            </p>
+        </div>
+
+        <!-- Forgot Password Form -->
+        <form method="post" action="<?= function_exists('safeRouteUrl') ? safeRouteUrl('auth.forgot') : '/forgot-password' ?>">
+            
+            <div style="margin-bottom:20px;">
+                <label for="email" style="display:block;margin-bottom:8px;font-weight:600;color:#333;">
+                    Email Address: <span style="color:#dc3545;">*</span>
+                </label>
+                <input type="email" id="email" name="email" required 
+                       style="width:100%;padding:12px;border:2px solid #e9ecef;border-radius:8px;font-size:1em;transition:border-color 0.3s;"
+                       onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e9ecef'"
+                       placeholder="your.email@example.com">
+            </div>
+            
+            <div style="margin-bottom:25px;">
+                <label for="role" style="display:block;margin-bottom:8px;font-weight:600;color:#333;">
+                    Account Role: <span style="color:#dc3545;">*</span>
+                </label>
+                <select id="role" name="role" required 
+                        style="width:100%;padding:12px;border:2px solid #e9ecef;border-radius:8px;font-size:1em;transition:border-color 0.3s;cursor:pointer;"
+                        onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e9ecef'">
+                    <option value="">Select your role...</option>
+                    <option value="student">👨‍🎓 Student</option>
+                    <option value="teacher">👨‍🏫 Teacher</option>
+                    <option value="parent">👪 Parent</option>
+                    <option value="staff">👔 Staff</option>
+                    <option value="admin">⚙️ Admin</option>
+                </select>
+            </div>
+            
+            <button type="submit" 
+                    style="width:100%;padding:15px;border:none;border-radius:8px;background:#667eea;color:white;font-size:1.1em;font-weight:600;cursor:pointer;transition:all 0.3s;margin-bottom:15px;"
+                    onmouseover="this.style.background='#5568d3'" onmouseout="this.style.background='#667eea'">
+                    🔑 Reset Password
+            </button>
+        </form>
+
+        <!-- Back to Login -->
+        <div style="text-align:center;margin-top:30px;padding-top:20px;border-top:1px solid #e9ecef;">
+            <p style="color:#6c757d;">
+                Remember your password? 
+                <a href="<?= function_exists('safeRouteUrl') ? safeRouteUrl('auth.login') : '/login' ?>" style="color:#667eea;font-weight:600;transition:color 0.3s;"
+                   onmouseover="this.style.color='#5568d3'" onmouseout="this.style.color='#667eea'">
+                    Login here
+                </a>
+            </p>
+        </div>
+
+    </div>
+
+</div>
+

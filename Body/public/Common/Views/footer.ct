@@ -1,3 +1,293 @@
-<div style="padding:16px;background:#333;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-    <p><?= htmlspecialchars($title ?? 'Home - Footer') ?></p>
+<?php
+/**
+ * CyberTirah Framework - Footer
+ * 
+ * Common footer for all public pages
+ */
+
+// Get current year
+$currentYear = date('Y');
+
+// Framework version
+$frameworkVersion = '2.0.0';
+
+// Footer data (can be extended to load from database)
+$footerData = [
+    'company_name' => 'CyberTirah',
+    'description' => 'A modern, powerful PHP framework inspired by OpenCart and CodeIgniter patterns. Built with PHP 8.3+, it provides developers with familiar patterns, high performance, and comprehensive features.',
+    'social' => [
+        'facebook' => 'cybertirah',
+        'linkedin' => 'cybertirah',
+        'youtube' => 'cybertirah',
+        'github' => 'cybertirah'
+    ]
+];
+
+// Check if user is logged in
+$isLoggedIn = isset($_SESSION['user_id']) || isset($_SESSION['logged_in']);
+$userRole = $_SESSION['role'] ?? null;
+?>
+
+<footer id="footer" style="background:#2d3748;color:#e2e8f0;padding:3rem 0;margin-top:3rem;">
+    <div style="max-width:1200px;margin:0 auto;padding:0 20px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;margin-bottom:2rem;">
+            
+            <!-- Company Info & Logo -->
+            <div>
+                <div style="margin-bottom:1rem;">
+                    <h3 style="font-size:1.5rem;font-weight:bold;color:#667eea;margin-bottom:0.5rem;">
+                        <?= htmlspecialchars($footerData['company_name']) ?>
+                    </h3>
+                    <p style="font-size:0.875rem;color:#cbd5e0;">Framework</p>
+                </div>
+                <p style="font-size:0.875rem;line-height:1.6;margin-bottom:1rem;color:#a0aec0;">
+                    <?= htmlspecialchars($footerData['description']) ?>
+                </p>
+                <p style="font-size:0.75rem;color:#718096;">
+                    &copy; <?= $currentYear ?> <?= htmlspecialchars($footerData['company_name']) ?>. All rights reserved.
+                </p>
+                <small style="display:block;margin-top:0.5rem;font-size:0.75rem;color:#4a5568;">
+                    Version: <?= htmlspecialchars($frameworkVersion) ?>
+                </small>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h3 style="font-weight:bold;text-transform:uppercase;margin-bottom:1rem;font-size:0.875rem;color:#e2e8f0;">
+                    Quick Links
+                </h3>
+                <ul style="list-style:none;margin:0;padding:0;">
+                    <li style="margin-bottom:0.5rem;">
+                        <a href="<?= function_exists('safeRouteUrl') ? safeRouteUrl('home') : '/' ?>" 
+                           style="color:#cbd5e0;text-decoration:none;font-size:0.875rem;transition:color 0.3s;"
+                           onmouseover="this.style.color='#667eea'"
+                           onmouseout="this.style.color='#cbd5e0'">
+                            Home
+                        </a>
+                    </li>
+                    <li style="margin-bottom:0.5rem;">
+                        <a href="<?= function_exists('safeRouteUrl') ? safeRouteUrl('about') : '/about' ?>" 
+                           style="color:#cbd5e0;text-decoration:none;font-size:0.875rem;transition:color 0.3s;"
+                           onmouseover="this.style.color='#667eea'"
+                           onmouseout="this.style.color='#cbd5e0'">
+                            About Us
+                        </a>
+                    </li>
+                    <li style="margin-bottom:0.5rem;">
+                        <a href="/about/team" 
+                           style="color:#cbd5e0;text-decoration:none;font-size:0.875rem;transition:color 0.3s;"
+                           onmouseover="this.style.color='#667eea'"
+                           onmouseout="this.style.color='#cbd5e0'">
+                            Our Team
+                        </a>
+                    </li>
+                    <li style="margin-bottom:0.5rem;">
+                        <a href="/about/contact" 
+                           style="color:#cbd5e0;text-decoration:none;font-size:0.875rem;transition:color 0.3s;"
+                           onmouseover="this.style.color='#667eea'"
+                           onmouseout="this.style.color='#cbd5e0'">
+                            Contact Us
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Resources -->
+            <div>
+                <h3 style="font-weight:bold;text-transform:uppercase;margin-bottom:1rem;font-size:0.875rem;color:#e2e8f0;">
+                    Resources
+                </h3>
+                <ul style="list-style:none;margin:0;padding:0;">
+                    <li style="margin-bottom:0.5rem;">
+                        <a href="/docs" 
+                           style="color:#cbd5e0;text-decoration:none;font-size:0.875rem;transition:color 0.3s;"
+                           onmouseover="this.style.color='#667eea'"
+                           onmouseout="this.style.color='#cbd5e0'">
+                            Documentation
+                        </a>
+                    </li>
+                    <li style="margin-bottom:0.5rem;">
+                        <a href="/api" 
+                           style="color:#cbd5e0;text-decoration:none;font-size:0.875rem;transition:color 0.3s;"
+                           onmouseover="this.style.color='#667eea'"
+                           onmouseout="this.style.color='#cbd5e0'">
+                            API Reference
+                        </a>
+                    </li>
+                    <li style="margin-bottom:0.5rem;">
+                        <a href="/privacy-policy" 
+                           style="color:#cbd5e0;text-decoration:none;font-size:0.875rem;transition:color 0.3s;"
+                           onmouseover="this.style.color='#667eea'"
+                           onmouseout="this.style.color='#cbd5e0'">
+                            Privacy Policy
+                        </a>
+                    </li>
+                    <li style="margin-bottom:0.5rem;">
+                        <a href="/terms-of-service" 
+                           style="color:#cbd5e0;text-decoration:none;font-size:0.875rem;transition:color 0.3s;"
+                           onmouseover="this.style.color='#667eea'"
+                           onmouseout="this.style.color='#cbd5e0'">
+                            Terms of Service
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Connect & Portals -->
+            <div>
+                <h3 style="font-weight:bold;text-transform:uppercase;margin-bottom:1rem;font-size:0.875rem;color:#e2e8f0;">
+                    Connect
+                </h3>
+                
+                <!-- Social Icons -->
+                <div style="display:flex;gap:1rem;margin-bottom:1.5rem;">
+                    <a href="https://www.facebook.com/<?= htmlspecialchars($footerData['social']['facebook']) ?>" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       style="color:#cbd5e0;font-size:1.5rem;transition:color 0.3s;"
+                       onmouseover="this.style.color='#1877f2'"
+                       onmouseout="this.style.color='#cbd5e0'"
+                       title="Facebook">
+                        <i class="fa-brands fa-facebook"></i>
+                    </a>
+                    <a href="https://pk.linkedin.com/in/<?= htmlspecialchars($footerData['social']['linkedin']) ?>" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       style="color:#cbd5e0;font-size:1.5rem;transition:color 0.3s;"
+                       onmouseover="this.style.color='#0077b5'"
+                       onmouseout="this.style.color='#cbd5e0'"
+                       title="LinkedIn">
+                        <i class="fa-brands fa-linkedin"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@<?= htmlspecialchars($footerData['social']['youtube']) ?>" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       style="color:#cbd5e0;font-size:1.5rem;transition:color 0.3s;"
+                       onmouseover="this.style.color='#ff0000'"
+                       onmouseout="this.style.color='#cbd5e0'"
+                       title="YouTube">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+                    <a href="https://github.com/<?= htmlspecialchars($footerData['social']['github']) ?>" 
+                       target="_blank" 
+                       rel="noopener noreferrer"
+                       style="color:#cbd5e0;font-size:1.5rem;transition:color 0.3s;"
+                       onmouseover="this.style.color='#ffffff'"
+                       onmouseout="this.style.color='#cbd5e0'"
+                       title="GitHub">
+                        <i class="fa-brands fa-github"></i>
+                    </a>
+                </div>
+
+                <!-- Portal Links (if user is logged in) -->
+                <?php if ($isLoggedIn): ?>
+                    <div style="margin-top:1rem;">
+                        <a href="/profile" 
+                           style="display:inline-block;padding:0.5rem 1rem;background:#667eea;color:white;text-decoration:none;border-radius:0.25rem;font-size:0.875rem;transition:background 0.3s;margin-bottom:0.5rem;"
+                           onmouseover="this.style.background='#5568d3'"
+                           onmouseout="this.style.background='#667eea'">
+                            My Profile
+                        </a>
+                        <a href="/logout" 
+                           style="display:inline-block;padding:0.5rem 1rem;background:#e53e3e;color:white;text-decoration:none;border-radius:0.25rem;font-size:0.875rem;transition:background 0.3s;"
+                           onmouseover="this.style.background='#c53030'"
+                           onmouseout="this.style.background='#e53e3e'">
+                            Logout
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <div style="margin-top:1rem;">
+                        <a href="/login" 
+                           style="display:inline-block;padding:0.5rem 1rem;background:#667eea;color:white;text-decoration:none;border-radius:0.25rem;font-size:0.875rem;transition:background 0.3s;margin-right:0.5rem;"
+                           onmouseover="this.style.background='#5568d3'"
+                           onmouseout="this.style.background='#667eea'">
+                            Login
+                        </a>
+                        <a href="/register" 
+                           style="display:inline-block;padding:0.5rem 1rem;background:#48bb78;color:white;text-decoration:none;border-radius:0.25rem;font-size:0.875rem;transition:background 0.3s;"
+                           onmouseover="this.style.background='#38a169'"
+                           onmouseout="this.style.background='#48bb78'">
+                            Register
+                        </a>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Scroll to Top Button -->
+                <div style="margin-top:1.5rem;">
+                    <a href="#header" 
+                       style="display:inline-flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem;background:#4a5568;color:white;text-decoration:none;border-radius:50%;transition:background 0.3s;"
+                       onmouseover="this.style.background='#667eea'"
+                       onmouseout="this.style.background='#4a5568'"
+                       title="Scroll to top">
+                        <i class="fas fa-chevron-up"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Bar -->
+        <div style="border-top:1px solid #4a5568;padding-top:1.5rem;margin-top:2rem;text-align:center;">
+            <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;font-size:0.75rem;color:#a0aec0;">
+                <span>Built with ❤️ using CyberTirah Framework</span>
+                <span>•</span>
+                <span>PHP 8.3+</span>
+                <span>•</span>
+                <span>OpenCart/CodeIgniter Inspired</span>
+                <span>•</span>
+                <a href="https://github.com/cybertirah" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   style="color:#667eea;text-decoration:none;"
+                   onmouseover="this.style.textDecoration='underline'"
+                   onmouseout="this.style.textDecoration='none'">
+                    Open Source
+                </a>
+            </div>
 </div>
+
+    </div>
+</footer>
+
+<!-- Optional: WhatsApp Chat Widget -->
+<?php if (defined('WHATSAPP_NUMBER') && WHATSAPP_NUMBER): ?>
+<script type="text/javascript">
+    (function () {
+        var options = {
+            whatsapp: "<?= WHATSAPP_NUMBER ?>",
+            message: "Hello! 👋 How can we help you?",
+            call_to_action: "Message us on WhatsApp",
+            position: "right",
+        };
+        var proto = document.location.protocol, 
+            host = "getbutton.io", 
+            url = proto + "//static." + host;
+        var s = document.createElement('script'); 
+        s.type = 'text/javascript'; 
+        s.async = true; 
+        s.src = url + '/widget-send-button/js/init.js';
+        s.onload = function () { WhWidgetSendButton.init(host, proto, options); };
+        var x = document.getElementsByTagName('script')[0]; 
+        x.parentNode.insertBefore(s, x);
+    })();
+</script>
+<?php endif; ?>
+
+<!-- Smooth Scroll Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    });
+</script>

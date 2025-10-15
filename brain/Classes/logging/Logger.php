@@ -1,85 +1,117 @@
 <?php
 
+declare(strict_types=1);
+
 class Logger
 {
     protected string $logPath;
-    protected string $defaultLogFile;
-    protected bool $splitByLevel;
+    protected string $defaultFile = 'frame.log';
+    protected bool $splitByLevel = true;
+    protected static ?Logger $instance = null;
 
-    /**
-     * Constructor
-     *
-     * @param string $logFileName The base log file name (e.g., "app.log").
-     * @param bool $splitByLevel Whether to split logs by severity level.
-     */
-    public function __construct(string $logFileName = 'frame.log', bool $splitByLevel = true)
+    public function __construct(string $logFile = 'frame.log', bool $splitByLevel = true)
     {
-        $base = defined('DIR_STORAGE_LOGS') ? DIR_STORAGE_LOGS
-            : (defined('DIR_LOGS') ? DIR_LOGS : (defined('ROOT') ? (ROOT . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'logs') : __DIR__));
-        $this->logPath = rtrim($base, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        $this->defaultLogFile = $logFileName;
+        $root = defined('ROOT') ? ROOT : __DIR__ . '/../../..';
+        $this->logPath = defined('DIR_STORAGE_LOGS') ? DIR_STORAGE_LOGS : $root . '/Storage/logs';
+        $this->defaultFile = $logFile;
         $this->splitByLevel = $splitByLevel;
 
         if (!is_dir($this->logPath)) {
-            mkdir($this->logPath, 0755, true);
+            @mkdir($this->logPath, 0755, true);
         }
     }
 
-    /**
-     * Log a message with a given level
-     */
+    public static function getInstance(): Logger
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
     public function log(string $level, string $message, array $context = []): void
     {
         $level = strtoupper($level);
-        $date = date('Y-m-d H:i:s');
+        $timestamp = date('Y-m-d H:i:s');
         $interpolated = $this->interpolate($message, $context);
-        $logLine = "[$date] [$level] $interpolated" . PHP_EOL;
+        $logLine = "[{$timestamp}] [{$level}] {$interpolated}" . PHP_EOL;
 
-        $filename = $this->getLogFileName($level);
-        file_put_contents($filename, $logLine, FILE_APPEND);
+        $file = $this->getLogFile($level);
+        @file_put_contents($file, $logLine, FILE_APPEND | LOCK_EX);
     }
 
-    // --- Shortcut Methods ---
-    public function debug(string $message, array $context = []): void { $this->log('DEBUG', $message, $context); }
-    public function info(string $message, array $context = []): void { $this->log('INFO', $message, $context); }
-    public function notice(string $message, array $context = []): void { $this->log('NOTICE', $message, $context); }
-    public function warning(string $message, array $context = []): void { $this->log('WARNING', $message, $context); }
-    public function error(string $message, array $context = []): void { $this->log('ERROR', $message, $context); }
-    public function critical(string $message, array $context = []): void { $this->log('CRITICAL', $message, $context); }
-    public function alert(string $message, array $context = []): void { $this->log('ALERT', $message, $context); }
-    public function emergency(string $message, array $context = []): void { $this->log('EMERGENCY', $message, $context); }
-
-    /**
-     * Set default log file name
-     */
-    public function setLogFile(string $filename): void
+    public function debug(string $message, array $context = []): void
     {
-        $this->defaultLogFile = $filename;
+        $this->log('DEBUG', $message, $context);
     }
 
-    /**
-     * Get log file name based on level or default
-     */
-    protected function getLogFileName(string $level = ''): string
+    public function info(string $message, array $context = []): void
     {
-        $datePrefix = date('Y-m-d');
+        $this->log('INFO', $message, $context);
+    }
+
+    public function notice(string $message, array $context = []): void
+    {
+        $this->log('NOTICE', $message, $context);
+    }
+
+    public function warning(string $message, array $context = []): void
+    {
+        $this->log('WARNING', $message, $context);
+    }
+
+    public function error(string $message, array $context = []): void
+    {
+        $this->log('ERROR', $message, $context);
+    }
+
+    public function critical(string $message, array $context = []): void
+    {
+        $this->log('CRITICAL', $message, $context);
+    }
+
+    public function alert(string $message, array $context = []): void
+    {
+        $this->log('ALERT', $message, $context);
+    }
+
+    public function emergency(string $message, array $context = []): void
+    {
+        $this->log('EMERGENCY', $message, $context);
+    }
+
+    protected function getLogFile(string $level = ''): string
+    {
+        $date = date('Y-m-d');
+        
         if ($this->splitByLevel && $level) {
-            return $this->logPath . "{$datePrefix}-" . strtolower($level) . '.log';
+            return $this->logPath . "/{$date}-" . strtolower($level) . '.log';
         }
 
-        return $this->logPath . "{$datePrefix}-" . $this->defaultLogFile;
+        return $this->logPath . "/{$date}-{$this->defaultFile}";
     }
 
-    /**
-     * Replace placeholders in message with context values
-     */
-    protected function interpolate(string $message, array $context = []): string
+    protected function interpolate(string $message, array $context): string
     {
-        $replacements = [];
-        foreach ($context as $key => $val) {
-            $replacements['{' . $key . '}'] = is_scalar($val) ? $val : json_encode($val);
+        if (empty($context)) {
+            return $message;
         }
 
-        return strtr($message, $replacements);
+        $replace = [];
+        foreach ($context as $key => $val) {
+            $replace['{' . $key . '}'] = is_scalar($val) ? (string)$val : json_encode($val);
+        }
+
+        return strtr($message, $replace);
+    }
+
+    public function clear(?string $level = null): bool
+    {
+        $date = date('Y-m-d');
+        $file = $level 
+            ? $this->logPath . "/{$date}-" . strtolower($level) . '.log'
+            : $this->logPath . "/{$date}-{$this->defaultFile}";
+
+        return file_exists($file) ? unlink($file) : false;
     }
 }

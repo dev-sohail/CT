@@ -1,0 +1,9 @@
+{
+  "routes": [
+    {"method": "GET", "path": "/admin/ai", "handler": "admin/AI/Ai@index", "name": "admin.ai.index"},
+    {"method": "GET", "path": "/admin/ai/test", "handler": "admin/AI/Ai@test", "name": "admin.ai.test"},
+    {"method": "POST", "path": "/admin/ai/process", "handler": "admin/AI/Ai@process", "name": "admin.ai.process"},
+    {"method": "GET", "path": "/admin/ai/clearlogs", "handler": "admin/AI/Ai@clearlogs", "name": "admin.ai.clearlogs"}
+  ]
+}
+

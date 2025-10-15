@@ -1,238 +1,112 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($blog['title']) ?> - CyberTirah Framework</title>
-    <meta name="description" content="<?= htmlspecialchars($blog['meta_description'] ?? $blog['excerpt'] ?? '') ?>">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .header {
-            background: #2c3e50;
-            color: white;
-            padding: 20px 0;
-            margin-bottom: 30px;
-        }
-        .header a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .header a:hover {
-            color: #3498db;
-        }
-        .blog-post {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-        .blog-image {
-            width: 100%;
-            height: 300px;
-            background: #ecf0f1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #7f8c8d;
-            font-size: 3rem;
-        }
-        .blog-content {
-            padding: 40px;
-        }
-        .blog-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0 0 20px 0;
-            color: #2c3e50;
-            line-height: 1.2;
-        }
-        .blog-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #ecf0f1;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .blog-date {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-        .blog-tags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .tag {
-            background: #ecf0f1;
-            color: #2c3e50;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 0.8rem;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        .tag:hover {
-            background: #3498db;
-            color: white;
-        }
-        .blog-body {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #2c3e50;
-        }
-        .blog-body h1, .blog-body h2, .blog-body h3 {
-            color: #2c3e50;
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
-        .blog-body p {
-            margin-bottom: 20px;
-        }
-        .blog-body ul, .blog-body ol {
-            margin-bottom: 20px;
-            padding-left: 30px;
-        }
-        .blog-body blockquote {
-            border-left: 4px solid #3498db;
-            padding-left: 20px;
-            margin: 20px 0;
-            font-style: italic;
-            color: #7f8c8d;
-        }
-        .related-posts {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 30px;
-        }
-        .related-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0 0 20px 0;
-            color: #2c3e50;
-        }
-        .related-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .related-item {
-            border: 1px solid #ecf0f1;
-            border-radius: 6px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
-        .related-item:hover {
-            border-color: #3498db;
-            transform: translateY(-2px);
-        }
-        .related-item h4 {
-            margin: 0 0 10px 0;
-            font-size: 1.1rem;
-        }
-        .related-item h4 a {
-            color: #2c3e50;
-            text-decoration: none;
-        }
-        .related-item h4 a:hover {
-            color: #3498db;
-        }
-        .related-item p {
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            margin: 0;
-        }
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #3498db;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .back-link:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="container">
-            <a href="/blog">&larr; Back to Blog</a>
-        </div>
-    </div>
-
-    <div class="container">
-        <article class="blog-post">
-            <?php if (!empty($blog['featured_image'])): ?>
-                <div class="blog-image" style="background-image: url('<?= htmlspecialchars($blog['featured_image']) ?>'); background-size: cover; background-position: center;"></div>
-            <?php else: ?>
-                <div class="blog-image">📝</div>
-            <?php endif; ?>
+<div class="blog-post-page" style="max-width:900px;margin:0 auto;padding:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+    
+    <?php if (!empty($post)): ?>
+        <article style="background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);overflow:hidden;margin-bottom:40px;">
             
-            <div class="blog-content">
-                <h1 class="blog-title"><?= htmlspecialchars($blog['title']) ?></h1>
-                
-                <div class="blog-meta">
-                    <span class="blog-date">
-                        Published on <?= date('F j, Y', strtotime($blog['created_at'])) ?>
-                    </span>
-                    
-                    <?php if (!empty($blog['tags'])): ?>
-                        <div class="blog-tags">
-                            <?php 
-                            $tags = explode(',', $blog['tags']);
-                            foreach ($tags as $tag): 
-                            ?>
-                                <a href="/blog?tag=<?= urlencode(trim($tag)) ?>" class="tag">
-                                    <?= htmlspecialchars(trim($tag)) ?>
-                                </a>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+            <!-- Post Header -->
+            <div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:80px 40px;text-align:center;">
+                <div style="font-size:5em;margin-bottom:20px;">
+                    <?= $post['image'] ?? '📝' ?>
                 </div>
                 
-                <div class="blog-body">
-                    <?= nl2br(htmlspecialchars($blog['content'])) ?>
+                <!-- Category Badge -->
+                <div style="margin-bottom:20px;">
+                    <span style="display:inline-block;padding:8px 16px;background:rgba(255,255,255,0.2);color:white;border-radius:20px;font-size:0.85em;text-transform:uppercase;font-weight:600;">
+                        <?= htmlspecialchars($post['category'] ?? 'General') ?>
+                    </span>
+                </div>
+                
+                <!-- Title -->
+                <h1 style="font-size:2.5em;color:white;margin-bottom:20px;line-height:1.3;">
+                    <?= htmlspecialchars($post['title']) ?>
+                </h1>
+                
+                <!-- Meta -->
+                <div style="color:rgba(255,255,255,0.9);font-size:1em;">
+                    <span>By <?= htmlspecialchars($post['author'] ?? 'Unknown') ?></span>
+                    <span style="margin:0 10px;">•</span>
+                    <span><?= date('F j, Y', strtotime($post['published_at'] ?? 'now')) ?></span>
                 </div>
             </div>
+            
+            <!-- Post Content -->
+            <div style="padding:40px;">
+                <!-- Excerpt -->
+                <?php if (!empty($post['excerpt'])): ?>
+                    <div style="font-size:1.2em;color:#6c757d;margin-bottom:30px;padding:20px;background:#f8f9fa;border-left:4px solid #667eea;border-radius:5px;">
+                        <?= htmlspecialchars($post['excerpt']) ?>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Main Content -->
+                <div style="font-size:1.1em;line-height:1.8;color:#333;">
+                    <?= nl2br(htmlspecialchars($post['content'])) ?>
+                </div>
+                
+                <!-- Tags (if available) -->
+                <?php if (!empty($post['tags'])): ?>
+                    <div style="margin-top:40px;padding-top:30px;border-top:1px solid #e9ecef;">
+                        <h3 style="font-size:1.1em;margin-bottom:15px;color:#333;">Tags:</h3>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <?php foreach ($post['tags'] as $tag): ?>
+                                <span style="padding:5px 12px;background:#e9ecef;color:#333;border-radius:20px;font-size:0.85em;">
+                                    #<?= htmlspecialchars($tag) ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+            
         </article>
 
+        <!-- Navigation -->
+        <div style="margin-bottom:40px;text-align:center;">
+            <a href="<?= function_exists('safeRouteUrl') ? safeRouteUrl('blog.index') : '/blog' ?>" 
+               style="display:inline-block;padding:12px 30px;background:#667eea;color:white;text-decoration:none;border-radius:5px;font-weight:600;transition:background 0.3s;"
+               onmouseover="this.style.background='#5568d3'"
+               onmouseout="this.style.background='#667eea'">
+                ← Back to Blog
+            </a>
+        </div>
+
         <!-- Related Posts -->
-        <?php if (isset($related) && !empty($related)): ?>
-            <div class="related-posts">
-                <h3 class="related-title">Related Posts</h3>
-                <div class="related-grid">
-                    <?php foreach ($related as $relatedPost): ?>
-                        <div class="related-item">
-                            <h4>
-                                <a href="/blog/<?= htmlspecialchars($relatedPost['slug']) ?>">
-                                    <?= htmlspecialchars($relatedPost['title']) ?>
+        <?php if (!empty($related_posts)): ?>
+            <div style="margin-top:60px;">
+                <h2 style="font-size:2em;margin-bottom:30px;text-align:center;color:#333;">Related Articles</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+                    <?php foreach ($related_posts as $related): ?>
+                        <div style="background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);padding:20px;">
+                            <div style="font-size:2.5em;margin-bottom:10px;text-align:center;">
+                                <?= $related['image'] ?? '📝' ?>
+                            </div>
+                            <h3 style="font-size:1.2em;margin-bottom:10px;">
+                                <a href="<?= function_exists('safeRouteUrl') ? safeRouteUrl('blog.show', ['id' => $related['id']]) : '/blog/' . (int)$related['id'] ?>" 
+                                   style="color:#333;text-decoration:none;"
+                                   onmouseover="this.style.color='#667eea'"
+                                   onmouseout="this.style.color='#333'">
+                                    <?= htmlspecialchars($related['title']) ?>
                                 </a>
-                            </h4>
-                            <?php if (!empty($relatedPost['excerpt'])): ?>
-                                <p><?= htmlspecialchars(substr($relatedPost['excerpt'], 0, 100)) ?>...</p>
-                            <?php endif; ?>
+                            </h3>
+                            <p style="font-size:0.9em;color:#6c757d;">
+                                <?= substr(htmlspecialchars($related['excerpt']), 0, 100) . '...' ?>
+                            </p>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </div>
         <?php endif; ?>
-    </div>
-</body>
-</html>
+
+    <?php else: ?>
+        <div style="text-align:center;padding:80px 20px;">
+            <h2 style="font-size:2em;margin-bottom:15px;color:#333;">Post Not Found</h2>
+            <p style="font-size:1.1em;color:#6c757d;margin-bottom:30px;">The post you're looking for doesn't exist.</p>
+            <a href="<?= function_exists('safeRouteUrl') ? safeRouteUrl('blog.index') : '/blog' ?>" 
+               style="display:inline-block;padding:12px 30px;background:#667eea;color:white;text-decoration:none;border-radius:5px;font-weight:600;">
+                View All Posts
+            </a>
+        </div>
+    <?php endif; ?>
+
+</div>
+

@@ -9,13 +9,17 @@ require_once ROOT . '/Brain/Core/Controller.php';
  */
 class VersionController extends Controller
 {
+    /**
+     * Version information endpoint
+     */
     public function index(): void
     {
-        $this->jsonResponse([
-            'version' => '2.0.0',
-            'framework' => 'CyberTirah',
-            'php_version' => PHP_VERSION,
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+        
+        $this->load->model('api/Version');
+        $version = $this->model_version->getInfo();
+        
+        echo json_encode($version, JSON_PRETTY_PRINT);
     }
 }

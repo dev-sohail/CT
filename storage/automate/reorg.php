@@ -1,459 +1,178 @@
 <?php
-/**
- * File Structure Reorganizer Script
- * This script reorganizes your existing PHP class files into a more logical structure
- */
 
-class FileReorganizer {
-    private $baseDir;
-    private $backupDir;
-    private $dryRun;
-    
-    // New structure mapping
-    private $newStructure = [
-        // Core framework files
-        'Core' => [
-            'app/AppKernel.php',
-            'app/ServiceContainer.php',
-            'app/ServiceProvider.php',
-            'app/EventDispatcher.php',
-            'core/App.php',
-            'core/Autoloader.php',
-            'core/Controller.php',
-            'core/Model.php',
-            'core/View.php',
-            'core/Router.php',
-            'core/Dispatcher.php',
-            'core/ErrorHandler.php',
-            'core/Profiler.php',
-            'config.php'
-        ],
-        
-        // HTTP & Web layer
-        'Http' => [
-            'request.php',
-            'response.php',
-            'middleware/Middleware.php',
-            'middleware/Cookie.php',
-            'middleware/Cors.php',
-            'middleware/Headers.php',
-            'middleware/RateLimiter.php',
-            'middleware/RequestFilter.php'
-        ],
-        
-        // Authentication & Security
-        'Auth' => [
-            'user.php',
-            'utils/Auth.php',
-            'utils/Password.php',
-            'security/session.php',
-            'security/BruteForceGuard.php',
-            'security/DeviceFingerprint.php',
-            'security/SessionHijackProtector.php'
-        ],
-        
-        // Security & Validation
-        'Security' => [
-            'utils/Acl.php',
-            'utils/Csrf.php',
-            'utils/Firewall.php',
-            'utils/Sanitizer.php',
-            'utils/Validator.php',
-            'security/InputNormalizer.php',
-            'security/SecurityScanner.php',
-            'encryption.php',
-            'captcha.php'
-        ],
-        
-        // Database layer
-        'Database' => [
-            'database/Database.php',
-            'database/DBConfig.php',
-            'database/ORM.php',
-            'database/QueryBuilder.php',
-            'database/Migration.php',
-            'database/Seeder.php',
-            'database/Transaction.php'
-        ],
-        
-        // Caching system
-        'Cache' => [
-            'cache.php',
-            'services/CacheManager.php',
-            'view/ViewCache.php'
-        ],
-        
-        // API layer
-        'Api' => [
-            'api/ApiRequest.php',
-            'api/ApiResponseFormatter.php',
-            'api/ApiVersioning.php',
-            'api/ApiDocsGenerator.php',
-            'api/HttpClient.php',
-            'api/ServiceDiscovery.php',
-            'misc/ApiAuth.php',
-            'misc/ApiRateLimiter.php',
-            'misc/ApiResponse.php',
-            'json.php'
-        ],
-        
-        // Business logic
-        'Business' => [
-            'business/ActivityFeed.php',
-            'business/ApprovalManager.php',
-            'business/NotificationQueue.php',
-            'business/RoleHierarchy.php',
-            'business/WorkflowEngine.php'
-        ],
-        
-        // Commerce/E-commerce
-        'Commerce' => [
-            'commerce/DiscountEngine.php',
-            'commerce/InvoiceGenerator.php',
-            'commerce/MultiCurrency.php',
-            'commerce/SubscriptionManager.php',
-            'commerce/TaxCalculator.php',
-            'cart.php',
-            'currency.php'
-        ],
-        
-        // Services layer
-        'Services' => [
-            'services/Event.php',
-            'services/Job.php',
-            'services/Queue.php',
-            'services/Notification.php',
-            'services/PushNotification.php',
-            'services/SMS.php',
-            'services/Webhook.php',
-            'mail.php'
-        ],
-        
-        // View & UI layer
-        'View' => [
-            'view/template.php',
-            'view/Layout.php',
-            'view/Component.php',
-            'view/AssetPipeline.php',
-            'view/SvgIcon.php',
-            'misc/AssetManager.php',
-            'misc/FormBuilder.php',
-            'misc/HtmlHelper.php',
-            'misc/ThemeManager.php'
-        ],
-        
-        // Utilities & Helpers
-        'Utils' => [
-            'helpers/Arr.php',
-            'helpers/Date.php',
-            'helpers/Env.php',
-            'helpers/File.php',
-            'helpers/Logger.php',
-            'helpers/Number.php',
-            'helpers/Path.php',
-            'helpers/Str.php',
-            'helpers/Timer.php',
-            'url--.php',
-            'pagination.php',
-            'image.php',
-            'document.php'
-        ],
-        
-        // File & Media handling
-        'Media' => [
-            'misc/ImageProcessor.php',
-            'misc/Uploader.php'
-        ],
-        
-        // Localization & Language
-        'Localization' => [
-            'language.php',
-            'misc/Locale.php'
-        ],
-        
-        // Modules & Plugins
-        'Modules' => [
-            'modules/ModuleManager.php',
-            'modules/PluginManager.php',
-            'modules/FeatureToggle.php',
-            'modules/HookManager.php',
-            'modules/Lifecycle.php',
-            'modules/ServiceRegistry.php',
-            'misc/PluginManager.php'
-        ],
-        
-        // Console & CLI
-        'Console' => [
-            'app/ConsoleKernel.php',
-            'app/CLIHelper.php',
-            'app/Command.php',
-            'app/Scheduler.php'
-        ],
-        
-        // Configuration
-        'Config' => [
-            'app/ConfigLoader.php'
-        ],
-        
-        // Logging & Monitoring
-        'Logging' => [
-            'logging/AuditTrail.php',
-            'logging/LoggerManager.php',
-            'logging/MetricsCollector.php',
-            'logging/RequestLogger.php',
-            'logging/UsageTracker.php'
-        ],
-        
-        // Testing
-        'Testing' => [
-            'tests/TestCase.php',
-            'tests/Mocker.php',
-            'tests/Fuzzer.php',
-            'tests/ScenarioRunner.php',
-            'tests/TestDataFactory.php'
-        ],
-        
-        // Support & Documentation
-        'Support' => [
-            'support/Changelog.php',
-            'support/DocGenerator.php',
-            'support/ErrorCodeMap.php',
-            'support/HelpManager.php',
-            'support/SupportTicket.php'
-        ],
-        
-        // System & Admin
-        'System' => [
-            'misc/Backup.php',
-            'misc/Installer.php',
-            'misc/LicenseManager.php',
-            'misc/Version.php',
-            'misc/GeoIP.php',
-            'misc/Slugger.php',
-            'affiliate.php',
-            'sgrid.php',
-            'icvSoap.php'
-        ]
+declare(strict_types=1);
+
+// CyberTirah Framework - Project Reorganization Utility
+// Usage (Windows PowerShell): php Storage/automate/reorg.php        # dry run
+//                              php Storage/automate/reorg.php --yes # apply
+
+function printLine(string $msg): void {
+    echo $msg . PHP_EOL;
+}
+
+function normalizeCaseInsensitiveRename(string $path, string $targetName, bool $apply, array &$actions): void {
+    $dir = dirname($path);
+    $base = basename($path);
+    if ($base === $targetName) {
+        return; // already correct
+    }
+
+    $temp = $dir . DIRECTORY_SEPARATOR . $base . '.tmp_ct_rename';
+    $target = $dir . DIRECTORY_SEPARATOR . $targetName;
+
+    $actions[] = [
+        'type' => 'rename',
+        'from' => $path,
+        'to' => $target,
     ];
-    
-    public function __construct($baseDir, $dryRun = true) {
-        $this->baseDir = rtrim($baseDir, '/\\');
-        $this->dryRun = $dryRun;
-        $this->backupDir = $this->baseDir . '_backup_' . date('Y-m-d_H-i-s');
-    }
-    
-    public function reorganize() {
-        echo "=== File Structure Reorganizer ===\n";
-        echo "Base Directory: {$this->baseDir}\n";
-        echo "Mode: " . ($this->dryRun ? "DRY RUN (no files will be moved)" : "LIVE RUN") . "\n";
-        echo "Backup Directory: {$this->backupDir}\n\n";
-        
-        if (!$this->dryRun) {
-            $this->createBackup();
-        }
-        
-        $this->createNewStructure();
-        $this->moveFiles();
-        $this->generateReport();
-    }
-    
-    private function createBackup() {
-        echo "Creating backup...\n";
-        if (!is_dir($this->backupDir)) {
-            mkdir($this->backupDir, 0755, true);
-        }
-        
-        // Copy entire directory structure
-        $this->copyDirectory($this->baseDir, $this->backupDir);
-        echo "Backup created at: {$this->backupDir}\n\n";
-    }
-    
-    private function copyDirectory($src, $dst) {
-        $dir = opendir($src);
-        if (!is_dir($dst)) {
-            mkdir($dst, 0755, true);
-        }
-        
-        while (($file = readdir($dir)) !== false) {
-            if ($file != '.' && $file != '..') {
-                if (is_dir($src . '/' . $file)) {
-                    $this->copyDirectory($src . '/' . $file, $dst . '/' . $file);
-                } else {
-                    copy($src . '/' . $file, $dst . '/' . $file);
-                }
-            }
-        }
-        closedir($dir);
-    }
-    
-    private function createNewStructure() {
-        echo "Creating new directory structure...\n";
-        
-        foreach (array_keys($this->newStructure) as $directory) {
-            $newDir = $this->baseDir . '/' . $directory;
-            
-            if ($this->dryRun) {
-                echo "[DRY RUN] Would create directory: $newDir\n";
-            } else {
-                if (!is_dir($newDir)) {
-                    mkdir($newDir, 0755, true);
-                    echo "Created directory: $newDir\n";
-                }
-            }
-        }
-        echo "\n";
-    }
-    
-    private function moveFiles() {
-        echo "Moving files to new structure...\n";
-        $movedFiles = [];
-        $notFoundFiles = [];
-        
-        foreach ($this->newStructure as $newDir => $files) {
-            foreach ($files as $oldPath) {
-                $oldFullPath = $this->baseDir . '/' . $oldPath;
-                $fileName = basename($oldPath);
-                $newFullPath = $this->baseDir . '/' . $newDir . '/' . $fileName;
-                
-                if (file_exists($oldFullPath)) {
-                    if ($this->dryRun) {
-                        echo "[DRY RUN] Would move: $oldPath -> $newDir/$fileName\n";
-                    } else {
-                        if (rename($oldFullPath, $newFullPath)) {
-                            echo "Moved: $oldPath -> $newDir/$fileName\n";
-                            $movedFiles[] = $oldPath;
-                        } else {
-                            echo "ERROR: Failed to move $oldPath\n";
-                        }
-                    }
-                } else {
-                    $notFoundFiles[] = $oldPath;
-                    echo "WARNING: File not found: $oldPath\n";
-                }
-            }
-        }
-        
-        if (!$this->dryRun) {
-            $this->cleanupEmptyDirectories();
-        }
-        
-        echo "\n";
-    }
-    
-    private function cleanupEmptyDirectories() {
-        echo "Cleaning up empty directories...\n";
-        
-        $oldDirs = [
-            'api', 'app', 'business', 'commerce', 'core', 'database',
-            'helpers', 'logging', 'middleware', 'misc', 'modules',
-            'security', 'services', 'support', 'tests', 'utils', 'view'
-        ];
-        
-        foreach ($oldDirs as $dir) {
-            $dirPath = $this->baseDir . '/' . $dir;
-            if (is_dir($dirPath) && $this->isDirectoryEmpty($dirPath)) {
-                rmdir($dirPath);
-                echo "Removed empty directory: $dir\n";
-            }
-        }
-    }
-    
-    private function isDirectoryEmpty($dir) {
-        $handle = opendir($dir);
-        while (($entry = readdir($handle)) !== false) {
-            if ($entry != "." && $entry != "..") {
-                closedir($handle);
-                return false;
-            }
-        }
-        closedir($handle);
-        return true;
-    }
-    
-    private function generateReport() {
-        echo "\n=== REORGANIZATION REPORT ===\n";
-        echo "New Structure Overview:\n\n";
-        
-        foreach ($this->newStructure as $dir => $files) {
-            echo "$dir/ (" . count($files) . " files)\n";
-            echo "├── " . implode("\n├── ", array_map('basename', $files)) . "\n\n";
-        }
-        
-        if ($this->dryRun) {
-            echo "\n*** THIS WAS A DRY RUN - NO FILES WERE ACTUALLY MOVED ***\n";
-            echo "To perform the actual reorganization, run with dryRun = false\n";
-        } else {
-            echo "\nReorganization completed!\n";
-            echo "Backup available at: {$this->backupDir}\n";
-        }
-        
-        $this->generateAutoloader();
-    }
-    
-    private function generateAutoloader() {
-        $autoloaderContent = '<?php
-/**
- * Auto-generated Autoloader for reorganized class structure
- */
 
-class CTFrameAutoloader {
-    private static $classMap = [
-        // Core
-        \'App\' => \'Core/App.php\',
-        \'Controller\' => \'Core/Controller.php\',
-        \'Model\' => \'Core/Model.php\',
-        \'View\' => \'Core/View.php\',
-        \'Router\' => \'Core/Router.php\',
-        
-        // Database
-        \'Database\' => \'Database/Database.php\',
-        \'ORM\' => \'Database/ORM.php\',
-        \'QueryBuilder\' => \'Database/QueryBuilder.php\',
-        
-        // Add more mappings as needed...
+    if (!$apply) return;
+
+    // Windows case-only rename requires a temp hop
+    if (!rename($path, $temp)) {
+        throw new RuntimeException("Failed temp rename: $path → $temp");
+    }
+    if (!rename($temp, $target)) {
+        // attempt rollback
+        @rename($temp, $path);
+        throw new RuntimeException("Failed final rename: $temp → $target");
+    }
+}
+
+function ensureDir(string $dir, bool $apply, array &$actions): void {
+    if (is_dir($dir)) return;
+    $actions[] = [ 'type' => 'mkdir', 'path' => $dir ];
+    if ($apply) {
+        if (!mkdir($dir, 0755, true) && !is_dir($dir)) {
+            throw new RuntimeException("Failed to create directory: $dir");
+        }
+    }
+}
+
+function scanModules(string $bodyRoot): array {
+    $roles = ['admin', 'public', 'api', 'ai', 'automate', 'user'];
+    $modules = [];
+    foreach ($roles as $role) {
+        $rolePath = $bodyRoot . DIRECTORY_SEPARATOR . $role;
+        if (!is_dir($rolePath)) continue;
+        $items = @scandir($rolePath) ?: [];
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+            $modulePath = $rolePath . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($modulePath)) {
+                $modules[] = [$role, $modulePath, $item];
+            }
+        }
+    }
+    return $modules;
+}
+
+function normalizeModule(string $role, string $modulePath, bool $apply, array &$actions): void {
+    // Normalize Controllers/Models/Views directory names (case-insensitive)
+    $candidates = [
+        'Controllers' => ['Controllers', 'controllers', 'Controller', 'controller'],
+        'Models'      => ['Models', 'models', 'Model', 'model'],
+        'Views'       => ['Views', 'views', 'View', 'view'],
     ];
-    
-    public static function register() {
-        spl_autoload_register([__CLASS__, \'load\']);
+
+    foreach ($candidates as $proper => $variants) {
+        $found = null;
+        foreach ($variants as $name) {
+            $p = $modulePath . DIRECTORY_SEPARATOR . $name;
+            if (is_dir($p)) { $found = $p; break; }
+        }
+        if ($found === null) continue;
+        normalizeCaseInsensitiveRename($found, $proper, $apply, $actions);
     }
-    
-    public static function load($className) {
-        if (isset(self::$classMap[$className])) {
-            $file = __DIR__ . \'/\' . self::$classMap[$className];
-            if (file_exists($file)) {
-                require_once $file;
-                return true;
+
+    // Normalize Common folder casing inside role where present
+    $commonCandidates = [
+        $modulePath . DIRECTORY_SEPARATOR . 'Common',
+        $modulePath . DIRECTORY_SEPARATOR . 'common',
+    ];
+    foreach ($commonCandidates as $p) {
+        if (is_dir($p)) {
+            normalizeCaseInsensitiveRename($p, 'Common', $apply, $actions);
+            break;
+        }
+    }
+
+    // Ensure routes.json is in module root if a routes file exists with wrong casing
+    $routeNames = ['routes.json', 'Routes.json', 'ROUTES.JSON', 'routes.JSON'];
+    $routeFound = null;
+    foreach ($routeNames as $rn) {
+        $rp = $modulePath . DIRECTORY_SEPARATOR . $rn;
+        if (is_file($rp)) { $routeFound = $rp; break; }
+    }
+    if ($routeFound && basename($routeFound) !== 'routes.json') {
+        $target = $modulePath . DIRECTORY_SEPARATOR . 'routes.json';
+        $actions[] = ['type' => 'copy_overwrite', 'from' => $routeFound, 'to' => $target];
+        if ($apply) {
+            if (!copy($routeFound, $target)) {
+                throw new RuntimeException("Failed to copy routes file to standard name: $routeFound → $target");
             }
-        }
-        return false;
-    }
-}
-
-// Register the autoloader
-CTFrameAutoloader::register();
-';
-        
-        $autoloaderPath = $this->baseDir . '/autoload.php';
-        
-        if ($this->dryRun) {
-            echo "\n[DRY RUN] Would create autoloader at: $autoloaderPath\n";
-        } else {
-            file_put_contents($autoloaderPath, $autoloaderContent);
-            echo "\nGenerated new autoloader: autoload.php\n";
+            @unlink($routeFound);
         }
     }
 }
 
-// Usage
-if (php_sapi_name() === 'cli') {
-    $baseDir = isset($argv[1]) ? $argv[1] : __DIR__;
-    $dryRun = !isset($argv[2]) || $argv[2] !== 'live';
-    
-    $reorganizer = new FileReorganizer($baseDir, $dryRun);
-    $reorganizer->reorganize();
-} else {
-    echo "This script should be run from command line.\n";
-    echo "Usage: php reorganize.php [directory] [live]\n";
-    echo "Example: php reorganize.php C:\\wamp64\\www\\me\\CT\\ct_frame\\brain\\Classes live\n";
+function clearRouteCache(string $root, bool $apply, array &$actions): void {
+    $cache = $root . DIRECTORY_SEPARATOR . 'Storage' . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . 'routes.php';
+    if (is_file($cache)) {
+        $actions[] = ['type' => 'delete', 'path' => $cache];
+        if ($apply) { @unlink($cache); }
+    }
 }
-?>
+
+function main(): void {
+    $apply = in_array('--yes', $GLOBALS['argv'] ?? [], true) || in_array('-y', $GLOBALS['argv'] ?? [], true);
+    $root = realpath(__DIR__ . '/../../') ?: getcwd();
+    $body = $root . DIRECTORY_SEPARATOR . 'Body';
+
+    if (!is_dir($body)) {
+        printLine('Body directory not found. Aborting.');
+        exit(1);
+    }
+
+    $actions = [];
+    $modules = scanModules($body);
+
+    foreach ($modules as [$role, $modulePath, $moduleName]) {
+        normalizeModule($role, $modulePath, $apply, $actions);
+    }
+
+    clearRouteCache($root, $apply, $actions);
+
+    // Report
+    $mode = $apply ? 'APPLY' : 'DRY-RUN';
+    printLine("=== CyberTirah Reorg ($mode) ===");
+    if (empty($actions)) {
+        printLine('No changes needed.');
+        return;
+    }
+
+    foreach ($actions as $a) {
+        switch ($a['type']) {
+            case 'rename':
+                printLine("RENAME: {$a['from']} → {$a['to']}");
+                break;
+            case 'mkdir':
+                printLine("MKDIR: {$a['path']}");
+                break;
+            case 'copy_overwrite':
+                printLine("COPY: {$a['from']} → {$a['to']} (overwrite)");
+                break;
+            case 'delete':
+                printLine("DELETE: {$a['path']}");
+                break;
+        }
+    }
+
+    if (!$apply) {
+        printLine('Dry-run complete. Re-run with --yes to apply changes.');
+    } else {
+        printLine('Apply complete. Route cache cleared if present.');
+    }
+}
+
+main();

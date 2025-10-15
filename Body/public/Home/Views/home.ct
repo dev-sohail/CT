@@ -1,1 +1,148 @@
-<h1>Well Come to Home</h1>
+<div class="home-page" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+    
+    <!-- Hero Section -->
+    <section class="hero" style="text-align:center;padding:80px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;">
+        <div style="max-width:1200px;margin:0 auto;">
+            <h1 style="font-size:3.5em;margin-bottom:20px;font-weight:bold;line-height:1.2;">
+                <?= htmlspecialchars($heading ?? 'Welcome') ?>
+            </h1>
+            <p style="font-size:1.3em;max-width:700px;margin:0 auto 30px;line-height:1.6;">
+                A modern, powerful PHP framework inspired by OpenCart and CodeIgniter patterns. 
+                Built with PHP 8.3+, it provides developers with familiar patterns, high performance, and comprehensive features.
+            </p>
+            <div style="display:flex;gap:15px;justify-content:center;flex-wrap:wrap;">
+                <a href="<?= function_exists('safeRouteUrl') ? safeRouteUrl('about') : '/about' ?>" 
+                   style="display:inline-block;padding:15px 40px;background:white;color:#667eea;text-decoration:none;border-radius:5px;font-weight:bold;font-size:1.1em;transition:transform 0.3s;"
+                   onmouseover="this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.transform='translateY(0)'">
+                    Learn More
+                </a>
+                <a href="/get-started" 
+                   style="display:inline-block;padding:15px 40px;background:transparent;color:white;text-decoration:none;border-radius:5px;font-weight:bold;font-size:1.1em;border:2px solid white;transition:background 0.3s;"
+                   onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                   onmouseout="this.style.background='transparent'">
+                    Get Started
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats" style="background:#f8f9fa;padding:60px 20px;">
+        <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;">
+            <?php if (!empty($stats)): ?>
+                <?php foreach ($stats as $stat): ?>
+                    <div style="text-align:center;padding:30px;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="font-size:3em;font-weight:bold;color:#667eea;margin-bottom:10px;">
+                            <?= htmlspecialchars($stat['number']) ?>
+                        </div>
+                        <div style="font-size:1.3em;font-weight:600;margin-bottom:5px;color:#333;">
+                            <?= htmlspecialchars($stat['label']) ?>
+                        </div>
+                        <div style="font-size:0.9em;color:#6c757d;">
+                            <?= htmlspecialchars($stat['description']) ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" style="padding:80px 20px;max-width:1200px;margin:0 auto;">
+        <div style="text-align:center;margin-bottom:60px;">
+            <h2 style="font-size:2.5em;margin-bottom:15px;color:#333;">Powerful Features</h2>
+            <p style="font-size:1.2em;color:#6c757d;max-width:600px;margin:0 auto;">
+                Everything you need to build modern web applications
+            </p>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:30px;">
+            <?php if (!empty($features)): ?>
+                <?php foreach ($features as $feature): ?>
+                    <div style="padding:30px;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:transform 0.3s;"
+                         onmouseover="this.style.transform='translateY(-5px)'"
+                         onmouseout="this.style.transform='translateY(0)'">
+                        <div style="font-size:3em;margin-bottom:15px;">
+                            <?= $feature['icon'] ?>
+                        </div>
+                        <h3 style="font-size:1.3em;margin-bottom:10px;color:#333;">
+                            <?= htmlspecialchars($feature['title']) ?>
+                        </h3>
+                        <p style="color:#6c757d;line-height:1.6;">
+                            <?= htmlspecialchars($feature['description']) ?>
+                        </p>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <?php if (!empty($testimonials)): ?>
+    <section class="testimonials" style="background:#f8f9fa;padding:80px 20px;">
+        <div style="max-width:1200px;margin:0 auto;">
+            <div style="text-align:center;margin-bottom:60px;">
+                <h2 style="font-size:2.5em;margin-bottom:15px;color:#333;">What Developers Say</h2>
+                <p style="font-size:1.2em;color:#6c757d;">
+                    Trusted by developers worldwide
+                </p>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px;">
+                <?php foreach ($testimonials as $testimonial): ?>
+                    <div style="padding:30px;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                        <div style="font-size:3em;margin-bottom:15px;text-align:center;">
+                            <?= $testimonial['avatar'] ?>
+                        </div>
+                        <p style="font-style:italic;color:#333;line-height:1.8;margin-bottom:20px;">
+                            "<?= htmlspecialchars($testimonial['text']) ?>"
+                        </p>
+                        <div style="text-align:center;">
+                            <div style="font-weight:bold;color:#333;margin-bottom:5px;">
+                                <?= htmlspecialchars($testimonial['name']) ?>
+                            </div>
+                            <div style="font-size:0.9em;color:#6c757d;">
+                                <?= htmlspecialchars($testimonial['role']) ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- CTA Section -->
+    <?php if (!empty($cta)): ?>
+    <section class="cta" style="padding:80px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;text-align:center;">
+        <div style="max-width:800px;margin:0 auto;">
+            <h2 style="font-size:2.5em;margin-bottom:20px;font-weight:bold;">
+                <?= htmlspecialchars($cta['heading']) ?>
+            </h2>
+            <p style="font-size:1.2em;margin-bottom:40px;line-height:1.6;">
+                <?= htmlspecialchars($cta['description']) ?>
+            </p>
+            <div style="display:flex;gap:15px;justify-content:center;flex-wrap:wrap;">
+                <?php if (!empty($cta['primary_button'])): ?>
+                    <a href="<?= htmlspecialchars($cta['primary_button']['url']) ?>" 
+                       style="display:inline-block;padding:15px 40px;background:white;color:#667eea;text-decoration:none;border-radius:5px;font-weight:bold;font-size:1.1em;transition:transform 0.3s;"
+                       onmouseover="this.style.transform='translateY(-2px)'"
+                       onmouseout="this.style.transform='translateY(0)'">
+                        <?= htmlspecialchars($cta['primary_button']['text']) ?>
+                    </a>
+                <?php endif; ?>
+                <?php if (!empty($cta['secondary_button'])): ?>
+                    <a href="<?= htmlspecialchars($cta['secondary_button']['url']) ?>" 
+                       style="display:inline-block;padding:15px 40px;background:transparent;color:white;text-decoration:none;border-radius:5px;font-weight:bold;font-size:1.1em;border:2px solid white;transition:background 0.3s;"
+                       onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                       onmouseout="this.style.background='transparent'">
+                        <?= htmlspecialchars($cta['secondary_button']['text']) ?>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+</div>

@@ -1,0 +1,32 @@
+<div class="admin-topbar">
+    <div class="topbar-left"><h2><i class="fas fa-plus-circle"></i> Create New Block</h2><p>Add a new reusable content block</p></div>
+    <div class="topbar-right"><a href="/admin/blocks" class="topbar-btn secondary"><i class="fas fa-arrow-left"></i> Back to Blocks</a></div>
+</div>
+
+<div class="admin-content">
+    <?php if (!empty($error)): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div><?php endif; ?>
+    
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-cube"></i> Block Details</h3></div>
+        <form method="POST" action="/admin/blocks/store">
+            <div class="form-group"><label><i class="fas fa-heading"></i> Block Name *</label><input type="text" name="block_name" class="form-control" required placeholder="Block Name" id="block-name"></div>
+            <div class="form-group"><label><i class="fas fa-link"></i> Block Slug *</label><input type="text" name="block_slug" class="form-control" required placeholder="block-slug" id="block-slug" style="font-family:monospace;"></div>
+            <div class="form-group"><label><i class="fas fa-code"></i> Content</label><textarea name="content" class="form-control" rows="10" placeholder="HTML content for this block"></textarea></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="form-group"><label><i class="fas fa-map-marker-alt"></i> Location</label><select name="location" class="form-control"><option value="global">Global</option><option value="header">Header</option><option value="footer">Footer</option><option value="sidebar">Sidebar</option><option value="content">Content</option></select></div>
+                <div class="form-group"><label><i class="fas fa-toggle-on"></i> Status *</label><select name="status" class="form-control"><option value="inactive" selected>Inactive</option><option value="active">Active</option></select></div>
+            </div>
+            <div style="margin-top:30px;padding-top:20px;border-top:2px solid #ecf0f1;display:flex;gap:10px;">
+                <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Create Block</button>
+                <a href="/admin/blocks" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+document.getElementById('block-name').addEventListener('input', function(e) {
+    const slug = e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    document.getElementById('block-slug').value = slug;
+});
+</script>
+

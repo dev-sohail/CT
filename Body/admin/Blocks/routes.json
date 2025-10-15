@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {"method": "GET", "path": "/admin/blocks", "handler": "admin/Blocks/Blocks@index", "name": "admin.blocks.index"},
+    {"method": "GET", "path": "/admin/blocks/create", "handler": "admin/Blocks/Blocks@create", "name": "admin.blocks.create"},
+    {"method": "POST", "path": "/admin/blocks/store", "handler": "admin/Blocks/Blocks@store", "name": "admin.blocks.store"},
+    {"method": "GET", "path": "/admin/blocks/edit", "handler": "admin/Blocks/Blocks@edit", "name": "admin.blocks.edit"},
+    {"method": "POST", "path": "/admin/blocks/update", "handler": "admin/Blocks/Blocks@update", "name": "admin.blocks.update"},
+    {"method": "GET", "path": "/admin/blocks/delete", "handler": "admin/Blocks/Blocks@delete", "name": "admin.blocks.delete"},
+    {"method": "GET", "path": "/admin/blocks/toggle", "handler": "admin/Blocks/Blocks@toggle", "name": "admin.blocks.toggle"}
+  ]
+}
+

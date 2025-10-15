@@ -1,0 +1,235 @@
+<div class="admin-topbar">
+    <div class="topbar-left">
+        <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+        <p>Welcome back, <?= htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'Admin') ?>!</p>
+    </div>
+    <div class="topbar-right">
+        <span style="padding:10px 20px;background:#28a745;color:white;border-radius:6px;font-weight:600;">
+            <i class="fas fa-circle" style="font-size:0.5em;margin-right:5px;"></i> System Online
+        </span>
+    </div>
+</div>
+
+<div class="admin-content">
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-card-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-card-value"><?= $stats['total_users'] ?></div>
+            <div class="stat-card-label">Total Users</div>
+            <div style="margin-top:10px;font-size:0.85em;color:#7f8c8d;">
+                <i class="fas fa-check-circle" style="color:#2ecc71;"></i> <?= $stats['active_users'] ?> Active
+            </div>
+        </div>
+        
+        <div class="stat-card success">
+            <div class="stat-card-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-card-value"><?= $stats['published_pages'] ?></div>
+            <div class="stat-card-label">Published Pages</div>
+            <div style="margin-top:10px;font-size:0.85em;color:#7f8c8d;">
+                <?= $stats['total_pages'] ?> Total
+            </div>
+        </div>
+        
+        <div class="stat-card warning">
+            <div class="stat-card-icon"><i class="fas fa-cube"></i></div>
+            <div class="stat-card-value"><?= $stats['active_blocks'] ?></div>
+            <div class="stat-card-label">Active Blocks</div>
+            <div style="margin-top:10px;font-size:0.85em;color:#7f8c8d;">
+                <?= $stats['total_blocks'] ?> Total
+            </div>
+        </div>
+        
+        <div class="stat-card purple">
+            <div class="stat-card-icon"><i class="fas fa-puzzle-piece"></i></div>
+            <div class="stat-card-value"><?= $stats['total_modules'] ?></div>
+            <div class="stat-card-label">Total Modules</div>
+            <div style="margin-top:10px;font-size:0.85em;color:#7f8c8d;">
+                All Types
+            </div>
+        </div>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:30px;margin-bottom:30px;">
+        <div class="card">
+            <div class="card-header"><h3><i class="fas fa-rocket"></i> Quick Actions</h3></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:15px;">
+                <a href="/admin/users/create" class="quick-action-btn" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+                    <i class="fas fa-user-plus" style="font-size:2em;margin-bottom:10px;"></i>
+                    <span>Add User</span>
+                </a>
+                <a href="/admin/pages/create" class="quick-action-btn" style="background:linear-gradient(135deg,#f093fb,#f5576c);">
+                    <i class="fas fa-file-medical" style="font-size:2em;margin-bottom:10px;"></i>
+                    <span>New Page</span>
+                </a>
+                <a href="/admin/blocks/create" class="quick-action-btn" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">
+                    <i class="fas fa-cube" style="font-size:2em;margin-bottom:10px;"></i>
+                    <span>New Block</span>
+                </a>
+                <a href="/admin/roles/create" class="quick-action-btn" style="background:linear-gradient(135deg,#43e97b,#38f9d7);">
+                    <i class="fas fa-shield-alt" style="font-size:2em;margin-bottom:10px;"></i>
+                    <span>Add Role</span>
+                </a>
+                <a href="/admin/module-generator" class="quick-action-btn" style="background:linear-gradient(135deg,#fa709a,#fee140);">
+                    <i class="fas fa-cogs" style="font-size:2em;margin-bottom:10px;"></i>
+                    <span>Generate Module</span>
+                </a>
+                <a href="/admin/ai/test" class="quick-action-btn" style="background:linear-gradient(135deg,#30cfd0,#330867);">
+                    <i class="fas fa-robot" style="font-size:2em;margin-bottom:10px;"></i>
+                    <span>Test AI</span>
+                </a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header"><h3><i class="fas fa-chart-pie"></i> System Info</h3></div>
+            <div style="space-y:12px;">
+                <div style="padding:12px 0;border-bottom:1px solid #ecf0f1;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="color:#7f8c8d;"><i class="fas fa-user-shield"></i> Roles</span>
+                        <strong style="color:#2c3e50;"><?= $stats['total_roles'] ?></strong>
+                    </div>
+                </div>
+                <div style="padding:12px 0;border-bottom:1px solid #ecf0f1;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="color:#7f8c8d;"><i class="fas fa-server"></i> Status</span>
+                        <span class="badge badge-success">Online</span>
+                    </div>
+                </div>
+                <div style="padding:12px 0;border-bottom:1px solid #ecf0f1;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="color:#7f8c8d;"><i class="fas fa-code-branch"></i> Framework</span>
+                        <strong style="color:#2c3e50;">v1.0</strong>
+                    </div>
+                </div>
+                <div style="padding:12px 0;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="color:#7f8c8d;"><i class="fas fa-clock"></i> Last Update</span>
+                        <strong style="color:#2c3e50;"><?= date('M d, Y') ?></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-th-large"></i> Management Modules</h3></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;">
+            <a href="/admin/users" class="module-card">
+                <div class="module-icon" style="background:rgba(52,152,219,0.1);color:#3498db;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4>User Management</h4>
+                <p>Manage users and permissions</p>
+            </a>
+            <a href="/admin/roles" class="module-card">
+                <div class="module-icon" style="background:rgba(46,204,113,0.1);color:#2ecc71;">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h4>Role Management</h4>
+                <p>Configure user roles</p>
+            </a>
+            <a href="/admin/pages" class="module-card">
+                <div class="module-icon" style="background:rgba(243,156,18,0.1);color:#f39c12;">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h4>Page Manager</h4>
+                <p>Create and edit pages</p>
+            </a>
+            <a href="/admin/blocks" class="module-card">
+                <div class="module-icon" style="background:rgba(155,89,182,0.1);color:#9b59b6;">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <h4>HTML Blocks</h4>
+                <p>Reusable content blocks</p>
+            </a>
+            <a href="/admin/module-generator" class="module-card">
+                <div class="module-icon" style="background:rgba(231,76,60,0.1);color:#e74c3c;">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h4>Module Generator</h4>
+                <p>Generate new modules</p>
+            </a>
+            <a href="/admin/public-content" class="module-card">
+                <div class="module-icon" style="background:rgba(52,152,219,0.1);color:#3498db;">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <h4>Public Content</h4>
+                <p>Manage public website</p>
+            </a>
+            <a href="/admin/ai" class="module-card">
+                <div class="module-icon" style="background:rgba(46,204,113,0.1);color:#2ecc71;">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h4>AI Assistant</h4>
+                <p>AI features and monitoring</p>
+            </a>
+            <a href="/admin/automation" class="module-card">
+                <div class="module-icon" style="background:rgba(243,156,18,0.1);color:#f39c12;">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <h4>Automation</h4>
+                <p>Automated tasks & modules</p>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.quick-action-btn {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:25px 15px;
+    border-radius:10px;
+    color:white;
+    text-decoration:none;
+    transition:all 0.3s;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+.quick-action-btn:hover {
+    transform:translateY(-5px);
+    box-shadow:0 6px 20px rgba(0,0,0,0.15);
+}
+
+.module-card {
+    display:block;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    text-decoration:none;
+    transition:all 0.3s;
+    border:2px solid #ecf0f1;
+}
+
+.module-card:hover {
+    transform:translateY(-5px);
+    box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    border-color:#3498db;
+}
+
+.module-icon {
+    width:60px;
+    height:60px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.8em;
+    margin-bottom:15px;
+}
+
+.module-card h4 {
+    color:#2c3e50;
+    margin:10px 0;
+    font-size:1.1em;
+}
+
+.module-card p {
+    color:#7f8c8d;
+    margin:0;
+    font-size:0.9em;
+}
+</style>

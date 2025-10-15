@@ -1,85 +1,236 @@
 ---
-description: Guidelines for developing modules in the CyberTirah framework
+description: Guidelines for creating new modules in CyberTirah Framework
+globs: Body/**/*.php,Body/**/*.ct,Body/**/*.json
 ---
 
-# Module Development Guidelines
+# Module Development Guide
 
-## Creating New Modules
+## Creating a New Module
 
-### Module Structure
-When creating a new module, follow this structure:
-```
-Body/{admin|public}/{ModuleName}/
-├── routes.json          # Route definitions
-├── Controllers/         # Controller classes
-│   └── {module}.php     # Main controller
-├── Models/             # Model classes
-│   └── {module}.php     # Main model
-└── Views/              # View templates
-    └── {module}.ct      # Main view template
+### 1. Directory Structure
+```bash
+# Create module directories
+mkdir -p Body/{role}/{ModuleName}/{Controllers,Models,Views}
+
+# Example for public Blog module:
+mkdir -p Body/public/Blog/{Controllers,Models,Views}
 ```
 
-### Route Configuration
-Define routes in `routes.json`:
+### 2. Controller (Body/{role}/{Module}/Controllers/module.php)
+```php
+<?php
+
+declare(strict_types=1);
+
+require_once ROOT . '/Brain/Core/Controller.php';
+
+class BlogController extends Controller
+{
+    public function index(): void
+    {
+        // Load model using Loader
+        $this->load->model('public/Blog/Blog');
+        
+        // Get data
+        $posts = $this->model_blog->getAllPosts();
+        
+        // Prepare view data
+        $data = [
+            'title' => 'Blog',
+            'posts' => $posts
+        ];
+        
+        // Load views
+        $this->load->view('public/Common/header', $data);
+        $this->load->view('public/Blog/index', $data);
+        $this->load->view('public/Common/footer', $data);
+    }
+    
+    public function show(): void
+    {
+        $id = $_GET['id'] ?? null;
+        
+        // Load model
+        $this->load->model('public/Blog/Blog');
+        $post = $this->model_blog->getById((int)$id);
+        
+        // Load view
+        $this->load->view('public/Blog/show', ['post' => $post]);
+    }
+}
+```
+
+### 3. Model (Body/{role}/{Module}/Models/{Module}Model.php)
+```php
+<?php
+
+declare(strict_types=1);
+
+require_once ROOT . '/Brain/Core/Model.php';
+
+class BlogModel extends Model
+{
+    protected string $table = 'posts';
+    
+    public function getAllPosts(): array
+    {
+        $query = "SELECT * FROM {$this->table} ORDER BY created_at DESC";
+        return $this->db->query($query)->fetchAll();
+    }
+    
+    public function getById(int $id): ?array
+    {
+        $query = "SELECT * FROM {$this->table} WHERE id = ?";
+        return $this->db->query($query, [$id])->fetch();
+    }
+    
+    public function create(array $data): bool
+    {
+        $query = "INSERT INTO {$this->table} (title, content) VALUES (?, ?)";
+        return $this->db->execute($query, [$data['title'], $data['content']]);
+    }
+}
+```
+
+### 4. View (Body/{role}/{Module}/Views/index.ct)
+```php
+<div class="module-page" style="max-width:1200px;margin:0 auto;padding:20px;">
+    <h1><?= htmlspecialchars($title ?? 'Page') ?></h1>
+    
+    <?php if (!empty($posts)): ?>
+        <?php foreach ($posts as $post): ?>
+            <div class="post-card" style="border:1px solid #ddd;padding:15px;margin-bottom:10px;">
+                <h2><?= htmlspecialchars($post['title']) ?></h2>
+                <p><?= htmlspecialchars($post['content']) ?></p>
+                <a href="<?= Router::url('blog.show', ['id' => $post['id']]) ?>">Read More</a>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p>No posts found.</p>
+    <?php endif; ?>
+</div>
+```
+
+### 5. Routes (Body/{role}/{Module}/routes.json)
 ```json
 {
   "routes": [
     {
       "method": "GET",
-      "path": "/module/action",
-      "controller": "ModuleController",
-      "action": "actionMethod"
+      "path": "/blog",
+      "handler": "public/Blog/Blog@index",
+      "name": "blog.index"
+    },
+    {
+      "method": "GET",
+      "path": "/blog/{id:\\d+}",
+      "handler": "public/Blog/Blog@show",
+      "name": "blog.show"
+    },
+    {
+      "method": "POST",
+      "path": "/blog",
+      "handler": "public/Blog/Blog@create",
+      "name": "blog.create",
+      "middleware": ["auth"]
     }
   ]
 }
 ```
 
-### Controller Development
-- Extend the base Controller class from [Brain/Core/Controller.php](mdc:Brain/Core/Controller.php)
-- Use dependency injection through Registry
-- Implement proper error handling
-- Follow RESTful conventions where appropriate
+## Component Loading Patterns
 
-### Model Development
-- Extend the base Model class from [Brain/Core/Model.php](mdc:Brain/Core/Model.php)
-- Use the Database class for data operations
-- Implement validation methods
-- Use proper relationships between models
+### Load Model
+```php
+// Method 1: Using Loader
+$this->load->model('public/Blog/Blog');
+$posts = $this->model_blog->getAllPosts();
 
-### View Templates
-- Use `.ct` extension for view files
-- Follow the framework's templating system
-- Implement proper escaping for security
-- Use components and layouts for reusability
+// Method 2: Direct instantiation
+$blogModel = new BlogModel($this->registry);
+```
 
-### Module Registration
-- Register modules in the appropriate directory structure
-- Update routing configuration
-- Ensure proper namespace usage
-- Test module functionality thoroughly
+### Load Library
+```php
+$this->load->library('security/Validator');
+$isValid = $this->validator->validate($data);
+```
+
+### Load Helper
+```php
+$this->load->helper('url');
+// Helper functions now available
+```
+
+### Load View
+```php
+// Single view
+$this->load->view('public/Blog/index', $data);
+
+// Multiple views (typical pattern)
+$this->load->view('public/Common/header', $data);
+$this->load->view('public/Blog/index', $data);
+$this->load->view('public/Common/footer', $data);
+```
+
+## Service Access
+
+### Using Magic Accessors
+```php
+// Database
+$users = $this->db->query("SELECT * FROM users")->fetchAll();
+
+// Session
+$userId = $this->session->get('user_id');
+$this->session->set('key', 'value');
+
+// Cache
+$data = $this->cache->get('cache_key');
+$this->cache->set('cache_key', $data, 3600);
+```
+
+## Route Parameters
+
+### Define with Regex
+```json
+{
+  "path": "/blog/{id:\\d+}",
+  "path": "/user/{username:[a-z0-9_]+}",
+  "path": "/post/{slug:[a-z0-9-]+}"
+}
+```
+
+### Access in Controller
+```php
+public function show(): void
+{
+    $id = $_GET['id'] ?? null;
+    $username = $_GET['username'] ?? null;
+}
+```
+
+## Middleware
+
+### Route-specific Middleware
+```json
+{
+  "path": "/admin/dashboard",
+  "handler": "admin/Dashboard@index",
+  "middleware": ["auth", "admin"]
+}
+```
+
+### Global Middleware
+```php
+// In Index/index.php or bootstrap
+Router::middleware(['csrf', 'session']);
+```
 
 ## Best Practices
 
-### Security
-- Validate all input data
-- Use framework security classes
-- Implement proper authentication
-- Follow CSRF protection guidelines
-
-### Performance
-- Use caching mechanisms
-- Optimize database queries
-- Implement proper pagination
-- Use lazy loading where appropriate
-
-### Testing
-- Write unit tests for controllers and models
-- Test view rendering
-- Validate route configurations
-- Test error handling scenarios
-
-### Documentation
-- Document all public methods
-- Provide usage examples
-- Update module documentation
-- Include configuration instructions
+1. **Always use strict typing**: `declare(strict_types=1);`
+2. **Use named routes**: Always define `name` in routes.json
+3. **Sanitize output**: Use `htmlspecialchars()` in views
+4. **Type hint parameters**: `public function show(int $id): void`
+5. **Load common views**: header/footer in most controllers
+6. **Use Router for URLs**: `Router::url('route.name', $params)` instead of hardcoded paths

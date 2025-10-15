@@ -1,0 +1,8 @@
+{
+  "routes": [
+    {"method": "GET", "path": "/admin/public-content", "handler": "admin/PublicContent/Publiccontent@index", "name": "admin.publiccontent.index"},
+    {"method": "GET", "path": "/admin/public-content/settings", "handler": "admin/PublicContent/Publiccontent@settings", "name": "admin.publiccontent.settings"},
+    {"method": "POST", "path": "/admin/public-content/savesettings", "handler": "admin/PublicContent/Publiccontent@savesettings", "name": "admin.publiccontent.savesettings"}
+  ]
+}
+

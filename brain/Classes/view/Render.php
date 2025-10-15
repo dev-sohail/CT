@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 class Render
 {
     protected Registry $registry;
+    protected array $cache = [];
 
     public function __construct(Registry $registry)
     {
@@ -19,7 +22,7 @@ class Render
      * @param bool   $return Return instead of echo
      * @return string|void
      */
-    public function render(string $role, string $module, string $file, array $data = [], bool $return = false)
+    public function render(string $role, string $module, string $file, array $data = [], bool $return = false): mixed
     {
         $base = rtrim(DIR_MODULES, '/');
         $candidates = [

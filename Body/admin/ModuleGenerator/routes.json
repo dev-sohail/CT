@@ -1,0 +1,7 @@
+{
+  "routes": [
+    {"method": "GET", "path": "/admin/module-generator", "handler": "admin/ModuleGenerator/Modulegenerator@index", "name": "admin.modulegenerator.index"},
+    {"method": "POST", "path": "/admin/module-generator/generate", "handler": "admin/ModuleGenerator/Modulegenerator@generate", "name": "admin.modulegenerator.generate"}
+  ]
+}
+

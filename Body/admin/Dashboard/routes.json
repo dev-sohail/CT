@@ -1,0 +1,23 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/admin",
+      "handler": "admin/Dashboard/Dashboard@index",
+      "name": "admin.dashboard"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/dashboard",
+      "handler": "admin/Dashboard/Dashboard@index",
+      "name": "admin.dashboard.index"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/analytics",
+      "handler": "admin/Dashboard/Dashboard@analytics",
+      "name": "admin.analytics"
+    }
+  ]
+}
+

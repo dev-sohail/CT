@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($title) ?></title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 40px 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 15px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        h1 { color: #667eea; margin-bottom: 10px; }
+        .subtitle { color: #6c757d; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 16px; transition: border 0.3s; }
+        input:focus, select:focus { outline: none; border-color: #667eea; }
+        .checkbox-group { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .checkbox-label { display: flex; align-items: center; padding: 12px; background: #f8f9fa; border-radius: 8px; cursor: pointer; transition: background 0.3s; }
+        .checkbox-label:hover { background: #e9ecef; }
+        .checkbox-label input { width: auto; margin-right: 10px; }
+        .btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.3s; width: 100%; }
+        .btn:hover { transform: translateY(-2px); }
+        .alert { padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚀 Module Generator</h1>
+    <p class="subtitle">Generate new modules for your CyberTirah Framework</p>
+    
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success">
+            <?= htmlspecialchars($_SESSION['success']) ?>
+            <?php unset($_SESSION['success']); ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-error">
+            <?= htmlspecialchars($_SESSION['error']) ?>
+            <?php unset($_SESSION['error']); ?>
+        </div>
+    <?php endif; ?>
+    
+    <form action="/automate/generate" method="POST">
+        
+        <div class="form-group">
+            <label for="role">Select Role:</label>
+            <select name="role" id="role" required>
+                <option value="">-- Choose a role --</option>
+                <?php foreach ($roles as $role): ?>
+                    <option value="<?= htmlspecialchars($role) ?>"><?= ucfirst($role) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="module">Module Name:</label>
+            <input type="text" name="module" id="module" placeholder="e.g., Products, Users, Dashboard" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Components to Generate:</label>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="components[]" value="controller" checked> Controller
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="components[]" value="model" checked> Model
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="components[]" value="view" checked> View
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="components[]" value="routes" checked> Routes
+                </label>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn">Generate Module</button>
+    </form>
+    
+    <div style="margin-top:30px;text-align:center;">
+        <a href="/automate/list" style="color:#667eea;text-decoration:none;font-weight:600;">View All Modules →</a>
+    </div>
+</div>
+
+</body>
+</html>
+

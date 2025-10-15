@@ -1,100 +1,127 @@
 <?php
 
+declare(strict_types=1);
+
 class Template
 {
     protected string $viewPath;
-    protected string $extension = '.ct.php';
-
-    protected ?string $role = null;
-    protected ?string $module = null;
-
     protected array $data = [];
     protected ?string $layout = null;
+    protected array $sections = [];
+    protected ?string $currentSection = null;
 
-    public function __construct(?string $role = null, ?string $module = null)
+    public function __construct(?string $viewPath = null)
     {
-        $this->role = $role ?? defined('DEFAULT_ROLE') ? DEFAULT_ROLE : 'App';
-        $this->module = $module ?? defined('DEFAULT_MODULE') ? DEFAULT_MODULE : 'Main';
-        if (defined('DIR_MODULES')) {
-            $this->viewPath = rtrim(DIR_MODULES, '/') . "/{$this->role}/{$this->module}/Views/";
+        if ($viewPath) {
+            $this->viewPath = rtrim($viewPath, '/');
+        } elseif (defined('DIR_BODY')) {
+            $this->viewPath = DIR_BODY;
         } else {
-            $this->viewPath = __DIR__ . '/../../../Views/';
+            $this->viewPath = defined('ROOT') ? ROOT . '/Body' : __DIR__ . '/../../../Body';
         }
     }
 
-    /**
-     * Assign variables to view
-     */
     public function set(string $key, mixed $value): void
     {
         $this->data[$key] = $value;
     }
 
-    /**
-     * Assign multiple variables at once
-     */
     public function setData(array $data): void
     {
         $this->data = array_merge($this->data, $data);
     }
 
-    /**
-     * Define layout file (optional)
-     */
-    public function setLayout(string $layoutFile): void
+    public function setLayout(string $layout): void
     {
-        $this->layout = $layoutFile;
+        $this->layout = $layout;
     }
 
-    /**
-     * Render a view file
-     */
-    public function render(string $viewFile, array $extraData = []): void
+    public function render(string $view, array $data = []): string
     {
-        $viewFullPath = $this->getViewFilePath($viewFile);
-        $data = array_merge($this->data, $extraData);
-
-        if (!file_exists($viewFullPath)) {
-            throw new Exception("View [$viewFullPath] not found.");
+        $viewPath = $this->resolveViewPath($view);
+        
+        if (!file_exists($viewPath)) {
+            throw new RuntimeException("View not found: $view at $viewPath");
         }
 
-        // Extract variables for view
-        extract($data);
+        $allData = array_merge($this->data, $data);
+        extract($allData, EXTR_SKIP);
 
-        // Capture view content
         ob_start();
-        include $viewFullPath;
+        include $viewPath;
         $content = ob_get_clean();
 
         if ($this->layout) {
-            $layoutFullPath = $this->getViewFilePath($this->layout);
-            if (!file_exists($layoutFullPath)) {
-                throw new Exception("Layout [$layoutFullPath] not found.");
+            $layoutPath = $this->resolveViewPath($this->layout);
+            
+            if (!file_exists($layoutPath)) {
+                throw new RuntimeException("Layout not found: {$this->layout} at $layoutPath");
             }
 
-            // Content will be available inside layout
-            extract(['content' => $content] + $data);
-            include $layoutFullPath;
-        } else {
-            echo $content;
+            $this->sections['content'] = $content;
+            extract(array_merge($allData, $this->sections), EXTR_SKIP);
+
+            ob_start();
+            include $layoutPath;
+            return ob_get_clean();
+        }
+
+        return $content;
+    }
+
+    public function display(string $view, array $data = []): void
+    {
+        echo $this->render($view, $data);
+    }
+
+    public function section(string $name): void
+    {
+        $this->currentSection = $name;
+        ob_start();
+    }
+
+    public function endSection(): void
+    {
+        if ($this->currentSection) {
+            $this->sections[$this->currentSection] = ob_get_clean();
+            $this->currentSection = null;
         }
     }
 
-    /**
-     * Resolve full path to view
-     */
-    protected function getViewFilePath(string $file): string
+    public function yieldSection(string $name, string $default = ''): string
     {
-        $base = rtrim($this->viewPath, '/');
-        $candidates = [
-            $base . '/' . rtrim($file, '.ct.php') . '.ct.php',
-            $base . '/' . rtrim($file, '.php') . '.php',
-        ];
-        foreach ($candidates as $candidate) {
-            if (file_exists($candidate)) {
-                return $candidate;
+        return $this->sections[$name] ?? $default;
+    }
+
+    public function extend(string $layout): void
+    {
+        $this->layout = $layout;
+    }
+
+    protected function resolveViewPath(string $view): string
+    {
+        $view = str_replace('.', '/', $view);
+        
+        $extensions = ['.ct', '.php'];
+        
+        foreach ($extensions as $ext) {
+            $path = $this->viewPath . '/' . $view . $ext;
+            if (file_exists($path)) {
+                return $path;
             }
         }
-        return $candidates[0];
+
+        return $this->viewPath . '/' . $view . '.ct';
+    }
+
+    public function escape(string $value): string
+    {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    public function e(string $value): string
+    {
+        return $this->escape($value);
     }
 }
+

@@ -1,0 +1,267 @@
+---
+description: View and template development patterns
+globs: **/Views/*.ct,**/views/*.ct
+---
+
+# Views and Templates Guide
+
+## View Files
+
+Views are stored in module directories at [Body/{role}/{module}/Views/](mdc:Body) with `.ct` extension.
+
+## Loading Views
+
+### Using Loader
+```php
+// Single view
+$this->load->view('public/Blog/index', $data);
+
+// Multiple views (common pattern)
+$this->load->view('public/Common/header', $data);
+$this->load->view('public/Blog/index', $data);
+$this->load->view('public/Common/footer', $data);
+```
+
+### View Path Format
+```
+"{role}/{module}/{viewname}"
+
+Examples:
+- "public/Home/home"
+- "admin/Dashboard/index"
+- "public/Common/header"
+```
+
+## Data Passing
+
+### Controller to View
+```php
+public function index(): void
+{
+    $data = [
+        'title' => 'Page Title',
+        'items' => $this->model->getAll(),
+        'user' => $this->session->get('user')
+    ];
+    
+    $this->load->view('public/Module/index', $data);
+}
+```
+
+### Accessing in View
+```php
+<h1><?= htmlspecialchars($title ?? 'Default Title') ?></h1>
+
+<?php if (!empty($items)): ?>
+    <?php foreach ($items as $item): ?>
+        <p><?= htmlspecialchars($item['name']) ?></p>
+    <?php endforeach; ?>
+<?php endif; ?>
+```
+
+## Common Views
+
+### Header ([Body/public/Common/Views/header.ct](mdc:Body/public/Common/Views/header.ct))
+```php
+<header id="header">
+    <nav>
+        <a href="<?= Router::url('home') ?>">Home</a>
+        <a href="<?= Router::url('about') ?>">About</a>
+    </nav>
+</header>
+
+<?php renderBreadcrumb(); ?>
+```
+
+### Footer ([Body/public/Common/Views/footer.ct](mdc:Body/public/Common/Views/footer.ct))
+```php
+<footer style="padding:16px;background:#333;color:#fff;">
+    <p>&copy; <?= date('Y') ?> CyberTirah Framework</p>
+</footer>
+```
+
+## Breadcrumb System
+
+### Automatic Breadcrumbs
+Breadcrumbs are automatically generated from the URL path.
+
+```php
+// In header.ct
+renderBreadcrumb(); // Generates from current URL
+```
+
+### Custom Breadcrumbs
+```php
+$customBreadcrumbs = [
+    ['label' => 'Home', 'url' => '/'],
+    ['label' => 'Products', 'url' => '/products'],
+    ['label' => 'Electronics', 'url' => '/products/electronics'],
+    ['label' => 'Item Name', 'url' => '']
+];
+
+renderBreadcrumb($customBreadcrumbs);
+```
+
+### Breadcrumb Dictionary
+Add custom term mappings in header.ct:
+
+```php
+function getBreadcrumbDictionary()
+{
+    return [
+        "index" => "Home",
+        "about" => "About Us",
+        "team" => "Our Team",
+        // Add custom mappings
+        "blog" => "Our Blog",
+        "products" => "Products",
+    ];
+}
+```
+
+## URL Generation in Views
+
+### Named Routes
+```php
+<a href="<?= Router::url('blog.show', ['id' => $post['id']]) ?>">
+    Read More
+</a>
+
+<a href="<?= Router::url('blog.index', [], ['page' => 2]) ?>">
+    Page 2
+</a>
+```
+
+### Direct URLs
+```php
+<a href="/about">About Us</a>
+<a href="/about/team">Our Team</a>
+```
+
+## HTML Output Escaping
+
+### Always Escape User Data
+```php
+<!-- Good -->
+<h1><?= htmlspecialchars($title) ?></h1>
+<p><?= htmlspecialchars($content) ?></p>
+
+<!-- Bad (XSS vulnerability) -->
+<h1><?= $title ?></h1>
+<p><?= $content ?></p>
+```
+
+### Safe HTML Output
+```php
+<!-- For trusted HTML content -->
+<?= $trustedHtml ?>
+
+<!-- For user content, use purifier -->
+<?= $htmlPurifier->purify($userContent) ?>
+```
+
+## Conditional Rendering
+
+### Check Data Existence
+```php
+<?php if (!empty($items)): ?>
+    <!-- Render items -->
+<?php else: ?>
+    <p>No items found.</p>
+<?php endif; ?>
+```
+
+### User Authentication
+```php
+<?php if ($this->session->has('user_id')): ?>
+    <a href="/logout">Logout</a>
+<?php else: ?>
+    <a href="/login">Login</a>
+<?php endif; ?>
+```
+
+## Styling Patterns
+
+### Inline Styles (Current Pattern)
+```php
+<div style="max-width:1200px;margin:0 auto;padding:20px;">
+    <h1 style="color:#667eea;font-size:2em;">Title</h1>
+</div>
+```
+
+### CSS Classes (Alternative)
+```php
+<div class="container">
+    <h1 class="page-title">Title</h1>
+</div>
+```
+
+## Common View Patterns
+
+### List View
+```php
+<div class="items-list">
+    <?php if (!empty($items)): ?>
+        <?php foreach ($items as $item): ?>
+            <div class="item-card">
+                <h3><?= htmlspecialchars($item['title']) ?></h3>
+                <p><?= htmlspecialchars($item['description']) ?></p>
+                <a href="<?= Router::url('item.show', ['id' => $item['id']]) ?>">
+                    View Details
+                </a>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p>No items to display.</p>
+    <?php endif; ?>
+</div>
+```
+
+### Detail View
+```php
+<div class="item-detail">
+    <h1><?= htmlspecialchars($item['title']) ?></h1>
+    
+    <div class="metadata">
+        <span>Created: <?= date('F j, Y', strtotime($item['created_at'])) ?></span>
+        <span>Author: <?= htmlspecialchars($item['author']) ?></span>
+    </div>
+    
+    <div class="content">
+        <?= nl2br(htmlspecialchars($item['content'])) ?>
+    </div>
+    
+    <a href="<?= Router::url('items.index') ?>">Back to List</a>
+</div>
+```
+
+### Form View
+```php
+<form method="POST" action="<?= Router::url('item.store') ?>">
+    <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" required 
+               value="<?= htmlspecialchars($item['title'] ?? '') ?>">
+    </div>
+    
+    <div class="form-group">
+        <label>Content</label>
+        <textarea name="content" required><?= htmlspecialchars($item['content'] ?? '') ?></textarea>
+    </div>
+    
+    <button type="submit">Save</button>
+</form>
+```
+
+## Best Practices
+
+1. **Always escape output**: Use `htmlspecialchars()` for user data
+2. **Use named routes**: For all URLs to enable easy refactoring
+3. **Check data existence**: Use `??` operator for defaults
+4. **Separate concerns**: Keep logic in controllers, display in views
+5. **Reuse common views**: header, footer, navigation
+6. **Use breadcrumbs**: Call `renderBreadcrumb()` for navigation context
+7. **Semantic HTML**: Use proper HTML5 elements
+8. **Responsive design**: Consider mobile-first approach
+9. **Accessibility**: Use proper ARIA labels and semantic markup
+10. **Performance**: Minimize inline styles, consider CSS classes for production

@@ -1,0 +1,49 @@
+<div class="team-page" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px;">
+    
+    <!-- Page Header -->
+    <section class="page-header" style="text-align: center; padding: 40px 20px; margin-bottom: 40px;">
+        <h1 style="font-size: 3em; margin-bottom: 15px; color: #333;"><?= htmlspecialchars($heading ?? 'Our Team') ?></h1>
+        <p style="font-size: 1.2em; color: #6c757d; max-width: 700px; margin: 0 auto;">
+            Meet the talented people behind CyberTirah Framework
+        </p>
+    </section>
+
+    <!-- Team Grid -->
+    <?php if (!empty($team)): ?>
+    <section class="team-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 60px;">
+        <?php foreach ($team as $member): ?>
+            <div class="team-card" style="background: #fff; padding: 40px; text-align: center; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                <div style="font-size: 5em; margin-bottom: 20px;">
+                    <?= $member['avatar'] ?? '👤' ?>
+                </div>
+                <h3 style="font-size: 1.8em; margin-bottom: 10px; color: #333;">
+                    <?= htmlspecialchars($member['name'] ?? '') ?>
+                </h3>
+                <div style="color: #667eea; font-weight: 600; font-size: 1.1em; margin-bottom: 15px;">
+                    <?= htmlspecialchars($member['role'] ?? '') ?>
+                </div>
+                <p style="color: #6c757d; line-height: 1.7; font-size: 1em;">
+                    <?= htmlspecialchars($member['bio'] ?? '') ?>
+                </p>
+            </div>
+        <?php endforeach; ?>
+    </section>
+    <?php else: ?>
+        <div style="text-align: center; padding: 60px 20px;">
+            <p style="font-size: 1.2em; color: #6c757d;">No team members found.</p>
+        </div>
+    <?php endif; ?>
+
+    <!-- Join Team Section -->
+    <section class="join-team" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 40px; text-align: center; border-radius: 15px; color: white;">
+        <h2 style="font-size: 2.5em; margin-bottom: 20px;">Want to Join Our Team?</h2>
+        <p style="font-size: 1.2em; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">
+            We're always looking for talented developers and contributors to help make CyberTirah even better!
+        </p>
+        <a href="/about/contact" style="display: inline-block; background: white; color: #667eea; padding: 15px 40px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 1.1em;">
+            Get In Touch
+        </a>
+    </section>
+
+</div>
+

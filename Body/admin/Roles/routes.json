@@ -1,0 +1,47 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/admin/roles",
+      "handler": "admin/Roles/Roles@index",
+      "name": "admin.roles.index"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/roles/create",
+      "handler": "admin/Roles/Roles@create",
+      "name": "admin.roles.create"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/roles/store",
+      "handler": "admin/Roles/Roles@store",
+      "name": "admin.roles.store"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/roles/edit",
+      "handler": "admin/Roles/Roles@edit",
+      "name": "admin.roles.edit"
+    },
+    {
+      "method": "POST",
+      "path": "/admin/roles/update",
+      "handler": "admin/Roles/Roles@update",
+      "name": "admin.roles.update"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/roles/delete",
+      "handler": "admin/Roles/Roles@delete",
+      "name": "admin.roles.delete"
+    },
+    {
+      "method": "GET",
+      "path": "/admin/roles/toggle",
+      "handler": "admin/Roles/Roles@toggle",
+      "name": "admin.roles.toggle"
+    }
+  ]
+}
+

@@ -1,6 +1,28 @@
 {
   "routes": [
-    { "method": "GET", "path": "/api/health", "handler": "api/Health/HealthController@index" },
-    { "method": "GET", "path": "/api/version", "handler": "api/Version/VersionController@index" }
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "handler": "api/Health@index",
+      "name": "api.health"
+    },
+    {
+      "method": "GET",
+      "path": "/api/version",
+      "handler": "api/Version@index",
+      "name": "api.version"
+    },
+    {
+      "method": "GET",
+      "path": "/api/routes",
+      "handler": "api/Routes@index",
+      "name": "api.routes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/routes/stats",
+      "handler": "api/Routes@stats",
+      "name": "api.routes.stats"
+    }
   ]
 }

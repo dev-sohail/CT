@@ -9,70 +9,60 @@ require_once ROOT . '/Brain/Core/Controller.php';
  */
 class ProcessController extends Controller
 {
+    /**
+     * Process AI request
+     */
     public function index(): void
     {
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+        
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $this->jsonResponse(['error' => 'Method not allowed'], 405);
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
             return;
         }
-
+        
+        // Get input
         $input = json_decode(file_get_contents('php://input'), true);
         
-        if (!$input || !isset($input['text'])) {
-            $this->jsonResponse(['error' => 'Invalid input'], 400);
+        if (!isset($input['prompt'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Prompt is required']);
             return;
         }
-
-        // Simulate AI processing
-        $result = [
-            'processed_text' => $input['text'],
-            'sentiment' => $this->analyzeSentiment($input['text']),
-            'keywords' => $this->extractKeywords($input['text']),
-            'confidence' => rand(80, 95) / 100,
-            'timestamp' => date('Y-m-d H:i:s')
-        ];
-
-        $this->jsonResponse($result);
+        
+        $this->load->model('ai/Process');
+        $result = $this->model_process->process($input['prompt']);
+        
+        echo json_encode($result, JSON_PRETTY_PRINT);
     }
-
-    private function analyzeSentiment(string $text): string
+    
+    /**
+     * Chat endpoint
+     */
+    public function chat(): void
     {
-        $positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic'];
-        $negativeWords = ['bad', 'terrible', 'awful', 'horrible', 'disgusting', 'hate'];
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
         
-        $text = strtolower($text);
-        $positiveCount = 0;
-        $negativeCount = 0;
-        
-        foreach ($positiveWords as $word) {
-            $positiveCount += substr_count($text, $word);
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            return;
         }
         
-        foreach ($negativeWords as $word) {
-            $negativeCount += substr_count($text, $word);
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        if (!isset($input['message'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Message is required']);
+            return;
         }
         
-        if ($positiveCount > $negativeCount) {
-            return 'positive';
-        } elseif ($negativeCount > $positiveCount) {
-            return 'negative';
-        } else {
-            return 'neutral';
-        }
-    }
-
-    private function extractKeywords(string $text): array
-    {
-        $words = str_word_count(strtolower($text), 1);
-        $stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+        $this->load->model('ai/Process');
+        $response = $this->model_process->chat($input['message'], $input['context'] ?? []);
         
-        $filteredWords = array_filter($words, function($word) use ($stopWords) {
-            return strlen($word) > 3 && !in_array($word, $stopWords);
-        });
-        
-        $wordCount = array_count_values($filteredWords);
-        arsort($wordCount);
-        
-        return array_slice(array_keys($wordCount), 0, 5);
+        echo json_encode($response, JSON_PRETTY_PRINT);
     }
 }

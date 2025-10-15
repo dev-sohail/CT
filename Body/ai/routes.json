@@ -1,6 +1,28 @@
 {
   "routes": [
-    { "method": "GET", "path": "/ai/status", "handler": "ai/Status/StatusController@index" },
-    { "method": "POST", "path": "/ai/process", "handler": "ai/Process/ProcessController@index" }
+    {
+      "method": "GET",
+      "path": "/ai/status",
+      "handler": "ai/Status@index",
+      "name": "ai.status"
+    },
+    {
+      "method": "GET",
+      "path": "/ai/capabilities",
+      "handler": "ai/Status@capabilities",
+      "name": "ai.capabilities"
+    },
+    {
+      "method": "POST",
+      "path": "/ai/process",
+      "handler": "ai/Process@index",
+      "name": "ai.process"
+    },
+    {
+      "method": "POST",
+      "path": "/ai/chat",
+      "handler": "ai/Process@chat",
+      "name": "ai.chat"
+    }
   ]
 }

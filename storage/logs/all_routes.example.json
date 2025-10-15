@@ -1,0 +1,241 @@
+{
+  "meta": {
+    "framework": "CyberTirah Framework",
+    "version": "2.0.0",
+    "generated_at": "2025-10-12 16:30:45",
+    "timestamp": 1697126445,
+    "total_routes": 16,
+    "total_named_routes": 16,
+    "methods": [
+      "get",
+      "post"
+    ],
+    "environment": "development"
+  },
+  "statistics": {
+    "by_method": {
+      "GET": 13,
+      "POST": 3
+    },
+    "with_middleware": 0,
+    "with_names": 16,
+    "with_params": 2
+  },
+  "named_routes": {
+    "home": {
+      "method": "GET",
+      "path": "/",
+      "handler": "public/Home/Home@index"
+    },
+    "home.get-started": {
+      "method": "GET",
+      "path": "/get-started",
+      "handler": "public/Home/Home@getStarted"
+    },
+    "about": {
+      "method": "GET",
+      "path": "/about",
+      "handler": "public/About/About@index"
+    },
+    "about.team": {
+      "method": "GET",
+      "path": "/about/team",
+      "handler": "public/About/About@team"
+    },
+    "about.contact": {
+      "method": "GET",
+      "path": "/about/contact",
+      "handler": "public/About/About@contact"
+    },
+    "about.contact.submit": {
+      "method": "POST",
+      "path": "/about/contact",
+      "handler": "public/About/About@submitContactForm"
+    },
+    "blog.index": {
+      "method": "GET",
+      "path": "/blog",
+      "handler": "public/Blog/Blog@index"
+    },
+    "blog.show": {
+      "method": "GET",
+      "path": "/blog/{id:\\d+}",
+      "handler": "public/Blog/Blog@show"
+    },
+    "blog.category": {
+      "method": "GET",
+      "path": "/blog/category/{category}",
+      "handler": "public/Blog/Blog@category"
+    },
+    "auth.login": {
+      "method": "GET",
+      "path": "/login",
+      "handler": "public/Auth/Auth@login"
+    },
+    "auth.login.post": {
+      "method": "POST",
+      "path": "/login",
+      "handler": "public/Auth/Auth@login"
+    },
+    "auth.register": {
+      "method": "GET",
+      "path": "/register",
+      "handler": "public/Auth/Auth@register"
+    },
+    "auth.register.post": {
+      "method": "POST",
+      "path": "/register",
+      "handler": "public/Auth/Auth@register"
+    },
+    "auth.logout": {
+      "method": "GET",
+      "path": "/logout",
+      "handler": "public/Auth/Auth@logout"
+    },
+    "auth.forgot": {
+      "method": "GET",
+      "path": "/forgot-password",
+      "handler": "public/Auth/Auth@forgotPassword"
+    },
+    "auth.forgot.post": {
+      "method": "POST",
+      "path": "/forgot-password",
+      "handler": "public/Auth/Auth@forgotPassword"
+    }
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "handler": "public/Home/Home@index",
+      "name": "home",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "GET",
+      "path": "/about",
+      "handler": "public/About/About@index",
+      "name": "about",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "GET",
+      "path": "/about/contact",
+      "handler": "public/About/About@contact",
+      "name": "about.contact",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "GET",
+      "path": "/about/team",
+      "handler": "public/About/About@team",
+      "name": "about.team",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "GET",
+      "path": "/blog",
+      "handler": "public/Blog/Blog@index",
+      "name": "blog.index",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "GET",
+      "path": "/blog/category/{category}",
+      "handler": "public/Blog/Blog@category",
+      "name": "blog.category",
+      "middleware": [],
+      "params": [
+        "category"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/blog/{id:\\d+}",
+      "handler": "public/Blog/Blog@show",
+      "name": "blog.show",
+      "middleware": [],
+      "params": [
+        "id"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/forgot-password",
+      "handler": "public/Auth/Auth@forgotPassword",
+      "name": "auth.forgot",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "GET",
+      "path": "/get-started",
+      "handler": "public/Home/Home@getStarted",
+      "name": "home.get-started",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "GET",
+      "path": "/login",
+      "handler": "public/Auth/Auth@login",
+      "name": "auth.login",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "GET",
+      "path": "/logout",
+      "handler": "public/Auth/Auth@logout",
+      "name": "auth.logout",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "GET",
+      "path": "/register",
+      "handler": "public/Auth/Auth@register",
+      "name": "auth.register",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "POST",
+      "path": "/about/contact",
+      "handler": "public/About/About@submitContactForm",
+      "name": "about.contact.submit",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "POST",
+      "path": "/forgot-password",
+      "handler": "public/Auth/Auth@forgotPassword",
+      "name": "auth.forgot.post",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "POST",
+      "path": "/login",
+      "handler": "public/Auth/Auth@login",
+      "name": "auth.login.post",
+      "middleware": [],
+      "params": []
+    },
+    {
+      "method": "POST",
+      "path": "/register",
+      "handler": "public/Auth/Auth@register",
+      "name": "auth.register.post",
+      "middleware": [],
+      "params": []
+    }
+  ]
+}
+

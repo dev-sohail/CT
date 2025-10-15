@@ -9,16 +9,31 @@ require_once ROOT . '/Brain/Core/Controller.php';
  */
 class StatusController extends Controller
 {
+    /**
+     * Get AI service status
+     */
     public function index(): void
     {
-        $this->jsonResponse([
-            'ai_status' => 'active',
-            'services' => [
-                'nlp' => 'available',
-                'ml' => 'available',
-                'prediction' => 'available'
-            ],
-            'timestamp' => date('Y-m-d H:i:s')
-        ]);
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+        
+        $this->load->model('ai/Status');
+        $status = $this->model_status->getStatus();
+        
+        echo json_encode($status, JSON_PRETTY_PRINT);
+    }
+    
+    /**
+     * Get AI capabilities
+     */
+    public function capabilities(): void
+    {
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+        
+        $this->load->model('ai/Status');
+        $capabilities = $this->model_status->getCapabilities();
+        
+        echo json_encode($capabilities, JSON_PRETTY_PRINT);
     }
 }

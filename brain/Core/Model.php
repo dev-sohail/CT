@@ -21,26 +21,26 @@ abstract class Model
     }
 
     /**
-     * Initialize database connection
+     * Initialize database connection from Registry
+     * Database should already be registered by Bootstrap
      */
     private function initializeDatabase(): void
     {
-        // Try to get database from registry
-        if ($this->registry->has('database')) {
-            $this->db = $this->registry->get('database');
-        } elseif ($this->registry->has('db')) {
-            $this->db = $this->registry->get('db');
-        } else {
-            // Create a new database connection if none exists
-            try {
-                require_once ROOT . '/Brain/Classes/database/Database.php';
-                $this->db = new Database();
-                $this->registry->set('database', $this->db);
-            } catch (Exception $e) {
-                error_log('Failed to initialize database: ' . $e->getMessage());
-                $this->db = null;
+        // Try multiple registry keys (for flexibility)
+        $dbKeys = ['pdo', 'db', 'database'];
+        
+        foreach ($dbKeys as $key) {
+            if ($this->registry->has($key)) {
+                $this->db = $this->registry->get($key);
+                if ($this->db instanceof \PDO) {
+                    return;
+                }
             }
         }
+        
+        // Database not found in registry - log warning
+        error_log('Warning: Database not found in registry. Ensure Bootstrap initializes PDO.');
+        $this->db = null;
     }
 
     /**
@@ -92,7 +92,27 @@ abstract class Model
      */
     protected function hasDatabase(): bool
     {
-        return $this->db !== null && method_exists($this->db, 'isConnected') && $this->db->isConnected();
+        if ($this->db === null) {
+            return false;
+        }
+        
+        // For PDO instances
+        if ($this->db instanceof \PDO) {
+            try {
+                // Simple ping to check connection
+                $this->db->query('SELECT 1');
+                return true;
+            } catch (\PDOException $e) {
+                return false;
+            }
+        }
+        
+        // For custom database wrappers
+        if (method_exists($this->db, 'isConnected')) {
+            return $this->db->isConnected();
+        }
+        
+        return true; // Assume available if can't determine
     }
 
     /**
@@ -110,30 +130,44 @@ abstract class Model
     }
 
     /**
-     * Execute a query
+     * Execute a query with PDO
      * 
      * @param string $sql The SQL query
      * @param array $params Query parameters
-     * @return mixed Query result
+     * @return \PDOStatement|false Statement result
      */
-    protected function query(string $sql, array $params = []): mixed
+    protected function query(string $sql, array $params = []): \PDOStatement|false
     {
         if (!$this->hasDatabase()) {
-            error_log('Database not available for query: ' . $sql);
-            return null;
+            throw new RuntimeException('Database not available. Ensure PDO is registered in Registry.');
         }
 
         try {
             $db = $this->getDatabase();
             
+            // If it's a PDO instance, use prepared statements
+            if ($db instanceof \PDO) {
+                if (empty($params)) {
+                    return $db->query($sql);
+                } else {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute($params);
+                    return $stmt;
+                }
+            }
+            
+            // If it's a custom wrapper with query method
             if (method_exists($db, 'query')) {
                 return $db->query($sql, $params);
             }
             
             throw new RuntimeException('Database query method not available');
-        } catch (Exception $e) {
-            error_log('Database query error: ' . $e->getMessage() . ' SQL: ' . $sql);
-            return null;
+        } catch (\PDOException $e) {
+            error_log("PDO Error in query '$sql': " . $e->getMessage());
+            throw new RuntimeException('Database query failed: ' . $e->getMessage(), 0, $e);
+        } catch (\Throwable $e) {
+            error_log("Error in query '$sql': " . $e->getMessage());
+            throw $e;
         }
     }
 
@@ -145,11 +179,16 @@ abstract class Model
      */
     public function findById(int|string $id): ?array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE {$this->primaryKey} = ?";
-        $result = $this->query($sql, [$id]);
+        if (empty($this->table)) {
+            throw new RuntimeException('Model table name not set');
+        }
         
-        if (is_object($result) && method_exists($result, 'row')) {
-            return $result->row;
+        $sql = "SELECT * FROM {$this->table} WHERE {$this->primaryKey} = ?";
+        $stmt = $this->query($sql, [$id]);
+        
+        if ($stmt instanceof \PDOStatement) {
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            return $result ?: null;
         }
         
         return null;
@@ -165,13 +204,17 @@ abstract class Model
      */
     public function findAll(array $conditions = [], int $limit = 0, int $offset = 0): array
     {
+        if (empty($this->table)) {
+            throw new RuntimeException('Model table name not set');
+        }
+        
         $sql = "SELECT * FROM {$this->table}";
         $params = [];
         
         if (!empty($conditions)) {
             $whereClause = [];
             foreach ($conditions as $field => $value) {
-                $whereClause[] = "{$field} = ?";
+                $whereClause[] = "`{$field}` = ?";
                 $params[] = $value;
             }
             $sql .= " WHERE " . implode(' AND ', $whereClause);
@@ -184,10 +227,10 @@ abstract class Model
             }
         }
         
-        $result = $this->query($sql, $params);
+        $stmt = $this->query($sql, $params);
         
-        if (is_object($result) && method_exists($result, 'rows')) {
-            return $result->rows;
+        if ($stmt instanceof \PDOStatement) {
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         }
         
         return [];
@@ -201,14 +244,27 @@ abstract class Model
      */
     public function insert(array $data): int|string
     {
-        $fields = array_keys($data);
+        if (empty($this->table)) {
+            throw new RuntimeException('Model table name not set');
+        }
+        
+        if (empty($data)) {
+            throw new \InvalidArgumentException('Insert data cannot be empty');
+        }
+        
+        $fields = array_map(fn($field) => "`{$field}`", array_keys($data));
         $placeholders = array_fill(0, count($fields), '?');
         
         $sql = "INSERT INTO {$this->table} (" . implode(', ', $fields) . ") VALUES (" . implode(', ', $placeholders) . ")";
         
-        $result = $this->query($sql, array_values($data));
+        $this->query($sql, array_values($data));
         
+        // Get last insert ID
         $db = $this->getDatabase();
+        if ($db instanceof \PDO) {
+            return $db->lastInsertId();
+        }
+        
         if (method_exists($db, 'getLastId')) {
             return $db->getLastId();
         }
@@ -225,11 +281,19 @@ abstract class Model
      */
     public function update(int|string $id, array $data): bool
     {
+        if (empty($this->table)) {
+            throw new RuntimeException('Model table name not set');
+        }
+        
+        if (empty($data)) {
+            throw new \InvalidArgumentException('Update data cannot be empty');
+        }
+        
         $fields = [];
         $params = [];
         
         foreach ($data as $field => $value) {
-            $fields[] = "{$field} = ?";
+            $fields[] = "`{$field}` = ?";
             $params[] = $value;
         }
         
@@ -237,9 +301,10 @@ abstract class Model
         
         $sql = "UPDATE {$this->table} SET " . implode(', ', $fields) . " WHERE {$this->primaryKey} = ?";
         
-        $result = $this->query($sql, $params);
+        $stmt = $this->query($sql, $params);
         
-        return true; // Assume success if no exception thrown
+        // Return true if query executed (even if no rows affected)
+        return $stmt instanceof \PDOStatement;
     }
 
     /**
@@ -250,11 +315,15 @@ abstract class Model
      */
     public function delete(int|string $id): bool
     {
+        if (empty($this->table)) {
+            throw new RuntimeException('Model table name not set');
+        }
+        
         $sql = "DELETE FROM {$this->table} WHERE {$this->primaryKey} = ?";
         
-        $result = $this->query($sql, [$id]);
+        $stmt = $this->query($sql, [$id]);
         
-        return true; // Assume success if no exception thrown
+        return $stmt instanceof \PDOStatement;
     }
 
     /**
@@ -265,24 +334,84 @@ abstract class Model
      */
     public function count(array $conditions = []): int
     {
+        if (empty($this->table)) {
+            throw new RuntimeException('Model table name not set');
+        }
+        
         $sql = "SELECT COUNT(*) as count FROM {$this->table}";
         $params = [];
         
         if (!empty($conditions)) {
             $whereClause = [];
             foreach ($conditions as $field => $value) {
-                $whereClause[] = "{$field} = ?";
+                $whereClause[] = "`{$field}` = ?";
                 $params[] = $value;
             }
             $sql .= " WHERE " . implode(' AND ', $whereClause);
         }
         
-        $result = $this->query($sql, $params);
+        $stmt = $this->query($sql, $params);
         
-        if (is_object($result) && method_exists($result, 'row')) {
-            return (int) $result->row['count'];
+        if ($stmt instanceof \PDOStatement) {
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+            return $result ? (int)$result['count'] : 0;
         }
         
         return 0;
     }
+    
+    /**
+     * Execute raw SQL (use with caution!)
+     * 
+     * @param string $sql The SQL query
+     * @param array $params Query parameters
+     * @return \PDOStatement|false
+     */
+    protected function execute(string $sql, array $params = []): \PDOStatement|false
+    {
+        return $this->query($sql, $params);
+    }
+    
+    /**
+     * Begin transaction
+     * 
+     * @return bool
+     */
+    protected function beginTransaction(): bool
+    {
+        $db = $this->getDatabase();
+        if ($db instanceof \PDO) {
+            return $db->beginTransaction();
+        }
+        return false;
+    }
+    
+    /**
+     * Commit transaction
+     * 
+     * @return bool
+     */
+    protected function commit(): bool
+    {
+        $db = $this->getDatabase();
+        if ($db instanceof \PDO) {
+            return $db->commit();
+        }
+        return false;
+    }
+    
+    /**
+     * Rollback transaction
+     * 
+     * @return bool
+     */
+    protected function rollback(): bool
+    {
+        $db = $this->getDatabase();
+        if ($db instanceof \PDO) {
+            return $db->rollback();
+        }
+        return false;
+    }
 }
+

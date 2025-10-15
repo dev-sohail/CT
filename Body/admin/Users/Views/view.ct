@@ -1,0 +1,81 @@
+<div class="admin-topbar">
+    <div class="topbar-left">
+        <h2><i class="fas fa-user"></i> User Details</h2>
+        <p>View user information</p>
+    </div>
+    <div class="topbar-right">
+        <a href="/admin/users/edit?id=<?= $user['user_id'] ?>" class="topbar-btn">
+            <i class="fas fa-edit"></i> Edit User
+        </a>
+        <a href="/admin/users" class="topbar-btn secondary">
+            <i class="fas fa-arrow-left"></i> Back to Users
+        </a>
+    </div>
+</div>
+
+<div class="admin-content">
+    
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-id-card"></i> User Information</h3>
+            <span class="badge <?= $user['status'] === 'active' ? 'badge-success' : 'badge-danger' ?>">
+                <?= htmlspecialchars(ucfirst($user['status'])) ?>
+            </span>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:25px;">
+            <div>
+                <label style="font-weight:600;color:#7f8c8d;font-size:0.9em;margin-bottom:5px;display:block;">User ID</label>
+                <p style="font-size:1.1em;color:#2c3e50;"><code>#<?= $user['user_id'] ?></code></p>
+            </div>
+            <div>
+                <label style="font-weight:600;color:#7f8c8d;font-size:0.9em;margin-bottom:5px;display:block;">Full Name</label>
+                <p style="font-size:1.1em;color:#2c3e50;"><?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></p>
+            </div>
+            <div>
+                <label style="font-weight:600;color:#7f8c8d;font-size:0.9em;margin-bottom:5px;display:block;">Username</label>
+                <p style="font-size:1.1em;color:#2c3e50;"><code><?= htmlspecialchars($user['username']) ?></code></p>
+            </div>
+            <div>
+                <label style="font-weight:600;color:#7f8c8d;font-size:0.9em;margin-bottom:5px;display:block;">Email</label>
+                <p style="font-size:1.1em;color:#2c3e50;"><a href="mailto:<?= htmlspecialchars($user['email']) ?>"><?= htmlspecialchars($user['email']) ?></a></p>
+            </div>
+            <div>
+                <label style="font-weight:600;color:#7f8c8d;font-size:0.9em;margin-bottom:5px;display:block;">Phone Number</label>
+                <p style="font-size:1.1em;color:#2c3e50;"><?= htmlspecialchars($user['phone_number'] ?? 'Not provided') ?></p>
+            </div>
+            <div>
+                <label style="font-weight:600;color:#7f8c8d;font-size:0.9em;margin-bottom:5px;display:block;">Role</label>
+                <p><span class="badge badge-primary" style="font-size:1em;padding:8px 15px;"><?= htmlspecialchars(ucfirst($user['role'])) ?></span></p>
+            </div>
+            <div>
+                <label style="font-weight:600;color:#7f8c8d;font-size:0.9em;margin-bottom:5px;display:block;">Created Date</label>
+                <p style="font-size:1.1em;color:#2c3e50;"><?= date('F d, Y g:i A', strtotime($user['created_at'])) ?></p>
+            </div>
+            <div>
+                <label style="font-weight:600;color:#7f8c8d;font-size:0.9em;margin-bottom:5px;display:block;">Last Updated</label>
+                <p style="font-size:1.1em;color:#2c3e50;"><?= $user['updated_at'] ? date('F d, Y g:i A', strtotime($user['updated_at'])) : 'Never' ?></p>
+            </div>
+            <div>
+                <label style="font-weight:600;color:#7f8c8d;font-size:0.9em;margin-bottom:5px;display:block;">Last Login</label>
+                <p style="font-size:1.1em;color:#2c3e50;"><?= $user['last_login'] ? date('F d, Y g:i A', strtotime($user['last_login'])) : 'Never' ?></p>
+            </div>
+        </div>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;">
+        <a href="/admin/users/edit?id=<?= $user['user_id'] ?>" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit User
+        </a>
+        <a href="/admin/users/toggle?id=<?= $user['user_id'] ?>" class="btn btn-warning">
+            <i class="fas fa-toggle-on"></i> Toggle Status
+        </a>
+        <?php if ($user['user_id'] != $_SESSION['user_id']): ?>
+            <a href="/admin/users/delete?id=<?= $user['user_id'] ?>" class="btn btn-danger confirm-delete">
+                <i class="fas fa-trash"></i> Delete User
+            </a>
+        <?php endif; ?>
+    </div>
+    
+</div>
+

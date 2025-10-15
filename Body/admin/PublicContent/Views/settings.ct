@@ -1,0 +1,67 @@
+<div class="admin-topbar">
+    <div class="topbar-left"><h2><i class="fas fa-cog"></i> Public Site Settings</h2><p>Configure public website settings</p></div>
+    <div class="topbar-right"><a href="/admin/public-content" class="topbar-btn secondary"><i class="fas fa-arrow-left"></i> Back</a></div>
+</div>
+
+<div class="admin-content">
+    <?php if (!empty($error)): ?><div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?></div><?php endif; ?>
+    
+    <div class="card">
+        <div class="card-header"><h3><i class="fas fa-sliders-h"></i> Site Configuration</h3></div>
+        <form method="POST" action="/admin/public-content/savesettings">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="form-group">
+                    <label><i class="fas fa-heading"></i> Site Name</label>
+                    <input type="text" name="site_name" class="form-control" value="<?= htmlspecialchars($settings['site_name']) ?>" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Site Tagline</label>
+                    <input type="text" name="site_tagline" class="form-control" value="<?= htmlspecialchars($settings['site_tagline']) ?>">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-font"></i> Footer Text</label>
+                <input type="text" name="footer_text" class="form-control" value="<?= htmlspecialchars($settings['footer_text']) ?>">
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-star"></i> Featured Module</label>
+                <input type="text" name="featured_module" class="form-control" value="<?= htmlspecialchars($settings['featured_module']) ?>" placeholder="e.g., Home, About">
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                        <input type="checkbox" name="maintenance_mode" <?= $settings['maintenance_mode'] ? 'checked' : '' ?> style="width:auto;">
+                        <span><i class="fas fa-wrench"></i> Maintenance Mode</span>
+                    </label>
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;">Enable to show maintenance page to visitors</small>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                        <input type="checkbox" name="allow_registration" <?= $settings['allow_registration'] ? 'checked' : '' ?> style="width:auto;">
+                        <span><i class="fas fa-user-plus"></i> Allow Registration</span>
+                    </label>
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;">Allow new users to register</small>
+                </div>
+            </div>
+            
+            <div style="margin-top:30px;padding-top:20px;border-top:2px solid #ecf0f1;">
+                <button type="submit" class="btn btn-success" style="padding:15px 40px;font-size:1.1em;"><i class="fas fa-save"></i> Save Settings</button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="card" style="background:#fff3cd;border-left:4px solid #ffc107;">
+        <h4 style="color:#856404;margin-bottom:10px;"><i class="fas fa-info-circle"></i> Settings Information</h4>
+        <ul style="color:#856404;line-height:2;padding-left:20px;">
+            <li><strong>Site Name:</strong> Appears in browser title and headers</li>
+            <li><strong>Maintenance Mode:</strong> Shows maintenance page to all visitors except admins</li>
+            <li><strong>Allow Registration:</strong> Controls if new users can create accounts</li>
+            <li><strong>Featured Module:</strong> Highlights specific module on homepage</li>
+        </ul>
+    </div>
+</div>
+

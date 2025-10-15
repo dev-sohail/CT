@@ -1,7 +1,23 @@
 {
   "routes": [
-    { "method": "GET", "path": "/blog", "handler": "public/Blog/BlogController@index" },
-    { "method": "GET", "path": "/blog/{slug}", "handler": "public/Blog/BlogController@show" },
-    { "method": "GET", "path": "/blog/json", "handler": "public/Blog/BlogController@json" }
+    {
+      "method": "GET",
+      "path": "/blog",
+      "handler": "public/Blog/Blog@index",
+      "name": "blog.index"
+    },
+    {
+      "method": "GET",
+      "path": "/blog/{id:\\d+}",
+      "handler": "public/Blog/Blog@show",
+      "name": "blog.show"
+    },
+    {
+      "method": "GET",
+      "path": "/blog/category/{category}",
+      "handler": "public/Blog/Blog@category",
+      "name": "blog.category"
+    }
   ]
 }
+

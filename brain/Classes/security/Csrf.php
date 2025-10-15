@@ -1,23 +1,20 @@
 <?php
-/**
- * Class Csrf
- *
- * Provides Cross-Site Request Forgery (CSRF) protection by generating and validating CSRF tokens.
- */
+
+declare(strict_types=1);
+
 class Csrf
 {
     protected string $sessionKey = '_csrf_token';
+    protected string $headerName = 'X-CSRF-Token';
 
-    public function __construct()
+    public function __construct(string $sessionKey = '_csrf_token')
     {
-        if (session_status() === PHP_SESSION_NONE) {
+        $this->sessionKey = $sessionKey;
+        if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
             session_start();
         }
     }
 
-    /**
-     * Generate a CSRF token and store it in session.
-     */
     public function generateToken(): string
     {
         $token = bin2hex(random_bytes(32));
@@ -25,31 +22,46 @@ class Csrf
         return $token;
     }
 
-    /**
-     * Get the current CSRF token, generating one if necessary.
-     */
     public function getToken(): string
     {
-        if (!isset($_SESSION[$this->sessionKey])) {
-            return $this->generateToken();
-        }
-        return $_SESSION[$this->sessionKey];
+        return $_SESSION[$this->sessionKey] ?? $this->generateToken();
     }
 
-    /**
-     * Validate a given CSRF token against the stored session token.
-     */
-    public function validateToken(?string $token): bool
+    public function validate(?string $token = null): bool
     {
-        return isset($_SESSION[$this->sessionKey]) && hash_equals($_SESSION[$this->sessionKey], (string)$token);
+        if ($token === null) {
+            $token = $_POST['_csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+        }
+        
+        if (empty($token) || !isset($_SESSION[$this->sessionKey])) {
+            return false;
+        }
+        
+        return hash_equals($_SESSION[$this->sessionKey], $token);
     }
 
-    /**
-     * Embed a hidden input field with the CSRF token for HTML forms.
-     */
-    public function getHiddenInput(): string
+    public function requireToken(): void
+    {
+        if (!$this->validate()) {
+            http_response_code(403);
+            die('CSRF token validation failed');
+        }
+    }
+
+    public function field(): string
     {
         $token = htmlspecialchars($this->getToken(), ENT_QUOTES, 'UTF-8');
         return "<input type='hidden' name='_csrf' value='{$token}'>";
+    }
+
+    public function meta(): string
+    {
+        $token = htmlspecialchars($this->getToken(), ENT_QUOTES, 'UTF-8');
+        return "<meta name='csrf-token' content='{$token}'>";
+    }
+
+    public function regenerate(): string
+    {
+        return $this->generateToken();
     }
 }

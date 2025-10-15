@@ -1,0 +1,164 @@
+<div class="admin-topbar">
+    <div class="topbar-left">
+        <h2><i class="fas fa-plus-circle"></i> Create New Role</h2>
+        <p>Add a new role to the system</p>
+    </div>
+    <div class="topbar-right">
+        <a href="/admin/roles" class="topbar-btn secondary">
+            <i class="fas fa-arrow-left"></i> Back to Roles
+        </a>
+    </div>
+</div>
+
+<div class="admin-content">
+    
+    <?php if (!empty($error)): ?>
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?>
+        </div>
+    <?php endif; ?>
+    
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-edit"></i> Role Information</h3>
+        </div>
+        
+        <form method="POST" action="/admin/roles/store">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;">
+                
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Role Name *</label>
+                    <input type="text" name="role_name" class="form-control" required 
+                           placeholder="e.g., Manager" 
+                           pattern="[A-Za-z\s]+" 
+                           title="Only letters and spaces allowed">
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;">
+                        Display name for this role (e.g., Manager, Moderator)
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-code"></i> Role Slug *</label>
+                    <input type="text" name="role_slug" class="form-control" required 
+                           placeholder="e.g., manager" 
+                           pattern="[a-z0-9_-]+" 
+                           title="Only lowercase letters, numbers, hyphens and underscores"
+                           style="font-family:monospace;">
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;">
+                        Unique identifier (lowercase, no spaces)
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-comment"></i> Display Name</label>
+                    <input type="text" name="display_name" class="form-control" 
+                           placeholder="e.g., Manager Login">
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;">
+                        Text shown on login button (optional)
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-smile"></i> Icon Emoji</label>
+                    <input type="text" name="icon" class="form-control" 
+                           placeholder="👨‍💼" value="👤"
+                           maxlength="4">
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;">
+                        Emoji icon for visual identification
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-palette"></i> Color</label>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <input type="color" name="color" value="#667eea" 
+                               style="width:60px;height:40px;border:2px solid #ecf0f1;border-radius:6px;cursor:pointer;">
+                        <input type="text" name="color_text" class="form-control" 
+                               value="#667eea" 
+                               pattern="#[0-9a-fA-F]{6}"
+                               style="flex:1;font-family:monospace;"
+                               readonly>
+                    </div>
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;">
+                        Button background color
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-toggle-on"></i> Status</label>
+                    <div style="padding:10px 0;">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                            <input type="checkbox" name="is_active" value="1" checked
+                                   style="width:20px;height:20px;cursor:pointer;">
+                            <span>Active (role is enabled)</span>
+                        </label>
+                    </div>
+                    <small style="color:#7f8c8d;display:block;margin-top:5px;">
+                        Inactive roles won't appear on login page
+                    </small>
+                </div>
+                
+            </div>
+            
+            <div style="margin-top:30px;padding-top:20px;border-top:2px solid #ecf0f1;display:flex;gap:10px;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Create Role
+                </button>
+                <a href="/admin/roles" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Preview Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-eye"></i> Login Button Preview</h3>
+        </div>
+        <div id="preview" style="text-align:center;padding:20px;">
+            <button type="button" id="preview-button" 
+                    style="padding:15px 30px;border:none;border-radius:8px;color:white;font-size:1.1em;font-weight:600;cursor:default;background:#667eea;">
+                👤 Role Login
+            </button>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+// Sync color inputs
+const colorPicker = document.querySelector('input[type="color"]');
+const colorText = document.querySelector('input[name="color_text"]');
+const previewButton = document.getElementById('preview-button');
+
+colorPicker.addEventListener('input', (e) => {
+    colorText.value = e.target.value;
+    updatePreview();
+});
+
+// Update preview
+function updatePreview() {
+    const icon = document.querySelector('input[name="icon"]').value || '👤';
+    const displayName = document.querySelector('input[name="display_name"]').value || 
+                        document.querySelector('input[name="role_name"]').value || 
+                        'Role';
+    const color = colorPicker.value;
+    
+    previewButton.textContent = `${icon} ${displayName} Login`;
+    previewButton.style.background = color;
+}
+
+// Update preview on input
+document.querySelectorAll('input[name="icon"], input[name="display_name"], input[name="role_name"]').forEach(input => {
+    input.addEventListener('input', updatePreview);
+});
+
+// Auto-generate slug from role name
+document.querySelector('input[name="role_name"]').addEventListener('input', (e) => {
+    const slug = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    document.querySelector('input[name="role_slug"]').value = slug;
+    updatePreview();
+});
+</script>
+

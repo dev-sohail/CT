@@ -1,0 +1,9 @@
+{
+  "routes": [
+    {"method": "GET", "path": "/admin/automation", "handler": "admin/Automation/Automation@index", "name": "admin.automation.index"},
+    {"method": "GET", "path": "/admin/automation/clearcache", "handler": "admin/Automation/Automation@clearcache", "name": "admin.automation.clearcache"},
+    {"method": "GET", "path": "/admin/automation/regenerateroutes", "handler": "admin/Automation/Automation@regenerateroutes", "name": "admin.automation.regenerateroutes"},
+    {"method": "GET", "path": "/admin/automation/scanmodules", "handler": "admin/Automation/Automation@scanmodules", "name": "admin.automation.scanmodules"}
+  ]
+}
+
