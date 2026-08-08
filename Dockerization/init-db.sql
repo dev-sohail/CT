@@ -1,0 +1,2 @@
+CREATE DATABASE edu_ct;
+CREATE DATABASE tirah_ai;

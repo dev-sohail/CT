@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "dashboard": "ڈیش بورڈ",
+    "admin": "ایڈمن",
+    "logout": "لاگ آؤٹ"
+  },
+  "auth": {
+    "login": "لاگ ان",
+    "register": "رجسٹر",
+    "email": "ای میل",
+    "password": "پاس ورڈ",
+    "forgotPassword": "پاس ورڈ بھول گئے؟"
+  },
+  "dashboard": {
+    "title": "ڈیش بورڈ",
+    "assistant": "AI اسسٹنٹ",
+    "tools": "ٹولز",
+    "history": "تاریخ",
+    "send": "بھیجیں",
+    "thinking": "Soch raha hai...",
+    "noTools": "کوئی ٹولز دستیاب نہیں ہیں",
+    "noHistory": "ابھی تک کوئی گفتگو تاریخ نہیں ہے",
+    "clearHistory": "تاریخ صاف کریں"
+  },
+  "admin": {
+    "title": "ایڈمن",
+    "users": "صارفین",
+    "active": "چالو",
+    "inactive": "نا چالو",
+    "toggleStatus": "حیثیت تبدیل کریں",
+    "role": "کردار"
+  },
+  "errors": {
+    "somethingWentWrong": "کچھ غلط ہو گیا!",
+    "tryAgain": "دوبارہ کوشش کریں",
+    "pageNotFound": "صفحہ نہیں ملا",
+    "goHome": "گھر واپس جائیں"
+  },
+  "tour": {
+    "skip": "ٹور چھوڑیں",
+    "next": "اگلا",
+    "back": "پچھلا",
+    "finish": "ختم",
+    "stepDashboard": "یہ آپ کا AI اسسٹنٹ ڈیش بورڈ ہے۔",
+    "stepTools": "یہاں سے براہ راست ٹولز چلا سکتے ہیں۔",
+    "stepHistory": "پچھلی گفتگووں کا جائزہ لیں۔",
+    "stepTheme": "لائٹ اور ڈارک موڈ کے درمیان تبدیل کریں۔"
+  }
+}

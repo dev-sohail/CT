@@ -1,0 +1,38 @@
+{
+  "routes": {
+    "greeting": {
+      "attempts": 7,
+      "successes": 7
+    },
+    "study_explain": {
+      "attempts": 24,
+      "successes": 24
+    },
+    "time_date": {
+      "attempts": 3,
+      "successes": 3
+    },
+    "help": {
+      "attempts": 2,
+      "successes": 2
+    },
+    "calculation": {
+      "attempts": 2,
+      "successes": 2
+    },
+    "general": {
+      "attempts": 1,
+      "successes": 1
+    },
+    "agent_general": {
+      "attempts": 2,
+      "successes": 2
+    },
+    "code_project": {
+      "attempts": 3,
+      "successes": 3
+    }
+  },
+  "feedback": [],
+  "accuracy": {}
+}

@@ -1,0 +1,148 @@
+﻿services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    networks:
+      - ct-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - ct-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  fastapi:
+    build:
+      context: ..
+      dockerfile: Dockerization/Dockerfile.fastapi
+    container_name: fastapi
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../FASTAPI:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://root:root@postgres:5432/tirah_ai"
+      SECRET_KEY: "change-me-in-production"
+      CORS_ORIGINS: "*"
+      TIRAH_CORE_URL: "http://fastapi:8000"
+    networks:
+      - ct-net
+    command: uvicorn v1.app:app --host 0.0.0.0 --port 8000 --reload
+
+  tirahai:
+    build:
+      context: ..
+      dockerfile: Dockerization/Dockerfile.tirahai
+    container_name: tirahai
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    volumes:
+      - ../TirahAI:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - ../TirahAI/.env
+    environment:
+      DATABASE_URL: "postgresql://root:root@postgres:5432/tirah_ai"
+      TIRAHAI_API_HOST: "0.0.0.0"
+      TIRAHAI_API_PORT: "8000"
+    networks:
+      - ct-net
+
+  edu-php:
+    build:
+      context: ..
+      dockerfile: Dockerization/Dockerfile.php
+    container_name: edu-php
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+    volumes:
+      - ../WEB/Edu_PHP:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      fastapi:
+        condition: service_started
+    environment:
+      WEB_DOCUMENT_ROOT: "/app/public"
+      DB_HOST: "postgres"
+      DB_CONNECTION: "pgsql"
+      DB_DATABASE: "edu_ct"
+      DB_USERNAME: "root"
+      DB_PASSWORD: "root"
+      REDIS_HOST: "redis"
+      TIRAHAI_API_URL: "http://tirahai:8000"
+      APP_URL: "http://localhost:8083"
+    networks:
+      - ct-net
+
+  tirahai-next:
+    build:
+      context: ..
+      dockerfile: Dockerization/Dockerfile.next
+    container_name: tirahai-next
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../WEB/TirahAI_NEXT:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      fastapi:
+        condition: service_started
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:8000"
+    networks:
+      - ct-net
+    command: npm run dev
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - ct-net
+
+volumes:
+  pgdata:
+
+networks:
+  ct-net:
+    driver: bridge

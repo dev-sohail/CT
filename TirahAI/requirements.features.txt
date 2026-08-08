@@ -1,0 +1,26 @@
+# TirahAi - Feature packages (vision, voice, automation)
+# These have pre-built wheels and install quickly.
+
+# --- Voice ---
+pyttsx3>=2.90
+gtts>=2.5.0
+SpeechRecognition>=3.10.0
+
+# --- Vision ---
+Pillow>=10.0.0
+pytesseract>=0.3.10
+PyMuPDF>=1.23.0
+opencv-python-headless>=4.8.0
+
+# --- NLP ---
+textblob>=0.18.0
+google-genai>=1.0.0
+
+# --- System ---
+schedule>=1.2.0
+apscheduler>=3.10.0
+pyserial>=3.5  # import as 'serial'
+pytz>=2023.3
+
+# --- Code ---
+autopep8>=2.0.0

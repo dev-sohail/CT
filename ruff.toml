@@ -1,0 +1,10 @@
+line-length = 120
+target-version = "py311"
+
+[LINT]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501", "B008"]
+
+[FORMAT]
+indent-style = "space"
+indent-width = 4

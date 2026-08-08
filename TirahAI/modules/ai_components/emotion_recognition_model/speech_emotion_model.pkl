@@ -1,0 +1,148 @@
+import os
+import librosa
+import numpy as np
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+import joblib
+
+# Function to extract features from an audio file (MFCC, Chroma, Spectral Contrast)
+def extract_audio_features(audio_path):
+    """
+    Extracts features like MFCC, Chroma, Spectral Contrast from an audio file.
+    Arguments:
+    - audio_path (str): Path to the audio file (e.g., .wav, .mp3).
+    Returns:
+    - features (numpy.array): Extracted audio features.
+    """
+    y, sr = librosa.load(audio_path, sr=None)
+
+    # Extract MFCC features (mean of 13 MFCC coefficients)
+    mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    mfccs_mean = np.mean(mfccs, axis=1)
+
+    # Extract Chroma feature (mean of chromagram)
+    chroma = librosa.feature.chroma_stft(y=y, sr=sr)
+    chroma_mean = np.mean(chroma, axis=1)
+
+    # Extract Spectral Contrast feature (mean of spectral contrast)
+    spectral_contrast = librosa.feature.spectral_contrast(y=y, sr=sr)
+    spectral_contrast_mean = np.mean(spectral_contrast, axis=1)
+
+    # Combine all features into a single feature vector
+    features = np.hstack([mfccs_mean, chroma_mean, spectral_contrast_mean])
+    return features
+
+# Load the RAVDESS dataset
+def load_ravdess_data(dataset_path):
+    """
+    Loads the RAVDESS dataset and extracts features.
+    Arguments:
+    - dataset_path (str): Path to the RAVDESS dataset folder.
+    Returns:
+    - features (list): List of extracted features for each audio file.
+    - labels (list): List of emotion labels corresponding to each audio file.
+    """
+    features = []
+    labels = []
+
+    # Loop through the RAVDESS dataset and extract features
+    for folder in os.listdir(dataset_path):
+        folder_path = os.path.join(dataset_path, folder)
+        
+        if os.path.isdir(folder_path):
+            for file in os.listdir(folder_path):
+                if file.endswith(".wav"):
+                    file_path = os.path.join(folder_path, file)
+
+                    # Extract features from the audio file
+                    feature = extract_audio_features(file_path)
+                    features.append(feature)
+
+                    # Extract emotion label from the filename (assumed format "filename-<emotion>.wav")
+                    label = file.split('-')[2]  # Extract the emotion label
+                    labels.append(label)
+
+    return np.array(features), np.array(labels)
+
+# Example path to the RAVDESS dataset (replace with your dataset path)
+dataset_path = '/path/to/ravdess'
+
+# Load the dataset and extract features/labels
+features, labels = load_ravdess_data(dataset_path)
+
+# Encode the labels (emotions) into numeric values
+encoder = LabelEncoder()
+labels_encoded = encoder.fit_transform(labels)
+
+# Split data into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(features, labels_encoded, test_size=0.2, random_state=42)
+
+print(f"Training samples: {X_train.shape[0]}, Testing samples: {X_test.shape[0]}")
+
+# Train the SVM model using the training data
+def train_svm_model(X_train, y_train):
+    """
+    Trains an SVM model on the extracted features.
+    Arguments:
+    - X_train (numpy.array): Training features.
+    - y_train (numpy.array): Training labels.
+    Returns:
+    - model: Trained SVM model.
+    """
+    svm_model = SVC(kernel='linear', random_state=42)
+    svm_model.fit(X_train, y_train)
+    return svm_model
+
+# Train the model
+svm_model = train_svm_model(X_train, y_train)
+
+# Evaluate the model on the test data
+def evaluate_model(svm_model, X_test, y_test):
+    """
+    Evaluates the model on the test data and prints accuracy.
+    Arguments:
+    - svm_model: Trained SVM model.
+    - X_test (numpy.array): Testing features.
+    - y_test (numpy.array): Testing labels.
+    """
+    accuracy = svm_model.score(X_test, y_test)
+    print(f"Model Accuracy: {accuracy * 100:.2f}%")
+
+# Evaluate the trained model
+evaluate_model(svm_model, X_test, y_test)
+
+# Save the trained model to a pickle file
+def save_model(svm_model, filename='speech_emotion_model.pkl'):
+    """
+    Saves the trained model to a pickle file.
+    Arguments:
+    - svm_model: Trained model.
+    - filename (str): Path to save the model.
+    """
+    joblib.dump(svm_model, filename)
+    print(f"Model saved to {filename}")
+
+# Save the model as speech_emotion_model.pkl
+save_model(svm_model)
+
+# Predict emotion for a new audio file using the saved model
+def predict_emotion(audio_path, model):
+    """
+    Predicts the emotion for a given audio file using the trained model.
+    Arguments:
+    - audio_path (str): Path to the audio file.
+    - model: Trained emotion recognition model.
+    Returns:
+    - emotion (str): Predicted emotion.
+    """
+    features = extract_audio_features(audio_path)
+    prediction = model.predict([features])
+    emotion = model.classes_[prediction[0]]
+    return emotion
+
+# Example usage: Load the saved model and predict emotion for a new audio file
+model = joblib.load('speech_emotion_model.pkl')
+audio_file = 'path_to_new_audio_file.wav'
+emotion = predict_emotion(audio_file, model)
+print(f"Predicted Emotion: {emotion}")

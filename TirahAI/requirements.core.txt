@@ -1,0 +1,33 @@
+# ============================================================
+# TirahAi - CORE requirements (API startup only)
+# These are the MINIMUM packages needed for the API to start.
+# Everything else is conditionally imported and can be added
+# via requirements.full.txt or installed at runtime.
+# ============================================================
+
+# API Framework
+fastapi>=0.115.0,<0.138.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.0.0
+
+# Auth
+PyJWT>=2.0.0
+passlib>=1.7.4
+bcrypt==3.2.2
+cryptography>=41.0.0
+
+# HTTP
+requests>=2.31.0
+
+# Database
+psycopg2-binary>=2.9.0
+
+# OS
+psutil>=5.9.0
+
+# Math
+numpy>=1.24.0
+
+# Utilities
+python-dotenv>=1.0.0
+python-multipart>=0.0.6

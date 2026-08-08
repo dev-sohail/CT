@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "logout": "Logout"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "assistant": "AI Assistant",
+    "tools": "Tools",
+    "history": "History",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "noTools": "No tools available",
+    "noHistory": "No conversation history yet",
+    "clearHistory": "Clear history"
+  },
+  "admin": {
+    "title": "Admin",
+    "users": "Users",
+    "active": "Active",
+    "inactive": "Inactive",
+    "toggleStatus": "Toggle Status",
+    "role": "Role"
+  },
+  "errors": {
+    "somethingWentWrong": "Something went wrong!",
+    "tryAgain": "Try again",
+    "pageNotFound": "Page not found",
+    "goHome": "Go back home"
+  },
+  "tour": {
+    "skip": "Skip tour",
+    "next": "Next",
+    "back": "Back",
+    "finish": "Finish",
+    "stepDashboard": "This is your AI assistant dashboard.",
+    "stepTools": "Execute tools directly from here.",
+    "stepHistory": "Review past conversations.",
+    "stepTheme": "Toggle between light and dark mode."
+  }
+}

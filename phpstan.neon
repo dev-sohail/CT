@@ -1,0 +1,7 @@
+<?php
+
+return [
+    'level' => 'max',
+    'paths' => [dirname(__DIR__) . '/TirahAI', dirname(__DIR__) . '/FASTAPI'],
+    'exclude' => [dirname(__DIR__) . '/vendor', dirname(__DIR__) . '/node_modules'],
+];

@@ -1,0 +1,16 @@
+{
+  "app_name": "TirahAi",
+  "theme_mode": "dark",
+  "user_name": "Sohail",
+  "startup_greeting": true,
+  "voice_enabled": true,
+  "voice_volume": 1.0,
+  "paths": {
+    "data_dir": "C:\\wamp64\\www\\me_so\\html\\TirahAi\\data",
+    "logs_dir": "C:\\wamp64\\www\\me_so\\html\\TirahAi\\logs"
+  },
+  "api_keys": {
+    "openai": "",
+    "weather": ""
+  }
+}

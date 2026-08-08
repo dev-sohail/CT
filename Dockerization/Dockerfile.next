@@ -1,0 +1,15 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+COPY WEB/TirahAI_NEXT/package.json WEB/TirahAI_NEXT/package-lock.json* ./
+RUN npm install
+
+COPY WEB/TirahAI_NEXT/ .
+
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=development
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

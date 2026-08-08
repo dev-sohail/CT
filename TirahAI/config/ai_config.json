@@ -1,0 +1,9 @@
+{
+  "primary_model": "gemini",
+  "fallback_model": "ollama",
+  "code_model": "gpt-4-turbo",
+  "temperature": 0.8,
+  "max_tokens": 2000,
+  "context_memory": 5,
+  "gemini_model": "gemini-pro"
+}

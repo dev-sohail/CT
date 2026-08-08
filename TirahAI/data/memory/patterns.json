@@ -1,0 +1,273 @@
+{
+  "phrases": {
+    "hello": {
+      "greeting": 2
+    },
+    "there": {
+      "greeting": 1
+    },
+    "what": {
+      "study_explain": 9,
+      "time_date": 3,
+      "help": 1
+    },
+    "time": {
+      "study_explain": 1,
+      "time_date": 3
+    },
+    "is": {
+      "study_explain": 8,
+      "time_date": 3
+    },
+    "it": {
+      "study_explain": 1,
+      "time_date": 3
+    },
+    "explain": {
+      "study_explain": 11
+    },
+    "machine": {
+      "study_explain": 5
+    },
+    "learning": {
+      "study_explain": 5
+    },
+    "help": {
+      "help": 1
+    },
+    "me": {
+      "help": 1,
+      "agent_general": 2
+    },
+    "calculate": {
+      "calculation": 2
+    },
+    "25": {
+      "calculation": 1
+    },
+    "*": {
+      "calculation": 2
+    },
+    "4": {
+      "calculation": 1
+    },
+    "+": {
+      "calculation": 1
+    },
+    "10": {
+      "calculation": 1
+    },
+    "15": {
+      "calculation": 1
+    },
+    "3": {
+      "calculation": 1
+    },
+    "gravity": {
+      "study_explain": 3
+    },
+    "photosynthesis": {
+      "study_explain": 1
+    },
+    "dna": {
+      "study_explain": 4
+    },
+    "hi": {
+      "greeting": 5,
+      "study_explain": 1
+    },
+    "are": {
+      "study_explain": 2
+    },
+    "you": {
+      "study_explain": 2,
+      "help": 1
+    },
+    "features": {
+      "study_explain": 1
+    },
+    "did": {
+      "help": 1
+    },
+    "use": {
+      "help": 1,
+      "study_explain": 1
+    },
+    "for": {
+      "help": 1
+    },
+    "thsi": {
+      "help": 1
+    },
+    "any": {
+      "study_explain": 1
+    },
+    "ai": {
+      "study_explain": 1
+    },
+    "model": {
+      "study_explain": 1
+    },
+    "quantum": {
+      "study_explain": 2
+    },
+    "computer": {
+      "study_explain": 2
+    },
+    "\"hello|": {
+      "study_explain": 1
+    },
+    "find": {
+      "general": 1,
+      "code_project": 1
+    },
+    "about": {
+      "general": 1,
+      "agent_general": 2
+    },
+    "elonmusk": {
+      "general": 1
+    },
+    "on": {
+      "general": 1
+    },
+    "wikipedia": {
+      "general": 1
+    },
+    "weather": {
+      "study_explain": 1
+    },
+    "tell": {
+      "agent_general": 2
+    },
+    "black": {
+      "agent_general": 2
+    },
+    "holes": {
+      "agent_general": 2
+    },
+    "scan": {
+      "code_project": 1
+    },
+    "the": {
+      "code_project": 2
+    },
+    "project": {
+      "code_project": 3
+    },
+    "/app": {
+      "code_project": 1
+    },
+    "files": {
+      "code_project": 1
+    },
+    "related": {
+      "code_project": 1
+    },
+    "to": {
+      "code_project": 2
+    },
+    "ocr": {
+      "code_project": 2
+    },
+    "in": {
+      "code_project": 2
+    },
+    "google": {
+      "code_project": 1
+    },
+    "how": {
+      "code_project": 1
+    },
+    "implement": {
+      "code_project": 1
+    },
+    "preprocessing": {
+      "code_project": 1
+    },
+    "this": {
+      "code_project": 1
+    },
+    "voice": {
+      "study_explain": 1
+    },
+    "ml": {
+      "study_explain": 3
+    }
+  },
+  "intents": {
+    "greeting": {
+      "count": 7,
+      "examples": [
+        "hello there",
+        "hello",
+        "hi"
+      ]
+    },
+    "study_explain": {
+      "count": 24,
+      "examples": [
+        "what time is it",
+        "explain what is machine learning",
+        "explain gravity",
+        "what is machine learning",
+        "explain photosynthesis",
+        "what is dna",
+        "what are you features",
+        "explain dna",
+        "are you use any ai model",
+        "explain Quantum computer",
+        "Quantum computer",
+        "DNA",
+        "explain \"hello|",
+        "what is weather",
+        "hi what is voice",
+        "dna",
+        "explain ml",
+        "ml",
+        "ML",
+        "machine learning"
+      ]
+    },
+    "time_date": {
+      "count": 3,
+      "examples": [
+        "what time is it"
+      ]
+    },
+    "help": {
+      "count": 2,
+      "examples": [
+        "help me",
+        "what did you use for thsi"
+      ]
+    },
+    "calculation": {
+      "count": 2,
+      "examples": [
+        "calculate 25 * 4 + 10",
+        "calculate 15 * 3"
+      ]
+    },
+    "general": {
+      "count": 1,
+      "examples": [
+        "find about elonmusk on wikipedia"
+      ]
+    },
+    "agent_general": {
+      "count": 2,
+      "examples": [
+        "tell me about black holes"
+      ]
+    },
+    "code_project": {
+      "count": 3,
+      "examples": [
+        "scan the project /app",
+        "find files related to OCR in the project",
+        "google how to implement OCR preprocessing in this project"
+      ]
+    }
+  }
+}
