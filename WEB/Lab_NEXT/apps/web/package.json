@@ -1,0 +1,33 @@
+{
+    "name": "@ctlab/web",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "typecheck": "tsc --noEmit",
+        "check": "next lint && tsc --noEmit && next build"
+    },
+    "dependencies": {
+        "@ctlab/ctlab-theme": "file:../../packages/js/ctlab-theme",
+        "@ctlab/ctlab-ui": "file:../../packages/js/ctlab-ui",
+        "lucide-react": "^1.31.0",
+        "next": "^14.2.5",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.14.0",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "autoprefixer": "^10.4.19",
+        "eslint": "^8.57.1",
+        "eslint-config-next": "^14.2.5",
+        "playwright-core": "^1.62.1",
+        "postcss": "^8.4.39",
+        "tailwindcss": "^3.4.6",
+        "typescript": "^5.5.3"
+    }
+}

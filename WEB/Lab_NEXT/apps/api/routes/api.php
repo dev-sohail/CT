@@ -1,0 +1,66 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+Route::prefix('v1')->group(function () {
+    Route::get('health', fn () => response()->json(['status' => 'ok', 'version' => 'v1']));
+
+    require __DIR__.'/../app/Domains/01_CoreIdentityAndAccessKernel/routes/api.php';
+    require __DIR__.'/../app/Domains/02_SharedRESTApiGateway/routes/api.php';
+    require __DIR__.'/../app/Domains/03_NotificationHubAndEventBus/routes/api.php';
+    require __DIR__.'/../app/Domains/04_FileAndDocumentVault/routes/api.php';
+    require __DIR__.'/../app/Domains/05_UnifiedSearchEngine/routes/api.php';
+    require __DIR__.'/../app/Domains/06_CalendarAndSchedulingKernel/routes/api.php';
+    require __DIR__.'/../app/Domains/07_ContactsAndRelationshipGraph/routes/api.php';
+    require __DIR__.'/../app/Domains/11_ImportExportAndDataPortability/routes/api.php';
+    require __DIR__.'/../app/Domains/12_DashboardAndWidgetFramework/routes/api.php';
+    require __DIR__.'/../app/Domains/16_RuleEngineAndWorkflowBuilder/routes/api.php';
+    require __DIR__.'/../app/Domains/17_ScheduledTaskAndCronManager/routes/api.php';
+    require __DIR__.'/../app/Domains/18_FileAutomationWatcher/routes/api.php';
+    require __DIR__.'/../app/Domains/19_UnifiedPlannerEngine/routes/api.php';
+    require __DIR__.'/../app/Domains/20_GoalHierarchyAndOKRTracker/routes/api.php';
+    require __DIR__.'/../app/Domains/21_TimeAuditAndTimeBlockAnalyzer/routes/api.php';
+    require __DIR__.'/../app/Domains/22_PersonalDashboardLifeOSHome/routes/api.php';
+    require __DIR__.'/../app/Domains/23_WorkShiftAndScheduleManager/routes/api.php';
+    require __DIR__.'/../app/Domains/24_ProjectRoadmapPlanner/routes/api.php';
+    require __DIR__.'/../app/Domains/25_ProductivityInsightsEngine/routes/api.php';
+    require __DIR__.'/../app/Domains/27_StudyAndCourseTracker/routes/api.php';
+    require __DIR__.'/../app/Domains/28_CertificationAndSkillRoadmap/routes/api.php';
+    require __DIR__.'/../app/Domains/29_ResearchAndPDFAnnotationManager/routes/api.php';
+    require __DIR__.'/../app/Domains/30_FlashcardEngineSM2/routes/api.php';
+    require __DIR__.'/../app/Domains/31_BookmarkAndReadLaterArchive/routes/api.php';
+    require __DIR__.'/../app/Domains/32_CodeSnippetManagerAndPackageIndex/routes/api.php';
+    require __DIR__.'/../app/Domains/33_LearningAnalyticsDashboard/routes/api.php';
+    require __DIR__.'/../app/Domains/34_DocumentArchiveAndVersionVault/routes/api.php';
+    require __DIR__.'/../app/Domains/35_DigitalMediaLibrary/routes/api.php';
+    require __DIR__.'/../app/Domains/36_QRAssetTaggingSystem/routes/api.php';
+    require __DIR__.'/../app/Domains/37_SecretsPasswordAnd2FAVault/routes/api.php';
+    require __DIR__.'/../app/Domains/38_SubscriptionAndRecurringPaymentTracker/routes/api.php';
+    require __DIR__.'/../app/Domains/39_ReceiptAndWarrantyArchive/routes/api.php';
+    require __DIR__.'/../app/Domains/40_HabitTrackingEngine/routes/api.php';
+    require __DIR__.'/../app/Domains/41_JournalAndStructuredReviewSystem/routes/api.php';
+    require __DIR__.'/../app/Domains/42_DecisionJournal/routes/api.php';
+    require __DIR__.'/../app/Domains/43_PersonalScorecardLifeKPITracker/routes/api.php';
+    require __DIR__.'/../app/Domains/44_VisionBoardAndBucketListManager/routes/api.php';
+    require __DIR__.'/../app/Domains/45_LifeTimelineAndHistoryArchive/routes/api.php';
+    require __DIR__.'/../app/Domains/46_WorkoutAndTrainingPlanner/routes/api.php';
+    require __DIR__.'/../app/Domains/47_NutritionAndMealPlanner/routes/api.php';
+    require __DIR__.'/../app/Domains/48_SleepAndRecoveryTracker/routes/api.php';
+    require __DIR__.'/../app/Domains/49_MedicationAndPrescriptionTracker/routes/api.php';
+    require __DIR__.'/../app/Domains/50_MedicalHistoryAndVisitLog/routes/api.php';
+    require __DIR__.'/../app/Domains/51_SymptomAndBodyMetricsTracker/routes/api.php';
+    require __DIR__.'/../app/Domains/52_HydrationAndMovementReminderEngine/routes/api.php';
+    require __DIR__.'/../app/Domains/53_ExpenseTrackingAndBudgetingEngine/routes/api.php';
+    require __DIR__.'/../app/Domains/54_60_FinanceSuite/routes/api.php';
+    require __DIR__.'/../app/Domains/61_HomeMaintenanceScheduler/routes/api.php';
+    require __DIR__.'/../app/Domains/62_HomeImprovementProjectPlanner/routes/api.php';
+    require __DIR__.'/../app/Domains/63_71_HomeTravelSuite/routes/api.php';
+    require __DIR__.'/../app/Domains/72_82_CareerBusinessSuite/routes/api.php';
+    require __DIR__.'/../app/Domains/83_90_EntertainmentWritingSuite/routes/api.php';
+    require __DIR__.'/../app/Domains/91_101_DevOpsSuite/routes/api.php';
+    require __DIR__.'/../app/Domains/102_106_SecurityAnalyticsSuite/routes/api.php';
+    require __DIR__.'/../app/Domains/08_TaggingAndCategorizationEngine/routes/api.php';
+    require __DIR__.'/../app/Domains/09_AuditTrailAndActivityTimeline/routes/api.php';
+    require __DIR__.'/../app/Domains/10_SettingsAndPreferencesService/routes/api.php';
+    require __DIR__.'/../app/Domains/26_SecondBrainPersonalWiki/routes/api.php';
+});

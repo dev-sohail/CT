@@ -1,0 +1,37 @@
+{
+    "contacts": {
+        "people": [
+            {
+                "name": "Alice",
+                "nickname": null,
+                "email": null,
+                "phone": null,
+                "company": null,
+                "birthday": null,
+                "avatar_url": null,
+                "notes": null,
+                "relationship_type": null,
+                "metadata": null,
+                "contact_methods": []
+            }
+        ],
+        "relationships": []
+    },
+    "calendar": {
+        "events": [
+            {
+                "title": "Standup",
+                "description": null,
+                "location": null,
+                "starts_at": "2026-09-01T09:00:00+00:00",
+                "ends_at": null,
+                "is_all_day": false,
+                "timezone": "UTC",
+                "status": "confirmed",
+                "recurrence_rule": null,
+                "recurrence_ends_at": null,
+                "metadata": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  api:
+    name: API (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: ['8.2', '8.3']
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: ctlab_testing
+          MYSQL_USER: ctlab
+          MYSQL_PASSWORD: secret
+          MYSQL_ROOT_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u root -psecret"
+          --health-interval=3s
+          --health-timeout=5s
+          --health-retries=10
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=3s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, gd, redis
+          coverage: none
+
+      - name: Setup Composer
+        working-directory: apps/api
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Lint (Pint)
+        working-directory: apps/api
+        run: vendor/bin/pint --test
+
+      - name: Run Tests
+        working-directory: apps/api
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: ctlab_testing
+          DB_USERNAME: ctlab
+          DB_PASSWORD: secret
+          REDIS_HOST: 127.0.0.1
+        run: |
+          php artisan key:generate
+          php artisan migrate --force
+          php artisan db:seed --force
+          vendor/bin/phpunit --colors=always
+
+  web:
+    name: Web (Next.js)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Build packages
+        run: |
+          cd packages/js/ctlab-theme && npm ci && npm run build
+          cd ../../../packages/js/ctlab-ui && npm ci && npm run build
+
+      - name: TypeScript check
+        working-directory: apps/web
+        run: npx tsc --noEmit
+
+      - name: Build
+        working-directory: apps/web
+        run: npm run build
+
+      - name: Lint
+        working-directory: apps/web
+        run: npm run lint

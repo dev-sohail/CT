@@ -1,0 +1,76 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ctlab-app
+    working_dir: /var/www/html
+    volumes:
+      - ./apps/api:/var/www/html
+      - ./packages:/var/www/packages
+    networks:
+      - ctlab
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=ctlab
+      - DB_USERNAME=ctlab
+      - DB_PASSWORD=secret
+      - REDIS_HOST=redis
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: ctlab-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./apps/api:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - ctlab
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: ctlab-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_DATABASE=ctlab
+      - MYSQL_USER=ctlab
+      - MYSQL_PASSWORD=secret
+      - MYSQL_ROOT_PASSWORD=secret
+    volumes:
+      - ctlab-mysql-data:/var/lib/mysql
+    networks:
+      - ctlab
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret"]
+      interval: 3s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: ctlab-redis
+    ports:
+      - "6380:6379"
+    networks:
+      - ctlab
+    restart: unless-stopped
+
+networks:
+  ctlab:
+    driver: bridge
+
+volumes:
+  ctlab-mysql-data:

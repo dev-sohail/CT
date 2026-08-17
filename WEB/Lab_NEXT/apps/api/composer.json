@@ -1,0 +1,136 @@
+{
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "App\\Domains\\CoreIdentityAndAccessKernel\\": "app/Domains/01_CoreIdentityAndAccessKernel/",
+            "App\\Domains\\NotificationHubAndEventBus\\": "app/Domains/03_NotificationHubAndEventBus/",
+            "App\\Domains\\FileAndDocumentVault\\": "app/Domains/04_FileAndDocumentVault/",
+            "App\\Domains\\UnifiedSearchEngine\\": "app/Domains/05_UnifiedSearchEngine/",
+            "App\\Domains\\CalendarAndSchedulingKernel\\": "app/Domains/06_CalendarAndSchedulingKernel/",
+            "App\\Domains\\ContactsAndRelationshipGraph\\": "app/Domains/07_ContactsAndRelationshipGraph/",
+            "App\\Domains\\ImportExportAndDataPortability\\": "app/Domains/11_ImportExportAndDataPortability/",
+            "App\\Domains\\DashboardAndWidgetFramework\\": "app/Domains/12_DashboardAndWidgetFramework/",
+            "App\\Domains\\RuleEngineAndWorkflowBuilder\\": "app/Domains/16_RuleEngineAndWorkflowBuilder/",
+            "App\\Domains\\ScheduledTaskAndCronManager\\": "app/Domains/17_ScheduledTaskAndCronManager/",
+            "App\\Domains\\FileAutomationWatcher\\": "app/Domains/18_FileAutomationWatcher/",
+            "App\\Domains\\UnifiedPlannerEngine\\": "app/Domains/19_UnifiedPlannerEngine/",
+            "App\\Domains\\GoalHierarchyAndOKRTracker\\": "app/Domains/20_GoalHierarchyAndOKRTracker/",
+            "App\\Domains\\TimeAuditAndTimeBlockAnalyzer\\": "app/Domains/21_TimeAuditAndTimeBlockAnalyzer/",
+            "App\\Domains\\PersonalDashboardLifeOSHome\\": "app/Domains/22_PersonalDashboardLifeOSHome/",
+            "App\\Domains\\WorkShiftAndScheduleManager\\": "app/Domains/23_WorkShiftAndScheduleManager/",
+            "App\\Domains\\ProjectRoadmapPlanner\\": "app/Domains/24_ProjectRoadmapPlanner/",
+            "App\\Domains\\ProductivityInsightsEngine\\": "app/Domains/25_ProductivityInsightsEngine/",
+            "App\\Domains\\StudyAndCourseTracker\\": "app/Domains/27_StudyAndCourseTracker/",
+            "App\\Domains\\CertificationAndSkillRoadmap\\": "app/Domains/28_CertificationAndSkillRoadmap/",
+            "App\\Domains\\ResearchAndPDFAnnotationManager\\": "app/Domains/29_ResearchAndPDFAnnotationManager/",
+            "App\\Domains\\FlashcardEngineSM2\\": "app/Domains/30_FlashcardEngineSM2/",
+            "App\\Domains\\BookmarkAndReadLaterArchive\\": "app/Domains/31_BookmarkAndReadLaterArchive/",
+            "App\\Domains\\CodeSnippetManagerAndPackageIndex\\": "app/Domains/32_CodeSnippetManagerAndPackageIndex/",
+            "App\\Domains\\LearningAnalyticsDashboard\\": "app/Domains/33_LearningAnalyticsDashboard/",
+            "App\\Domains\\DocumentArchiveAndVersionVault\\": "app/Domains/34_DocumentArchiveAndVersionVault/",
+            "App\\Domains\\DigitalMediaLibrary\\": "app/Domains/35_DigitalMediaLibrary/",
+            "App\\Domains\\QRAssetTaggingSystem\\": "app/Domains/36_QRAssetTaggingSystem/",
+            "App\\Domains\\SecretsPasswordAnd2FAVault\\": "app/Domains/37_SecretsPasswordAnd2FAVault/",
+            "App\\Domains\\SubscriptionAndRecurringPaymentTracker\\": "app/Domains/38_SubscriptionAndRecurringPaymentTracker/",
+            "App\\Domains\\ReceiptAndWarrantyArchive\\": "app/Domains/39_ReceiptAndWarrantyArchive/",
+            "App\\Domains\\HabitTrackingEngine\\": "app/Domains/40_HabitTrackingEngine/",
+            "App\\Domains\\JournalAndStructuredReviewSystem\\": "app/Domains/41_JournalAndStructuredReviewSystem/",
+            "App\\Domains\\DecisionJournal\\": "app/Domains/42_DecisionJournal/",
+            "App\\Domains\\PersonalScorecardLifeKPITracker\\": "app/Domains/43_PersonalScorecardLifeKPITracker/",
+            "App\\Domains\\VisionBoardAndBucketListManager\\": "app/Domains/44_VisionBoardAndBucketListManager/",
+            "App\\Domains\\LifeTimelineAndHistoryArchive\\": "app/Domains/45_LifeTimelineAndHistoryArchive/",
+            "App\\Domains\\WorkoutAndTrainingPlanner\\": "app/Domains/46_WorkoutAndTrainingPlanner/",
+            "App\\Domains\\NutritionAndMealPlanner\\": "app/Domains/47_NutritionAndMealPlanner/",
+            "App\\Domains\\SleepAndRecoveryTracker\\": "app/Domains/48_SleepAndRecoveryTracker/",
+            "App\\Domains\\MedicationAndPrescriptionTracker\\": "app/Domains/49_MedicationAndPrescriptionTracker/",
+            "App\\Domains\\MedicalHistoryAndVisitLog\\": "app/Domains/50_MedicalHistoryAndVisitLog/",
+            "App\\Domains\\SymptomAndBodyMetricsTracker\\": "app/Domains/51_SymptomAndBodyMetricsTracker/",
+            "App\\Domains\\HydrationAndMovementReminderEngine\\": "app/Domains/52_HydrationAndMovementReminderEngine/",
+            "App\\Domains\\ExpenseTrackingAndBudgetingEngine\\": "app/Domains/53_ExpenseTrackingAndBudgetingEngine/",
+            "App\\Domains\\FinanceSuite\\": "app/Domains/54_60_FinanceSuite/",
+            "App\\Domains\\HomeMaintenanceScheduler\\": "app/Domains/61_HomeMaintenanceScheduler/",
+            "App\\Domains\\HomeImprovementProjectPlanner\\": "app/Domains/62_HomeImprovementProjectPlanner/",
+            "App\\Domains\\HomeTravelSuite\\": "app/Domains/63_71_HomeTravelSuite/",
+            "App\\Domains\\CareerBusinessSuite\\": "app/Domains/72_82_CareerBusinessSuite/",
+            "App\\Domains\\EntertainmentWritingSuite\\": "app/Domains/83_90_EntertainmentWritingSuite/",
+            "App\\Domains\\DevOpsSuite\\": "app/Domains/91_101_DevOpsSuite/",
+            "App\\Domains\\SecurityAnalyticsSuite\\": "app/Domains/102_106_SecurityAnalyticsSuite/",
+            "App\\Domains\\TaggingAndCategorizationEngine\\": "app/Domains/08_TaggingAndCategorizationEngine/",
+            "App\\Domains\\AuditTrailAndActivityTimeline\\": "app/Domains/09_AuditTrailAndActivityTimeline/",
+            "App\\Domains\\SecondBrainPersonalWiki\\": "app/Domains/26_SecondBrainPersonalWiki/",
+            "App\\Domains\\SettingsAndPreferencesService\\": "app/Domains/10_SettingsAndPreferencesService/",
+            "App\\Domains\\SharedRESTApiGateway\\": "app/Domains/02_SharedRESTApiGateway/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "php-http/discovery": true
+        },
+        "audit": {
+            "block-insecure": false
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "description": "CTLabs modular monolith API (Laravel) - one schema, many domain modules.",
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "name": "ctlab/api",
+    "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../packages/php/ctlab-support"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^10.0|^11.0",
+        "laravel/sanctum": "^3.2",
+        "ctlab/ctlab-support": "*",
+        "php": "^8.1|^8.2"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.20",
+        "laravel/pint": "^1.0",
+        "mockery/mockery": "^1.4.4",
+        "phpunit/phpunit": "^10.0",
+        "spatie/laravel-ignition": "^2.0"
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi",
+            "@php artisan migrate --ansi"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "test": [
+            "@php vendor/bin/phpunit"
+        ],
+        "lint": [
+            "@php vendor/bin/pint"
+        ],
+        "check": [
+            "@lint",
+            "@test"
+        ]
+    },
+    "type": "project"
+}

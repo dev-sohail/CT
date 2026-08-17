@@ -1,0 +1,44 @@
+# --- Dependencies ---
+/vendor/
+**/vendor/
+/node_modules/
+**/node_modules/
+
+# --- Environment & secrets ---
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# --- Laravel runtime artifacts ---
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/testing/*
+/storage/logs/*.log
+/public/storage
+**/bootstrap/cache/*.php
+
+# --- PHP tooling ---
+.phpunit.result.cache
+.php-cs-fixer.cache
+.phpunit.cache/
+tests/_output/
+
+# --- Node / Next.js artifacts ---
+/dist/
+/out/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+.eslintcache
+
+# --- Build output that is served by Apache (regenerated on build) ---
+apps/web/out/
+
+# --- Editor / OS ---
+.DS_Store
+*.log
+.idea/
+.vscode/

@@ -1,0 +1,23 @@
+{
+    "contacts": {
+        "people": [
+            {
+                "name": "Alice",
+                "nickname": null,
+                "email": null,
+                "phone": null,
+                "company": null,
+                "birthday": null,
+                "avatar_url": null,
+                "notes": null,
+                "relationship_type": null,
+                "metadata": null,
+                "contact_methods": []
+            }
+        ],
+        "relationships": []
+    },
+    "calendar": {
+        "events": []
+    }
+}

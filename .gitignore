@@ -85,3 +85,28 @@ db_data/
 *.dll
 *.exe
 *.msi
+
+# PHP Composer
+/vendor/
+composer.lock
+
+# Next.js
+WEB/Eco_NEXT/node_modules/
+WEB/Eco_NEXT/.next/
+WEB/Eco_NEXT/out/
+WEB/TirahAI_NEXT/node_modules/
+WEB/TirahAI_NEXT/.next/
+WEB/TirahAI_NEXT/out/
+WEB/Lab_NEXT/apps/web/node_modules/
+WEB/Lab_NEXT/apps/web/.next/
+WEB/Lab_NEXT/apps/web/out/
+
+# Docker
+docker/db_data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# LAMPP
+*.bak

@@ -1,0 +1,31 @@
+{
+    "name": "@ctlab/ctlab-ui",
+    "version": "0.1.0",
+    "description": "Shared React component library for the CTLabs ecosystem.",
+    "license": "MIT",
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": "./dist/index.js",
+        "./styles.css": "./dist/ctlab-ui.css"
+    },
+    "files": ["dist"],
+    "scripts": {
+        "build": "tsc -p tsconfig.json && node -e \"const fs=require('fs');fs.cpSync('src','dist',{recursive:true,filter:(s)=>fs.statSync(s).isDirectory()||s.endsWith('.css')})\"",
+        "lint": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@ctlab/ctlab-theme": "file:../ctlab-theme"
+    },
+    "peerDependencies": {
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0"
+    },
+    "devDependencies": {
+        "@types/react": "^18.0.0",
+        "@types/react-dom": "^18.0.0",
+        "typescript": "^5.4.0"
+    }
+}

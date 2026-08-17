@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Compatibility layer: map the legacy --color-* variables used across pages
+ * onto the CTLabs theme tokens. Pages migrate to `ctlab-*`/theme classes in
+ * later phases; this keeps them rendering correctly until then.
+ */
+:root {
+    --color-bg: hsl(var(--ctlab-bg));
+    --color-surface: hsl(var(--ctlab-surface));
+    --color-surface-2: hsl(var(--ctlab-surface-2));
+    --color-border: hsl(var(--ctlab-border));
+    --color-text: hsl(var(--ctlab-text));
+    --color-muted: hsl(var(--ctlab-text-muted));
+    --color-accent: hsl(var(--ctlab-primary));
+    --color-accent-hover: hsl(var(--ctlab-primary-hover));
+    --color-accent-soft: hsl(var(--ctlab-primary) / 0.14);
+    --color-ok: hsl(var(--ctlab-success));
+    --color-warn: hsl(var(--ctlab-warning));
+    --color-bad: hsl(var(--ctlab-danger));
+    --color-info: hsl(var(--ctlab-info));
+    --font-ui: var(--ctlab-font-sans);
+    --font-mono: var(--ctlab-font-mono);
+}
