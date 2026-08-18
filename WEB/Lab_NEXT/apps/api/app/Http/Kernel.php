@@ -43,7 +43,6 @@ class Kernel extends HttpKernel
             VerifyCsrfToken::class,
         ],
         'api' => [
-            EnsureFrontendRequestsAreStateful::class,
             ThrottleRequests::class.':api',
             SubstituteBindings::class,
             ResolveApiVersion::class,

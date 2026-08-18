@@ -1,0 +1,36 @@
+{
+  "name": "frame-php",
+  "version": "1.0.0",
+  "description": "Frame PHP - Global PHP Framework",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "postcss storage/resources-src/css/input.css -o storage/css/app.css",
+    "build:js": "esbuild storage/resources-src/js/app.js --bundle --outfile=storage/js/app.js --platform=browser --format=iife --global-name=App",
+    "build:js:analyze": "esbuild storage/resources-src/js/app.js --bundle --outfile=storage/js/app.js --platform=browser --format=iife --global-name=App --analyze",
+    "build": "npm run build:css && npm run build:js",
+    "watch:css": "postcss storage/resources-src/css/input.css -o storage/css/app.css --watch",
+    "watch:js": "esbuild storage/resources-src/js/app.js --bundle --outfile=storage/js/app.js --platform=browser --format=iife --global-name=App --watch",
+    "watch": "concurrently \"npm:watch:css\" \"npm:watch:js\"",
+    "dev": "npm run watch",
+    "test:js": "vitest run",
+    "test:js:watch": "vitest",
+    "test:php": "phpunit",
+    "test": "npm run test:js && npm run test:php"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "autoprefixer": "^10.4.19",
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.21.5",
+    "jsdom": "^30.0.1",
+    "postcss": "^8.4.38",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^3.4.3",
+    "vitest": "^4.1.10"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true
+  }
+}

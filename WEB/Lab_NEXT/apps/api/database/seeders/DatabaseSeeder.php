@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             \App\Domains\CoreIdentityAndAccessKernel\Database\Seeders\RolePermissionSeeder::class,
+            \Database\Seeders\CtlabDummySeeder::class,
         ]);
     }
 }

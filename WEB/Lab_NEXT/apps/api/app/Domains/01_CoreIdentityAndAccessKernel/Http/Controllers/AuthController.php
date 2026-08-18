@@ -40,7 +40,7 @@ class AuthController extends ApiController
         $token = $this->auth->issueToken($user, $request->userAgent() ?? 'api');
 
         return $this->respondCreated(
-            UserResource::make($user)->toArray($request),
+            UserResource::make($user->load('roles'))->toArray($request),
             ['token' => $token]
         );
     }
@@ -59,7 +59,7 @@ class AuthController extends ApiController
         $this->audit->recordFromRequest($request, 'auth.login', $user, actor: $user);
 
         return $this->respondSuccess(
-            UserResource::make($user)->toArray($request),
+            UserResource::make($user->load('roles'))->toArray($request),
             ['token' => $token]
         );
     }
@@ -73,7 +73,9 @@ class AuthController extends ApiController
 
     public function me(Request $request)
     {
-        return $this->respondSuccess(UserResource::make($request->user())->toArray($request));
+        $user = $request->user()->load('roles');
+
+        return $this->respondSuccess(UserResource::make($user)->toArray($request));
     }
 
     public function forgotPassword(ForgotPasswordRequest $request)

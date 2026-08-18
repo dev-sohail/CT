@@ -2,22 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { LogIn } from 'lucide-react';
 import { Button, Card, Input } from '@ctlab/ctlab-ui';
 import { api, saveToken } from '@/lib/api';
 
 export default function LoginPage() {
-    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [message, setMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setMessage(null);
         setError(null);
         setLoading(true);
         try {
@@ -29,9 +25,7 @@ export default function LoginPage() {
             if (r?.errors) setError(r.errors.message ?? 'Login failed');
             else if (r?.meta?.token) {
                 saveToken(r.meta.token);
-                setMessage(`Signed in as ${r.data?.email}`);
-                setPassword('');
-                window.setTimeout(() => router.push('/dashboard'), 300);
+                window.location.replace('/dashboard/');
             } else setError('Unexpected response');
         } catch {
             setError('Network error');
@@ -55,7 +49,6 @@ export default function LoginPage() {
                 <form onSubmit={onSubmit} className="space-y-4">
                     <Input label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
                     <Input label="Password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-                    {message && <p className="text-sm text-[var(--color-ok)]">{message}</p>}
                     {error && <p className="text-sm text-[var(--color-bad)]">{error}</p>}
                     <Button type="submit" block loading={loading} icon={<LogIn size={16} />}>
                         Sign in

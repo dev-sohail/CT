@@ -3,10 +3,9 @@
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2, Edit2, X, Check } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit2, Search } from 'lucide-react';
 import { wikiApi, formatDate } from '@/components/wiki/api';
-import { PageHeader, Badge } from '@ctlab/ctlab-ui';
-import { fieldCls, primaryBtn, ghostBtn, Modal } from '@/components/wiki/ui';
+import { PageHeader, Badge, Button, Card, EmptyState, Input, Modal, Select, Switch, Spinner, ToastProvider, useToast, DropdownMenu } from '@ctlab/ctlab-ui';
 
 interface SectionDef {
     key: string;
@@ -14,26 +13,26 @@ interface SectionDef {
     icon: React.ReactNode;
     color: string;
     nameKey: string;
-    fields: { key: string; label: string; type?: string; required?: boolean; options?: { value: string; label: string }[] }[];
+    fields: { key: string; label: string; type?: string; required?: boolean; placeholder?: string; options?: { value: string; label: string }[] }[];
 }
 
 const sections: SectionDef[] = [
     { key: 'workspaces', label: 'Workspaces', icon: <span className="text-lg">🗂️</span>, color: '#0ea5e9', nameKey: 'name', fields: [
         { key: 'name', label: 'Name', required: true },
-        { key: 'description', label: 'Description' },
+        { key: 'description', label: 'Description', placeholder: 'Optional description' },
     ]},
     { key: 'pages', label: 'Pages', icon: <span className="text-lg">📄</span>, color: '#8b5cf6', nameKey: 'title', fields: [
         { key: 'title', label: 'Title', required: true },
-        { key: 'content', label: 'Content' },
-        { key: 'icon', label: 'Icon' },
+        { key: 'content', label: 'Content', placeholder: 'Write your content here...' },
+        { key: 'icon', label: 'Icon', placeholder: 'Emoji or icon name' },
     ]},
     { key: 'notebooks', label: 'Notebooks', icon: <span className="text-lg">📓</span>, color: '#10b981', nameKey: 'name', fields: [
         { key: 'name', label: 'Name', required: true },
-        { key: 'description', label: 'Description' },
+        { key: 'description', label: 'Description', placeholder: 'Optional description' },
     ]},
     { key: 'projects', label: 'Projects', icon: <span className="text-lg">📂</span>, color: '#f59e0b', nameKey: 'name', fields: [
         { key: 'name', label: 'Name', required: true },
-        { key: 'description', label: 'Description' },
+        { key: 'description', label: 'Description', placeholder: 'Project description' },
         { key: 'status', label: 'Status', type: 'select', options: [
             { value: 'active', label: 'Active' },
             { value: 'completed', label: 'Completed' },
@@ -42,7 +41,7 @@ const sections: SectionDef[] = [
     ]},
     { key: 'tasks', label: 'Tasks', icon: <span className="text-lg">✅</span>, color: '#ef4444', nameKey: 'title', fields: [
         { key: 'title', label: 'Title', required: true },
-        { key: 'description', label: 'Description' },
+        { key: 'description', label: 'Description', placeholder: 'Task description' },
         { key: 'priority', label: 'Priority', type: 'select', options: [
             { value: 'low', label: 'Low' },
             { value: 'medium', label: 'Medium' },
@@ -53,7 +52,7 @@ const sections: SectionDef[] = [
     ]},
     { key: 'reviews', label: 'Reviews', icon: <span className="text-lg">⭐</span>, color: '#ec4899', nameKey: 'title', fields: [
         { key: 'title', label: 'Title', required: true },
-        { key: 'content', label: 'Content' },
+        { key: 'content', label: 'Content', placeholder: 'Review content...' },
         { key: 'status', label: 'Status', type: 'select', options: [
             { value: 'pending', label: 'Pending' },
             { value: 'in_progress', label: 'In Progress' },
@@ -62,30 +61,33 @@ const sections: SectionDef[] = [
     ]},
     { key: 'templates', label: 'Templates', icon: <span className="text-lg">🏷️</span>, color: '#6366f1', nameKey: 'name', fields: [
         { key: 'name', label: 'Name', required: true },
-        { key: 'content', label: 'Template Content' },
+        { key: 'content', label: 'Template Content', placeholder: 'Template body...' },
     ]},
     { key: 'questions', label: 'Questions', icon: <span className="text-lg">❓</span>, color: '#14b8a6', nameKey: 'question', fields: [
         { key: 'question', label: 'Question', required: true },
-        { key: 'answer', label: 'Answer' },
+        { key: 'answer', label: 'Answer', placeholder: 'Answer...' },
     ]},
     { key: 'references', label: 'References', icon: <span className="text-lg">🔖</span>, color: '#f97316', nameKey: 'title', fields: [
         { key: 'title', label: 'Title', required: true },
-        { key: 'url', label: 'URL' },
-        { key: 'description', label: 'Description' },
+        { key: 'url', label: 'URL', placeholder: 'https://...' },
+        { key: 'description', label: 'Description', placeholder: 'Description...' },
     ]},
     { key: 'sections', label: 'Sections', icon: <span className="text-lg">📝</span>, color: '#84cc16', nameKey: 'title', fields: [
         { key: 'title', label: 'Title', required: true },
-        { key: 'content', label: 'Content' },
+        { key: 'content', label: 'Content', placeholder: 'Section content...' },
     ]},
 ];
 
 function WikiSectionView({ section }: { section: SectionDef }) {
+    const { notify } = useToast();
     const [items, setItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showCreate, setShowCreate] = useState(false);
+    const [showForm, setShowForm] = useState(false);
     const [editItem, setEditItem] = useState<any | null>(null);
     const [form, setForm] = useState<Record<string, any>>({});
     const [saving, setSaving] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState<any | null>(null);
+    const [search, setSearch] = useState('');
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -103,7 +105,8 @@ function WikiSectionView({ section }: { section: SectionDef }) {
 
     function openCreate() {
         setForm({});
-        setShowCreate(true);
+        setEditItem(null);
+        setShowForm(true);
     }
 
     function openEdit(item: any) {
@@ -114,6 +117,13 @@ function WikiSectionView({ section }: { section: SectionDef }) {
         f.id = item.id;
         setForm(f);
         setEditItem(item);
+        setShowForm(true);
+    }
+
+    function closeForm() {
+        setShowForm(false);
+        setEditItem(null);
+        setForm({});
     }
 
     async function handleSave(e: React.FormEvent) {
@@ -122,109 +132,207 @@ function WikiSectionView({ section }: { section: SectionDef }) {
         try {
             if (editItem) {
                 await wikiApi.put(`/${section.key}/${editItem.id}`, form);
+                notify(`${section.label.slice(0, -1)} updated`, 'success');
             } else {
                 await wikiApi.post(`/${section.key}`, form);
+                notify(`${section.label.slice(0, -1)} created`, 'success');
             }
-            setShowCreate(false);
-            setEditItem(null);
-            setForm({});
+            closeForm();
             load();
         } catch (err: any) {
-            alert(err.message || 'Save failed');
+            notify(err.message || 'Save failed', 'danger');
         } finally {
             setSaving(false);
         }
     }
 
-    async function handleDelete(item: any) {
-        if (!confirm(`Delete "${item[section.nameKey]}"?`)) return;
+    async function handleDelete() {
+        if (!confirmDelete) return;
         try {
-            await wikiApi.del(`/${section.key}/${item.id}`);
+            await wikiApi.del(`/${section.key}/${confirmDelete.id}`);
+            notify(`${section.label.slice(0, -1)} deleted`, 'info');
+            setConfirmDelete(null);
             load();
         } catch (err: any) {
-            alert(err.message || 'Delete failed');
+            notify(err.message || 'Delete failed', 'danger');
         }
     }
 
-    const displayFields = section.fields.filter((f) => f.key !== section.nameKey);
+    const filtered = search.trim()
+        ? items.filter((item) => String(item[section.nameKey] ?? '').toLowerCase().includes(search.toLowerCase()))
+        : items;
 
     return (
         <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                     {section.icon}
                     <h2 className="text-lg font-semibold text-[var(--color-text)]">{section.label}</h2>
-                    <Badge>{items.length}</Badge>
+                    <Badge tone="neutral">{items.length}</Badge>
                 </div>
-                <button onClick={openCreate} className={primaryBtn}>
-                    <Plus size={14} className="mr-1" /> New {section.label.slice(0, -1)}
-                </button>
+                <Button size="sm" icon={<Plus size={14} />} onClick={openCreate}>New {section.label.slice(0, -1)}</Button>
             </div>
 
             {loading ? (
-                <p className="text-sm text-[var(--color-muted)] py-8 text-center">Loading...</p>
+                <Card>
+                    <div className="flex flex-col items-center justify-center py-12 gap-3">
+                        <Spinner size={24} />
+                        <span className="text-sm text-[var(--color-muted)]">Loading {section.label.toLowerCase()}...</span>
+                    </div>
+                </Card>
             ) : items.length === 0 ? (
-                <div className="text-center py-12 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]">
-                    <p className="text-[var(--color-muted)] mb-4">No {section.label.toLowerCase()} yet.</p>
-                    <button onClick={openCreate} className={primaryBtn}>Create first {section.label.slice(0, -1)}</button>
-                </div>
+                <EmptyState
+                    description={`No ${section.label.toLowerCase()} yet.`}
+                    action={<Button size="sm" icon={<Plus size={14} />} onClick={openCreate}>Create first {section.label.slice(0, -1)}</Button>}
+                />
             ) : (
-                <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] divide-y divide-[var(--color-border)]">
-                    {items.map((item) => (
-                        <div key={item.id} className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-surface-2)] transition-colors group">
-                            <span className="text-lg shrink-0">{section.icon}</span>
-                            <div className="min-w-0 flex-1">
-                                <p className="font-medium text-[var(--color-text)] truncate">{item[section.nameKey]}</p>
-                                {displayFields.slice(0, 2).map((f) => item[f.key] && (
-                                    <p key={f.key} className="text-xs text-[var(--color-muted)] truncate">{String(item[f.key]).slice(0, 100)}</p>
+                <>
+                    {items.length > 3 && (
+                        <div className="max-w-sm">
+                            <Input
+                                icon={<Search size={14} />}
+                                placeholder={`Search ${section.label.toLowerCase()}...`}
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                    )}
+
+                    {filtered.length === 0 ? (
+                        <EmptyState title="No results" description={`No results for "${search}".`} />
+                    ) : (
+                        <Card className="[&_.nx-card-body]:p-0">
+                            <div className="divide-y divide-[var(--color-border)]">
+                                {filtered.map((item) => (
+                                    <div key={item.id} className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-surface-2)] transition-colors group">
+                                        <span className="text-lg shrink-0">{section.icon}</span>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-medium text-[var(--color-text)] truncate text-sm">{item[section.nameKey]}</p>
+                                            {section.fields.filter((f) => f.key !== section.nameKey).slice(0, 2).map((f) => item[f.key] && (
+                                                <p key={f.key} className="text-xs text-[var(--color-muted)] truncate">{String(item[f.key]).slice(0, 100)}</p>
+                                            ))}
+                                        </div>
+                                        {item.updated_at && <span className="text-xs text-[var(--color-muted)] shrink-0 hidden sm:block">{formatDate(item.updated_at)}</span>}
+                                        <div className="shrink-0">
+                                            <DropdownMenu
+                                                trigger={
+                                                    <button className="p-1.5 rounded hover:bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer">
+                                                        <span className="sr-only">Actions</span>
+                                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/></svg>
+                                                    </button>
+                                                }
+                                                items={[
+                                                    { key: 'edit', label: 'Edit', icon: <Edit2 size={13} />, onSelect: () => openEdit(item) },
+                                                    { key: 'delete', label: 'Delete', icon: <Trash2 size={13} />, danger: true, onSelect: () => setConfirmDelete(item) },
+                                                ]}
+                                                align="end"
+                                            />
+                                        </div>
+                                    </div>
                                 ))}
                             </div>
-                            {item.updated_at && <span className="text-xs text-[var(--color-muted)] shrink-0">{formatDate(item.updated_at)}</span>}
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button onClick={() => openEdit(item)} className="p-1.5 rounded hover:bg-[var(--color-surface)] text-[var(--color-muted)] hover:text-[var(--color-text)] cursor-pointer" title="Edit">
-                                    <Edit2 size={14} />
-                                </button>
-                                <button onClick={() => handleDelete(item)} className="p-1.5 rounded hover:bg-[var(--color-bad)]/10 text-[var(--color-muted)] hover:text-[var(--color-bad)] cursor-pointer" title="Delete">
-                                    <Trash2 size={14} />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        </Card>
+                    )}
+                </>
             )}
 
-            {(showCreate || editItem) && (
-                <Modal title={editItem ? `Edit ${section.label.slice(0, -1)}` : `New ${section.label.slice(0, -1)}`} onClose={() => { setShowCreate(false); setEditItem(null); setForm({}); }}>
-                    <form onSubmit={handleSave} className="space-y-4">
-                        {section.fields.map((f) => (
-                            <label key={f.key} className="block space-y-1">
-                                <span className="text-xs text-[var(--color-muted)]">{f.label}</span>
-                                {f.type === 'select' && f.options ? (
-                                    <select value={form[f.key] ?? ''} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })} className={fieldCls} required={f.required}>
-                                        <option value="">Select...</option>
-                                        {f.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                                    </select>
-                                ) : f.type === 'toggle' ? (
-                                    <div className="flex items-center gap-2">
-                                        <button type="button" onClick={() => setForm({ ...form, [f.key]: !form[f.key] })} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${form[f.key] ? 'bg-[var(--color-ok)]' : 'bg-[var(--color-surface-2)]'}`}>
-                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form[f.key] ? 'translate-x-6' : 'translate-x-1'}`} />
-                                        </button>
-                                        <span className="text-sm text-[var(--color-muted)]">{form[f.key] ? 'Yes' : 'No'}</span>
+            {showForm && (
+                <Modal
+                    open
+                    onClose={closeForm}
+                    title={editItem ? `Edit ${section.label.slice(0, -1)}` : `New ${section.label.slice(0, -1)}`}
+                    footer={
+                        <>
+                            <Button variant="ghost" size="sm" onClick={closeForm}>Cancel</Button>
+                            <Button size="sm" loading={saving} onClick={() => {
+                                const formEl = document.querySelector<HTMLFormElement>('[data-wiki-form]');
+                                formEl?.requestSubmit();
+                            }}>
+                                {editItem ? 'Update' : 'Create'}
+                            </Button>
+                        </>
+                    }
+                >
+                    <form data-wiki-form onSubmit={handleSave} className="space-y-4">
+                        {section.fields.map((f) => {
+                            const val = form[f.key];
+                            if (f.type === 'select' && f.options) {
+                                return (
+                                    <Select
+                                        key={f.key}
+                                        label={f.label}
+                                        value={val ?? ''}
+                                        onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                                        options={f.options}
+                                    />
+                                );
+                            }
+                            if (f.type === 'toggle') {
+                                return (
+                                    <div key={f.key} className="flex items-center justify-between p-3 rounded-lg border border-[var(--color-border)]">
+                                        <span className="text-sm font-medium text-[var(--color-text)]">{f.label}</span>
+                                        <Switch checked={!!val} onChange={(v) => setForm({ ...form, [f.key]: v })} />
                                     </div>
-                                ) : f.type === 'date' ? (
-                                    <input type="date" value={form[f.key] ?? ''} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })} className={fieldCls} required={f.required} />
-                                ) : f.key === 'content' || f.key === 'description' || f.key === 'answer' ? (
-                                    <textarea value={form[f.key] ?? ''} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })} rows={4} className={fieldCls} required={f.required} />
-                                ) : (
-                                    <input type="text" value={form[f.key] ?? ''} onChange={(e) => setForm({ ...form, [f.key]: e.target.value })} className={fieldCls} required={f.required} />
-                                )}
-                            </label>
-                        ))}
-                        <div className="flex justify-end gap-3 pt-2">
-                            <button type="button" onClick={() => { setShowCreate(false); setEditItem(null); setForm({}); }} className={ghostBtn}>Cancel</button>
-                            <button type="submit" disabled={saving} className={primaryBtn}>{saving ? 'Saving...' : editItem ? 'Update' : 'Create'}</button>
-                        </div>
+                                );
+                            }
+                            if (f.type === 'date') {
+                                return (
+                                    <Input
+                                        key={f.key}
+                                        label={f.label}
+                                        type="date"
+                                        value={val ?? ''}
+                                        onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                                        required={f.required}
+                                    />
+                                );
+                            }
+                            if (f.key === 'content' || f.key === 'description' || f.key === 'answer') {
+                                return (
+                                    <div key={f.key}>
+                                        <label className="block text-sm font-medium text-[var(--color-text)] mb-1.5">{f.label}</label>
+                                        <textarea
+                                            value={val ?? ''}
+                                            onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                                            rows={4}
+                                            required={f.required}
+                                            placeholder={f.placeholder}
+                                            className="w-full px-3 py-2 text-sm rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:text-[var(--color-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] resize-y"
+                                        />
+                                    </div>
+                                );
+                            }
+                            return (
+                                <Input
+                                    key={f.key}
+                                    label={f.label}
+                                    value={val ?? ''}
+                                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                                    required={f.required}
+                                    placeholder={f.placeholder}
+                                />
+                            );
+                        })}
                     </form>
+                </Modal>
+            )}
+
+            {confirmDelete && (
+                <Modal
+                    open
+                    onClose={() => setConfirmDelete(null)}
+                    title={`Delete ${section.label.slice(0, -1)}`}
+                    size="sm"
+                    footer={
+                        <>
+                            <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+                            <Button variant="danger" size="sm" icon={<Trash2 size={13} />} onClick={handleDelete}>Delete</Button>
+                        </>
+                    }
+                >
+                    <p className="text-sm text-[var(--color-muted)]">
+                        Are you sure you want to delete <strong>{confirmDelete[section.nameKey] ?? 'this item'}</strong>? This action cannot be undone.
+                    </p>
                 </Modal>
             )}
         </div>
@@ -234,17 +342,14 @@ function WikiSectionView({ section }: { section: SectionDef }) {
 function WikiModuleInner() {
     const searchParams = useSearchParams();
     const activeSection = searchParams.get('section');
-
     const sectionDef = activeSection ? sections.find((s) => s.key === activeSection) : null;
 
     if (sectionDef) {
         return (
             <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                    <Link href="/modules/26" className="inline-flex items-center gap-1 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]">
-                        <ArrowLeft size={14} /> Overview
-                    </Link>
-                </div>
+                <Link href="/modules/26" className="inline-flex items-center gap-1 text-sm text-[var(--color-muted)] hover:text-[var(--color-text)]">
+                    <ArrowLeft size={14} /> Overview
+                </Link>
                 <WikiSectionView section={sectionDef} />
             </div>
         );
@@ -275,8 +380,10 @@ function WikiModuleInner() {
 
 export default function WikiModulePage() {
     return (
-        <Suspense fallback={<p className="text-sm text-[var(--color-muted)] py-8 text-center">Loading...</p>}>
-            <WikiModuleInner />
-        </Suspense>
+        <ToastProvider>
+            <Suspense fallback={<div className="flex flex-col items-center justify-center py-12 gap-3"><Spinner size={24} /><span className="text-sm text-[var(--color-muted)]">Loading...</span></div>}>
+                <WikiModuleInner />
+            </Suspense>
+        </ToastProvider>
     );
 }

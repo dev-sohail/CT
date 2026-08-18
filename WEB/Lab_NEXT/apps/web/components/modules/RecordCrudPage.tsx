@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Plus, Pencil, Trash2, X } from 'lucide-react';
-import { Button, Card, EmptyState, Input, Modal, PageHeader, Table, Badge, type Column } from '@ctlab/ctlab-ui';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { Plus, Pencil, Trash2, Search, MoreHorizontal } from 'lucide-react';
+import { Button, Card, EmptyState, Input, Modal, PageHeader, Table, Badge, Spinner, Switch, Select, ToastProvider, useToast, DropdownMenu, type Column } from '@ctlab/ctlab-ui';
 import { wikiApi } from '@/components/wiki/api';
-import { fieldCls, selectCls } from '@/components/wiki/ui';
 
 export interface FieldDef {
     key: string;
@@ -54,7 +53,7 @@ function emptyRow(fields: FieldDef[]): Record<string, any> {
     return row;
 }
 
-export function RecordCrudPage({
+function RecordCrudPageInner({
     title,
     subtitle,
     basePath,
@@ -67,6 +66,7 @@ export function RecordCrudPage({
     statsOnly = false,
     statsEndpoints,
 }: RecordCrudPageProps) {
+    const { notify } = useToast();
     const [rows, setRows] = useState<Record<string, any>[]>([]);
     const [statsData, setStatsData] = useState<Record<string, any> | null>(null);
     const [multiStats, setMultiStats] = useState<Record<string, any>[]>([]);
@@ -76,6 +76,7 @@ export function RecordCrudPage({
     const [form, setForm] = useState<Record<string, any>>({});
     const [saving, setSaving] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState<Record<string, any> | null>(null);
+    const [search, setSearch] = useState('');
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -91,7 +92,6 @@ export function RecordCrudPage({
                     stats ? wikiApi.get<Record<string, any>>(stats.path).catch(() => null) : Promise.resolve(null),
                 ]);
                 setRows(listData);
-                if (stats && statsData !== null) setStatsData(statsData);
                 if (stats) {
                     try {
                         setStatsData(await wikiApi.get<Record<string, any>>(stats.path));
@@ -131,13 +131,15 @@ export function RecordCrudPage({
             });
             if (editRow) {
                 await wikiApi.put(`${basePath}/${rowKey(editRow)}`, body);
+                notify(`${title.replace(/s$/, '')} updated`, 'success');
             } else {
                 await wikiApi.post(basePath, body);
+                notify(`${title.replace(/s$/, '')} created`, 'success');
             }
             setShowForm(false);
             load();
         } catch (err: any) {
-            alert(err.message || 'Save failed');
+            notify(err.message || 'Save failed', 'danger');
         } finally {
             setSaving(false);
         }
@@ -147,9 +149,10 @@ export function RecordCrudPage({
         try {
             await wikiApi.del(`${basePath}/${rowKey(row)}`);
             setConfirmDelete(null);
+            notify(`${title.replace(/s$/, '')} deleted`, 'info');
             load();
         } catch (err: any) {
-            alert(err.message || 'Delete failed');
+            notify(err.message || 'Delete failed', 'danger');
         }
     }
 
@@ -157,17 +160,33 @@ export function RecordCrudPage({
         setForm((prev) => ({ ...prev, [key]: value }));
     }
 
+    const filteredRows = useMemo(() => {
+        if (!search.trim()) return rows;
+        const q = search.toLowerCase();
+        return rows.filter((row) =>
+            fields.some((fd) => {
+                const v = row[fd.key];
+                if (v == null) return false;
+                if (fd.type === 'select' && fd.options) {
+                    const opt = fd.options.find((o) => o.value === String(v));
+                    return opt?.label.toLowerCase().includes(q) || String(v).toLowerCase().includes(q);
+                }
+                return String(v).toLowerCase().includes(q);
+            })
+        );
+    }, [rows, search, fields]);
+
     const displayColumns: Column<Record<string, any>>[] = tableColumns ?? fields.slice(0, 5).map((fd) => ({
         key: fd.key,
         header: fd.label,
         render: (row) => {
             const v = row[fd.key];
-            if (fd.type === 'toggle') return v ? '✓' : '—';
+            if (fd.type === 'toggle') return v ? <Badge tone="success">Yes</Badge> : <Badge tone="neutral">No</Badge>;
             if (fd.type === 'select' && fd.options) {
                 const opt = fd.options.find((o) => o.value === v);
-                return opt ? <Badge>{opt.label}</Badge> : (v ?? '—');
+                return opt ? <Badge tone="primary">{opt.label}</Badge> : (v ?? '—');
             }
-            if (fd.key === 'status') return <Badge>{String(v ?? '—')}</Badge>;
+            if (fd.key === 'status') return <Badge tone="info">{String(v ?? '—')}</Badge>;
             if (fd.key.includes('date') || fd.key.includes('_at')) {
                 if (!v) return '—';
                 const d = new Date(v);
@@ -181,39 +200,41 @@ export function RecordCrudPage({
         className: fd.columnClassName,
     }));
 
+    const menuItems = [
+        { key: 'edit', label: 'Edit', icon: <Pencil size={13} /> },
+        ...(actions?.map((act) => ({ key: `act_${act.label}`, label: act.label })) ?? []),
+        { key: 'delete', label: 'Delete', icon: <Trash2 size={13} />, danger: true },
+    ];
+
     displayColumns.push({
         key: '__actions',
         header: '',
-        className: 'w-24 text-right',
+        className: 'w-12 text-right',
         render: (row) => (
-            <div className="flex items-center justify-end gap-1">
-                <button onClick={(e) => { e.stopPropagation(); openEdit(row); }} className="p-1 rounded hover:bg-[var(--color-surface-2)] text-[var(--color-muted)]" title="Edit">
-                    <Pencil size={14} />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); setConfirmDelete(row); }} className="p-1 rounded hover:bg-[var(--color-bad)]/10 text-[var(--color-muted)] hover:text-[var(--color-bad)]" title="Delete">
-                    <Trash2 size={14} />
-                </button>
-                {actions?.map((act) => (
-                    <button
-                        key={act.label}
-                        onClick={async (e) => {
-                            e.stopPropagation();
-                            try {
-                                await wikiApi[act.method === 'delete' ? 'del' : act.method === 'post' ? 'post' : 'put'](
-                                    act.path(row),
-                                    act.body?.(row),
-                                );
-                                if (act.after) act.after();
-                                else load();
-                            } catch (err: any) { alert(err.message); }
-                        }}
-                        className="p-1 rounded hover:bg-[var(--color-surface-2)] text-[var(--color-muted)] text-xs"
-                        title={act.label}
-                    >
-                        {act.label}
+            <DropdownMenu
+                trigger={
+                    <button className="p-1 rounded hover:bg-[var(--color-surface-2)] text-[var(--color-muted)] cursor-pointer">
+                        <MoreHorizontal size={16} />
                     </button>
-                ))}
-            </div>
+                }
+                items={menuItems.map((item) => ({
+                    ...item,
+                    onSelect: () => {
+                        if (item.key === 'edit') openEdit(row);
+                        else if (item.key === 'delete') setConfirmDelete(row);
+                        else {
+                            const act = actions?.find((a) => `act_${a.label}` === item.key);
+                            if (act) {
+                                wikiApi[act.method === 'delete' ? 'del' : act.method === 'post' ? 'post' : 'put'](
+                                    act.path(row), act.body?.(row),
+                                ).then(() => { if (act.after) act.after(); else load(); })
+                                  .catch((err: any) => notify(err.message, 'danger'));
+                            }
+                        }
+                    },
+                }))}
+                align="end"
+            />
         ),
     });
 
@@ -225,7 +246,7 @@ export function RecordCrudPage({
                     <span className="flex items-center gap-3">
                         {subtitle}
                         {statsData && stats && stats.render(statsData)}
-                        {!statsOnly && <span className="text-[var(--color-muted)]">{rows.length} records</span>}
+                        {!statsOnly && <span className="text-[var(--color-muted)]">{rows.length} record{rows.length !== 1 ? 's' : ''}</span>}
                     </span>
                 }
                 actions={
@@ -238,7 +259,12 @@ export function RecordCrudPage({
             />
 
             {loading ? (
-                <Card><p className="text-[var(--color-muted)] text-sm py-8 text-center">Loading...</p></Card>
+                <Card>
+                    <div className="flex flex-col items-center justify-center py-12 gap-3">
+                        <Spinner size={24} />
+                        <span className="text-sm text-[var(--color-muted)]">Loading {title.toLowerCase()}...</span>
+                    </div>
+                </Card>
             ) : statsOnly ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {multiStats.map((data, i) => {
@@ -260,23 +286,43 @@ export function RecordCrudPage({
                     })}
                     {multiStats.length === 0 && (
                         <Card className="md:col-span-2 lg:col-span-3">
-                            <p className="text-[var(--color-muted)] text-sm py-8 text-center">No analytics data available yet.</p>
+                            <EmptyState description="No analytics data available yet." />
                         </Card>
                     )}
                 </div>
-            ) : rows.length === 0 ? (
-                <EmptyState
-                    description={`No ${title.toLowerCase()} yet. Click "Add ${title.replace(/s$/, '')}" to create your first record.`}
-                />
             ) : (
-                <Card>
-                    <Table
-                        columns={displayColumns}
-                        rows={rows}
-                        rowKey={rowKey}
-                        empty="No records."
-                    />
-                </Card>
+                <>
+                    {rows.length > 0 && (
+                        <div className="max-w-sm">
+                            <Input
+                                icon={<Search size={14} />}
+                                placeholder={`Search ${title.toLowerCase()}...`}
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                        </div>
+                    )}
+
+                    {filteredRows.length === 0 && !search ? (
+                        <EmptyState
+                            description={`No ${title.toLowerCase()} yet. Click "Add ${title.replace(/s$/, '')}" to create your first record.`}
+                        />
+                    ) : filteredRows.length === 0 && search ? (
+                        <EmptyState
+                            title="No results"
+                            description={`No ${title.toLowerCase()} match "${search}". Try a different search.`}
+                        />
+                    ) : (
+                        <Card>
+                            <Table
+                                columns={displayColumns}
+                                rows={filteredRows}
+                                rowKey={rowKey}
+                                empty="No records."
+                            />
+                        </Card>
+                    )}
+                </>
             )}
 
             {showForm && (
@@ -285,48 +331,54 @@ export function RecordCrudPage({
                     onClose={() => setShowForm(false)}
                     title={editRow ? `Edit ${title.replace(/s$/, '')}` : `New ${title.replace(/s$/, '')}`}
                     size="lg"
+                    footer={
+                        <>
+                            <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>Cancel</Button>
+                            <Button size="sm" loading={saving} disabled={saving} onClick={() => {
+                                const formEl = document.querySelector<HTMLFormElement>('[data-crud-form]');
+                                formEl?.requestSubmit();
+                            }}>
+                                {editRow ? 'Update' : 'Create'}
+                            </Button>
+                        </>
+                    }
                 >
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form data-crud-form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {fields.map((fd) => {
                                 const val = form[fd.key];
                                 if (fd.type === 'toggle') {
                                     return (
-                                        <label key={fd.key} className="flex items-center gap-3 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={!!val}
-                                                onChange={(e) => setField(fd.key, e.target.checked)}
-                                                className="accent-[var(--color-accent)]"
-                                            />
-                                            <span className="text-sm text-[var(--color-text)]">{fd.label}</span>
-                                        </label>
+                                        <div key={fd.key} className="flex items-center justify-between md:col-span-2 p-3 rounded-lg border border-[var(--color-border)]">
+                                            <div>
+                                                <p className="text-sm font-medium text-[var(--color-text)]">{fd.label}</p>
+                                                {fd.hint && <p className="text-xs text-[var(--color-muted)]">{fd.hint}</p>}
+                                            </div>
+                                            <Switch checked={!!val} onChange={(v) => setField(fd.key, v)} />
+                                        </div>
                                     );
                                 }
                                 if (fd.type === 'select') {
                                     return (
-                                        <div key={fd.key}>
-                                            <label className="nx-label">{fd.label}</label>
-                                            <select value={val ?? ''} onChange={(e) => setField(fd.key, e.target.value)} className={selectCls}>
-                                                <option value="">Select...</option>
-                                                {fd.options?.map((o) => (
-                                                    <option key={o.value} value={o.value}>{o.label}</option>
-                                                ))}
-                                            </select>
-                                        </div>
+                                        <Select
+                                            key={fd.key}
+                                            label={fd.label}
+                                            value={val ?? ''}
+                                            onChange={(e) => setField(fd.key, e.target.value)}
+                                            options={fd.options ?? []}
+                                        />
                                     );
                                 }
                                 if (fd.type === 'textarea') {
                                     return (
                                         <div key={fd.key} className="md:col-span-2">
-                                            <label className="nx-label">{fd.label}</label>
-                                            <textarea
+                                            <Input
+                                                label={fd.label}
                                                 value={val ?? ''}
                                                 onChange={(e) => setField(fd.key, e.target.value)}
                                                 required={fd.required}
                                                 placeholder={fd.placeholder}
-                                                rows={3}
-                                                className={`${fieldCls} resize-y`}
+                                                hint={fd.hint}
                                             />
                                         </div>
                                     );
@@ -346,10 +398,6 @@ export function RecordCrudPage({
                                 );
                             })}
                         </div>
-                        <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
-                            <Button variant="secondary" type="button" onClick={() => setShowForm(false)}>Cancel</Button>
-                            <Button type="submit" disabled={saving}>{saving ? 'Saving...' : editRow ? 'Update' : 'Create'}</Button>
-                        </div>
                     </form>
                 </Modal>
             )}
@@ -358,18 +406,28 @@ export function RecordCrudPage({
                 <Modal
                     open
                     onClose={() => setConfirmDelete(null)}
-                    title="Confirm Delete"
+                    title={`Delete ${title.replace(/s$/, '')}`}
                     size="sm"
+                    footer={
+                        <>
+                            <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(null)}>Cancel</Button>
+                            <Button variant="danger" size="sm" icon={<Trash2 size={13} />} onClick={() => handleDelete(confirmDelete)}>Delete</Button>
+                        </>
+                    }
                 >
-                    <p className="text-sm text-[var(--color-text)] mb-4">
-                        Are you sure you want to delete <strong>{confirmDelete[nameKey] ?? 'this record'}</strong>?
+                    <p className="text-sm text-[var(--color-muted)]">
+                        Are you sure you want to delete <strong>{confirmDelete[nameKey] ?? 'this record'}</strong>? This action cannot be undone.
                     </p>
-                    <div className="flex justify-end gap-2">
-                        <Button variant="secondary" onClick={() => setConfirmDelete(null)}>Cancel</Button>
-                        <Button variant="danger" onClick={() => handleDelete(confirmDelete)}>Delete</Button>
-                    </div>
                 </Modal>
             )}
         </div>
+    );
+}
+
+export function RecordCrudPage(props: RecordCrudPageProps) {
+    return (
+        <ToastProvider>
+            <RecordCrudPageInner {...props} />
+        </ToastProvider>
     );
 }

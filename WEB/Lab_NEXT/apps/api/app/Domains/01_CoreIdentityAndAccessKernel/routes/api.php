@@ -1,6 +1,9 @@
 <?php
 
 use App\Domains\CoreIdentityAndAccessKernel\Http\Controllers\AuthController;
+use App\Domains\CoreIdentityAndAccessKernel\Http\Controllers\UserController;
+use App\Domains\CoreIdentityAndAccessKernel\Http\Controllers\RoleController;
+use App\Domains\CoreIdentityAndAccessKernel\Http\Controllers\PermissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -10,6 +13,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('can:assignRole,App\Domains\CoreIdentityAndAccessKernel\Models\User')
         ->post('users/{user}/role', [AuthController::class, 'assignRole'])
         ->name('identity.users.role');
+
+    // Users CRUD
+    Route::apiResource('users', UserController::class)->parameters(['users' => 'user']);
+
+    // Roles CRUD
+    Route::apiResource('roles', RoleController::class)->parameters(['roles' => 'role']);
+
+    // Permissions CRUD
+    Route::apiResource('permissions', PermissionController::class)->parameters(['permissions' => 'permission']);
 });
 
 Route::middleware('throttle:10,1')->post('register', [AuthController::class, 'register'])->name('identity.register');

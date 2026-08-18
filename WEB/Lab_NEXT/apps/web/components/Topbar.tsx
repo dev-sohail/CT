@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogOut, Moon, Search, Sun, X } from 'lucide-react';
+import { LogOut, Moon, Search, Sun, X, Shield } from 'lucide-react';
 import { useTheme } from '@ctlab/ctlab-theme';
 import { roadmapGroups } from './roadmap-data';
+import { useRBAC } from './RBACProvider';
+import { clearToken } from '@/lib/api';
 
 const allModules = roadmapGroups.flatMap((g) =>
     g.items.map((item) => ({ id: item.id, label: item.label, group: g.label, icon: item.icon }))
@@ -19,6 +21,7 @@ export default function Topbar() {
     const boxRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const { mode, toggle } = useTheme();
+    const { currentUser, currentRole } = useRBAC();
 
     useEffect(() => {
         const q = query.trim().toLowerCase();
@@ -108,7 +111,20 @@ export default function Topbar() {
                 )}
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
+                {currentUser && (
+                    <div className="flex items-center gap-2 mr-2 px-3 py-1.5 rounded-lg bg-[var(--color-surface-2)] border border-[var(--color-border)]">
+                        <div className="w-7 h-7 rounded-full bg-[var(--color-accent-soft)] flex items-center justify-center text-[10px] font-bold text-[var(--color-accent-hover)] shrink-0">
+                            {currentUser.name.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div className="hidden md:block leading-tight">
+                            <p className="text-xs font-medium text-[var(--color-text)]">{currentUser.name}</p>
+                            <p className="text-[10px] text-[var(--color-muted)] flex items-center gap-1">
+                                <Shield size={8} />{currentRole?.name ?? 'No role'}
+                            </p>
+                        </div>
+                    </div>
+                )}
                 <button
                     type="button"
                     onClick={toggle}
@@ -120,7 +136,7 @@ export default function Topbar() {
                 <button
                     type="button"
                     onClick={() => {
-                        localStorage.removeItem('ctlab_token');
+                        clearToken();
                         window.location.replace('/login');
                     }}
                     aria-label="Sign out"

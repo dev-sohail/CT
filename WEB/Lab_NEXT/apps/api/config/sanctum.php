@@ -2,7 +2,7 @@
 
 return [
     'defaults' => [
-        'guard' => 'web',
+        'guard' => ['web'],
         'expiration' => null,
         'middleware' => [
             'verify' => 'verified',

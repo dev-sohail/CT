@@ -2,23 +2,19 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { UserPlus } from 'lucide-react';
 import { Button, Card, Input } from '@ctlab/ctlab-ui';
 import { api, saveToken } from '@/lib/api';
 
 export default function RegisterPage() {
-    const router = useRouter();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [message, setMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setMessage(null);
         setError(null);
         setLoading(true);
         try {
@@ -30,8 +26,7 @@ export default function RegisterPage() {
             if (r?.errors) setError(r.errors.message ?? 'Registration failed');
             else if (r?.meta?.token) {
                 saveToken(r.meta.token);
-                setMessage(`Account created for ${r.data?.email}`);
-                window.setTimeout(() => router.push('/dashboard'), 300);
+                window.location.replace('/dashboard/');
             } else setError('Unexpected response');
         } catch {
             setError('Network error');
@@ -56,7 +51,6 @@ export default function RegisterPage() {
                     <Input label="Name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada Lovelace" />
                     <Input label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
                     <Input label="Password (min 12 chars)" type="password" required minLength={12} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-                    {message && <p className="text-sm text-[var(--color-ok)]">{message}</p>}
                     {error && <p className="text-sm text-[var(--color-bad)]">{error}</p>}
                     <Button type="submit" block loading={loading} icon={<UserPlus size={16} />}>
                         Create account

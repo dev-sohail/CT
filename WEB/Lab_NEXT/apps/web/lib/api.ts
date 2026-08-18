@@ -15,7 +15,8 @@ export async function api<T = unknown>(path: string, options: RequestInit = {}):
 
     if (res.status === 401 && typeof window !== 'undefined') {
         window.localStorage.removeItem('ctlab_token');
-        if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        const p = window.location.pathname.replace(/\/+$/, '') || '/';
+        if (p !== '/login' && p !== '/register') {
             window.location.replace('/login');
         }
     }

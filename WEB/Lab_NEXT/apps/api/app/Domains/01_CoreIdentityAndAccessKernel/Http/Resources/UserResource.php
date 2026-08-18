@@ -16,8 +16,8 @@ class UserResource extends ApiResource
             'email' => $this->email,
             'is_active' => $this->is_active,
             'email_verified_at' => $this->email_verified_at,
-            'roles' => $this->whenLoaded('roles', fn () => $this->roles->pluck('slug')),
-            'permissions' => $this->whenLoaded('roles', fn () => $this->cachedPermissions ?? []),
+            'roles' => $this->whenLoaded('roles', fn () => $this->roles->pluck('slug')->toArray()),
+            'permissions' => $this->whenLoaded('roles', fn () => $this->permissions()->toArray()),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
